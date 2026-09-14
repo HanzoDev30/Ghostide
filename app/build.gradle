@@ -1,0 +1,134 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace 'ir.hanzodev1375.ghostide'
+    compileSdk 36
+
+    signingConfigs {
+        release {
+            storeFile file("my-release-key.jks")
+            storePassword "HanzoDev1375"
+            keyAlias "myalias"
+            keyPassword "HanzoDev1375"
+        }
+    }
+
+    defaultConfig {
+        applicationId 'ir.hanzodev1375.ghostide'
+        minSdk 30
+        targetSdk 36
+        versionCode 6
+        versionName '1.1.5beta2' 
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    buildTypes {
+        
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+    
+   packagingOptions {
+    jniLibs {
+        useLegacyPackaging = true
+    }
+    resources {
+        excludes += [
+            'META-INF/AL2.0',
+            'META-INF/LGPL2.1',
+            'about_files/*',
+            'plugin.xml',
+            'fragment.xml',
+            'OSGI-INF/*',
+            'META-INF/eclipse/',
+            'META-INF/services/',
+            'schema/',
+            'META-INF/eclipse.inf',
+            'plugin.properties'
+        ]
+    }
+   }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency { details ->
+            if (details.requested.group == 'com.caverock') {
+                details.useTarget 'com.caverock:androidsvg:1.4'
+                details.because 'حل تداخل بین وابستگی‌های androidsvg'
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation project(":editor")
+    implementation project(":ide-api")
+    implementation project(":ide-ui-api")
+    implementation project(":logcat")
+    implementation project(":components")
+    implementation project(":jgit")
+    implementation project(":aimodel")
+    implementation project(":terminal-emulator")
+    implementation project(":terminal-view")
+    implementation project(":prddownloader")
+    
+    implementation(project(":materialfileicon")) {
+        transitive = false
+    }
+    
+    implementation(libs.okhttp)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.gson)
+    implementation(libs.glide)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.powermenu)
+    implementation(libs.zip4j)
+    implementation(libs.utilcode)
+    implementation(libs.eventbus)
+    implementation(libs.glide.avif.integration)
+    implementation(libs.androidx.recyclerview.selection)
+    implementation(libs.androidx.swiperefreshlayout)
+    annotationProcessor libs.glide.compiler
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
+    implementation("androidx.palette:palette:1.0.0")
+    implementation('com.github.HanzoDev1375.AndroidFileTree:filetreelib:1.1.5')
+    
+    implementation('com.github.HanzoDev1375.AndroidFileTree:filetreeglide:1.1.5') {
+        transitive = false
+    }
+    implementation 'com.caverock:androidsvg:1.4'
+    implementation project(':musicpreview')
+    api fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+    implementation 'org.apache.commons:commons-compress:1.26.0'
+    implementation 'org.tukaani:xz:1.9'
+    implementation(libs.lsp4j)
+    implementation(libs.glass)
+    implementation 'com.github.Dimezis:BlurView:version-3.2.0'
+    
+    implementation project(':thememanager')
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
+}

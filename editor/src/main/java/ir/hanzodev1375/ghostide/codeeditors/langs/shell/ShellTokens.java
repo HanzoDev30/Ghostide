@@ -1,0 +1,112 @@
+/**
+ * Comment by ghost ide
+ *
+ * @author: Ninjacoder
+ */
+package ir.hanzodev1375.ghostide.codeeditors.langs.shell;
+
+public enum ShellTokens {
+  WHITESPACE,
+  NEWLINE,
+  EOF,
+  UNKNOWN,
+  // #
+  LINE_COMMENT,
+  LPAREN,
+  RPAREN,
+  LBRACE,
+  RBRACE,
+  LBRACK,
+  RBRACK,
+  SEMICOLON,
+  COLON,
+  COMMA,
+  DOT,
+  // $
+  DOLLAR,
+  // `
+  BACKTICK,
+  // |
+  PIPE,
+  // &
+  AMPERSAND,
+  // <
+  REDIRECT_IN,
+  // >
+  REDIRECT_OUT,
+  // >>
+  REDIRECT_APPEND,
+  // 2>
+  REDIRECT_ERR,
+  // &>
+  REDIRECT_BOTH,
+  // <<
+  HERE_DOC,
+  // <<<
+  HERESTRING,
+  PLUS,
+  MINUS,
+  STAR,
+  SLASH,
+  PERCENT,
+  EQ,
+  NOT_EQ,
+  LT,
+  GT,
+  LT_EQ,
+  GT_EQ,
+  ASSIGN,
+  AND,
+  OR,
+  NOT,
+  INC,
+  DEC,
+  INTEGER_LITERAL,
+  STRING_LITERAL,
+  // true, false
+  BOOLEAN_LITERAL,
+  IDENTIFIER,
+  KEYWORD_IF,
+  KEYWORD_THEN,
+  KEYWORD_ELSE,
+  KEYWORD_ELIF,
+  KEYWORD_FI,
+  KEYWORD_FOR,
+  KEYWORD_WHILE,
+  KEYWORD_UNTIL,
+  KEYWORD_DO,
+  KEYWORD_DONE,
+  KEYWORD_CASE,
+  KEYWORD_ESAC,
+  KEYWORD_IN,
+  KEYWORD_FUNCTION,
+  KEYWORD_RETURN,
+  KEYWORD_EXIT,
+  KEYWORD_SOURCE,
+  KEYWORD_EXPORT,
+  KEYWORD_READONLY,
+  KEYWORD_LOCAL,
+  KEYWORD_DECLARE,
+  KEYWORD_TYPESET,
+  KEYWORD_UNSET,
+  KEYWORD_SHIFT,
+  KEYWORD_GETOPTS,
+  KEYWORD_SELECT,
+  KEYWORD_TIME,
+  KEYWORD_EVAL,
+  KEYWORD_EXEC,
+  KEYWORD_TRAP,
+  KEYWORD_WAIT,
+  KEYWORD_SUSPEND,
+  // -f, -d, -z, -n, etc.
+  TEST_OPERATOR,
+  // {1..10}
+  BRACE_EXPANSION,
+  // ${var}
+  PARAM_EXPANSION,
+  // $(cmd)
+  COMMAND_SUBSTITUTION,
+  // $((...))
+  ARITHMETIC,
+  ECHO
+}

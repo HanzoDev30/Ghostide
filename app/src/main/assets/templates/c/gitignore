@@ -1,0 +1,4 @@
+*.o
+*.out
+{{PROJECT_NAME_LOWER}}
+build/

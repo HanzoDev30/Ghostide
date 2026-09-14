@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.listitem.ListItemLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    >
+
+    <com.google.android.material.listitem.ListItemCardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="16dp"
+        android:id="@+id/cardrepo"
+        >
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            >
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                >
+
+                <ImageView
+                    android:layout_height="40dp"
+                    android:layout_width="40dp"
+                    android:src="@drawable/deployed_code_24px"
+                    android:id="@+id/ivRepoIcon"
+                    />
+
+                <LinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    >
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16sp"
+                        android:id="@+id/tvRepoName"
+                        android:textStyle="bold"
+                        />
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:alpha="0.7"
+                        android:textSize="13sp"
+                        android:layout_marginTop="4dp"
+                        android:id="@+id/tvDescription"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                >
+
+                <ImageView
+                    android:layout_height="10dp"
+                    android:layout_width="10dp"
+                    android:src="@drawable/circle_24px"
+                    android:id="@+id/ivLangDot"
+                    />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:textSize="12sp"
+                    android:layout_marginStart="6dp"
+                    android:id="@+id/tvLanguage"
+                    />
+
+                <ImageView
+                    android:layout_height="16dp"
+                    android:layout_width="16dp"
+                    android:src="@drawable/fork_right_24px"
+                    android:id="@+id/ivFork"
+                    />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp"
+                    android:id="@+id/tvFork"
+                    />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="12sp"
+                    android:id="@+id/tvStars"
+                    android:text="★"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginStart="12dp"
+                    android:id="@+id/chipPrivate"
+                    android:text="Private"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.listitem.ListItemCardView>
+
+</com.google.android.material.listitem.ListItemLayout>

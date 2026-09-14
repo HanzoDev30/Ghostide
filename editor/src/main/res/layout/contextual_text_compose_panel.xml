@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HorizontalScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:scrollbars="none"
+     android:background="@drawable/contextual_magnifier_background"
+     tools:theme="@style/Theme.Material3.DayNight"
+     android:id="@+id/panel_root">
+
+    <LinearLayout
+         android:layout_height="match_parent"
+         android:layout_width="wrap_content"
+         android:gravity="center_vertical"
+         android:orientation="horizontal">
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:visibility="gone"
+             android:contentDescription="@string/editor_format"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_format_selection"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_format"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_expand_selection"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_expand_selection"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_expand_selection"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_select_all"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_select_all"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_select_all"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_copy_text"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_copy_selection"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_copy"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_paste_text"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_paste_content"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_paste"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_long_select"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_select_drag"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_long_select"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_cut_text"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_cut_selection"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_cut"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:visibility="gone"
+             android:contentDescription="@string/editor_lsp_definition"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_lsp_definition"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_lsp_definition"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:visibility="gone"
+             android:contentDescription="@string/editor_lsp_references"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_lsp_references"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_lsp_references"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:visibility="gone"
+             android:contentDescription="@string/editor_lsp_rename"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_lsp_rename"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_lsp_rename"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:visibility="gone"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_lsp_code_action"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_lsp_code_action"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:visibility="gone"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_translate"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_translate"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+        <ImageButton
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:contentDescription="@string/editor_more"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_more_vert_black_20dp"
+             android:background="@android:color/transparent"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/panel_btn_more"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
+
+    </LinearLayout>
+
+</HorizontalScrollView>

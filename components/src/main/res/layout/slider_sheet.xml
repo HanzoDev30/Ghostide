@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:gravity="center_horizontal"
+     android:orientation="vertical">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginBottom="4dp"
+         android:textSize="16sp"
+         android:layout_marginTop="4dp"
+         android:id="@+id/title" />
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:gravity="center_horizontal"
+         android:orientation="vertical">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginBottom="4dp"
+             android:layout_marginTop="4dp"
+             android:id="@+id/lable" />
+
+        <com.google.android.material.slider.Slider
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:id="@+id/slider" />
+
+    </LinearLayout>
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:orientation="horizontal">
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginEnd="8dp"
+             android:layout_marginStart="8dp"
+             android:id="@+id/btnok" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginEnd="8dp"
+             android:layout_marginStart="8dp"
+             android:id="@+id/btnno" />
+
+    </LinearLayout>
+
+</LinearLayout>

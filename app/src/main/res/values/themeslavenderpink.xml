@@ -1,0 +1,50 @@
+<resources>
+    <style name="AppTheme.LavenderPink" parent="BaseThemeLight">
+        <item name="colorPrimary">@color/theme_themeslavenderpink_primary</item>
+        <item name="colorOnPrimary">@color/theme_themeslavenderpink_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/theme_themeslavenderpink_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/theme_themeslavenderpink_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/theme_themeslavenderpink_secondary</item>
+        <item name="colorOnSecondary">@color/theme_themeslavenderpink_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/theme_themeslavenderpink_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/theme_themeslavenderpink_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/theme_themeslavenderpink_tertiary</item>
+        <item name="colorOnTertiary">@color/theme_themeslavenderpink_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/theme_themeslavenderpink_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/theme_themeslavenderpink_onTertiaryContainer</item>
+        <item name="colorError">@color/theme_themeslavenderpink_error</item>
+        <item name="colorOnError">@color/theme_themeslavenderpink_onError</item>
+        <item name="colorErrorContainer">@color/theme_themeslavenderpink_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/theme_themeslavenderpink_onErrorContainer</item>
+        <item name="android:colorBackground">@color/theme_themeslavenderpink_background</item>
+        <item name="colorOnBackground">@color/theme_themeslavenderpink_onBackground</item>
+        <item name="colorSurface">@color/theme_themeslavenderpink_surface</item>
+        <item name="colorOnSurface">@color/theme_themeslavenderpink_onSurface</item>
+        <item name="colorSurfaceVariant">@color/theme_themeslavenderpink_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/theme_themeslavenderpink_onSurfaceVariant</item>
+        <item name="colorOutline">@color/theme_themeslavenderpink_outline</item>
+        <item name="colorOutlineVariant">@color/theme_themeslavenderpink_outlineVariant</item>
+        <item name="colorSurfaceInverse">@color/theme_themeslavenderpink_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/theme_themeslavenderpink_inverseOnSurface</item>
+        <item name="colorPrimaryInverse">@color/theme_themeslavenderpink_inversePrimary</item>
+        <item name="colorPrimaryFixed">@color/theme_themeslavenderpink_primaryFixed</item>
+        <item name="colorOnPrimaryFixed">@color/theme_themeslavenderpink_onPrimaryFixed</item>
+        <item name="colorPrimaryFixedDim">@color/theme_themeslavenderpink_primaryFixedDim</item>
+        <item name="colorOnPrimaryFixedVariant">@color/theme_themeslavenderpink_onPrimaryFixedVariant</item>
+        <item name="colorSecondaryFixed">@color/theme_themeslavenderpink_secondaryFixed</item>
+        <item name="colorOnSecondaryFixed">@color/theme_themeslavenderpink_onSecondaryFixed</item>
+        <item name="colorSecondaryFixedDim">@color/theme_themeslavenderpink_secondaryFixedDim</item>
+        <item name="colorOnSecondaryFixedVariant">@color/theme_themeslavenderpink_onSecondaryFixedVariant</item>
+        <item name="colorTertiaryFixed">@color/theme_themeslavenderpink_tertiaryFixed</item>
+        <item name="colorOnTertiaryFixed">@color/theme_themeslavenderpink_onTertiaryFixed</item>
+        <item name="colorTertiaryFixedDim">@color/theme_themeslavenderpink_tertiaryFixedDim</item>
+        <item name="colorOnTertiaryFixedVariant">@color/theme_themeslavenderpink_onTertiaryFixedVariant</item>
+        <item name="colorSurfaceDim">@color/theme_themeslavenderpink_surfaceDim</item>
+        <item name="colorSurfaceBright">@color/theme_themeslavenderpink_surfaceBright</item>
+        <item name="colorSurfaceContainerLowest">@color/theme_themeslavenderpink_surfaceContainerLowest</item>
+        <item name="colorSurfaceContainerLow">@color/theme_themeslavenderpink_surfaceContainerLow</item>
+        <item name="colorSurfaceContainer">@color/theme_themeslavenderpink_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/theme_themeslavenderpink_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/theme_themeslavenderpink_surfaceContainerHighest</item>
+    </style>
+</resources>

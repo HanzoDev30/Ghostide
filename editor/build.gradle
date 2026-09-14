@@ -1,0 +1,71 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    id 'com.android.library'
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    //noinspection GradleDependency
+    compileSdk = 36
+    namespace = 'ir.hanzodev1375.ghostide.codeeditors'
+    
+    buildFeatures {
+        viewBinding = true 
+    }
+    
+    defaultConfig {
+        minSdkVersion 26
+        //noinspection OldTargetApi
+        targetSdkVersion 36
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled = false
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+}
+
+dependencies {
+    implementation project(":ide-api")
+    implementation project(':ide-ui-api')
+    implementation project(":components")
+    implementation project(':thememanager')
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
+    api(libs.other.sora.editor.code)
+    api(libs.other.sora.editor.lsp)
+    implementation(libs.utilcode)
+    implementation(libs.gson)
+    implementation(libs.guava)
+    implementation(libs.glide)
+    implementation(libs.androidsvg)
+    implementation(libs.jsoup)
+    implementation(libs.eventbus)
+    implementation(libs.powermenu) //for Animator
+    implementation(libs.okhttp)
+    implementation(libs.markwon.core)
+    implementation(libs.markwon.ext.strikethrough)
+    implementation(libs.markwon.linkify)
+    implementation(libs.markwon.recycler)
+    implementation(libs.markwon.html)
+    implementation(libs.markwon.ext.tables)
+    implementation(libs.markwon.ext.tasklist)
+    implementation(libs.lsp4j)
+    implementation(libs.markwon.image)
+    implementation 'top.canyie.pine:core:0.3.0'
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
+}

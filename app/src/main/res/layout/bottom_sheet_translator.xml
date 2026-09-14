@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center_horizontal"/>
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:textSize="18sp"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_weight="1"
+            android:text="@string/translator_title"
+            android:textStyle="bold"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="12sp"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:id="@+id/btnDeselectAll"
+            android:text="@string/translator_deselect_all"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="12sp"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:id="@+id/btnSelectAll"
+            android:text="@string/translator_select_all"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_height="1dp"
+        android:layout_width="match_parent"
+        android:background="?attr/colorOutlineVariant"/>
+
+    <TextView
+        android:id="@+id/tvStringsPath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:maxLines="2"
+        android:ellipsize="start"/>
+
+    <View
+        android:layout_height="1dp"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="8dp"
+        android:background="?attr/colorOutlineVariant"/>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            android:paddingHorizontal="12dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:chipSpacingVertical="4dp"
+                app:chipSpacingHorizontal="6dp"
+                android:id="@+id/chipGroupLanguages"/>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:id="@+id/layoutProgress">
+
+                <LinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:ellipsize="middle"
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="1"
+                        android:layout_weight="1"
+                        android:id="@+id/tvProgressLabel"/>
+
+                </LinearLayout>
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:max="100"
+                    android:indeterminate="false"
+                    app:trackCornerRadius="4dp"
+                    android:progress="0"
+                    android:id="@+id/progressBar"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    android:layout_marginTop="12dp"
+                    app:cardCornerRadius="12dp">
+
+                    <ScrollView
+                        android:layout_height="160dp"
+                        android:layout_width="match_parent"
+                        android:fadeScrollbars="false"
+                        android:id="@+id/scrollLog">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:padding="12dp"
+                            android:textSize="12sp"
+                            android:fontFamily="monospace"
+                            android:textColor="?attr/colorOnSurface"
+                            android:lineSpacingExtra="4dp"
+                            android:id="@+id/tvLog"/>
+
+                    </ScrollView>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <View
+        android:layout_height="1dp"
+        android:layout_width="match_parent"
+        android:background="?attr/colorOutlineVariant"/>
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:gravity="end"
+        android:padding="12dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:visibility="gone"
+            android:layout_marginEnd="8dp"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:id="@+id/btnCancel"
+            android:text="@string/translator_cancel"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            style="@style/Widget.Material3.Button"
+            android:enabled="false"
+            android:id="@+id/btnTranslate"
+            android:text="@string/translator_start"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="2dp">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvBlameLineNum"
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:paddingEnd="6dp"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:fontFamily="monospace" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvBlameHash"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:paddingEnd="6dp"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorPrimary"
+        android:fontFamily="monospace" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvBlameAuthor"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:paddingEnd="6dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorTertiary" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvBlameContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:fontFamily="monospace"
+        android:singleLine="true"
+        android:ellipsize="end" />
+</LinearLayout>

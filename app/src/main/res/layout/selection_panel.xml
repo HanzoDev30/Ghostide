@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.floatingtoolbar.FloatingToolbarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:visibility="gone"
+    android:layout_marginEnd="8dp"
+    android:elevation="8dp"
+    app:marginRightSystemWindowInsets="true"
+    android:padding="12dp"
+    android:orientation="horizontal"
+    app:marginBottomSystemWindowInsets="true"
+    android:layout_marginStart="8dp"
+    android:layout_gravity="bottom|center_horizontal"
+    android:gravity="center_vertical"
+    android:background="?colorSurface"
+    app:marginLeftSystemWindowInsets="true"
+    app:marginTopSystemWindowInsets="false"
+    android:id="@+id/selectionPanel"
+    >
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        >
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:padding="8dp"
+                android:textSize="15sp"
+                android:textColor="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/txt_selected_count"
+                android:text="0"
+                android:textStyle="bold"
+                />
+
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/ic_close"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:id="@+id/btn_close"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            
+        >
+
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/ic_copy"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/btn_copy"
+                />
+
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/ic_cut"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/btn_cut"
+                />
+
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/outline_select_all"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/btn_selectall"
+                />
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/ic_paste"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/btn_paste"
+                />
+
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/ic_delete"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/btn_delete"
+                />
+
+            <ImageView
+                android:layout_height="32dp"
+                android:layout_width="32dp"
+                android:src="@drawable/more_vert"
+                android:scaleType="centerInside"
+                android:tint="?colorOnSurface"
+                android:layout_weight="1"
+                android:id="@+id/selectionmore"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.floatingtoolbar.FloatingToolbarLayout>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:orientation="vertical"
+         android:paddingBottom="32dp">
+
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+             android:layout_height="4dp"
+             android:layout_width="32dp"
+             android:layout_marginBottom="8dp"
+             android:layout_marginTop="12dp"
+             android:layout_gravity="center_horizontal" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:gravity="end"
+             android:textAppearance="?attr/textAppearanceTitleMedium"
+             android:layout_marginHorizontal="20dp"
+             android:textColor="?attr/colorOnSurface"
+             android:layout_marginTop="4dp"
+             android:id="@+id/tv_sheet_title" />
+
+        <com.google.android.material.divider.MaterialDivider
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="4dp"
+             android:layout_marginHorizontal="20dp"
+             android:layout_marginTop="8dp" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:visibility="gone"
+             android:orientation="vertical"
+             android:id="@+id/layout_single">
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginBottom="4dp"
+                 android:gravity="end"
+                 android:textAppearance="?attr/textAppearanceLabelSmall"
+                 android:layout_marginHorizontal="20dp"
+                 android:textColor="?attr/colorPrimary"
+                 android:layout_marginTop="16dp"
+                 android:text="@string/props_section_general" />
+
+            <com.google.android.material.card.MaterialCardView
+                 android:id="@+id/card_single"
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginHorizontal="16dp"
+                 app:cardElevation="0dp"
+                 app:strokeWidth="0dp"
+                 app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+                 app:cardCornerRadius="16dp">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical">
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_name" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_location" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_type" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_size" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_modified" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginBottom="4dp"
+                 android:gravity="end"
+                 android:textAppearance="?attr/textAppearanceLabelSmall"
+                 android:layout_marginHorizontal="20dp"
+                 android:textColor="?attr/colorPrimary"
+                 android:layout_marginTop="16dp"
+                 android:text="@string/props_section_system" />
+
+            <com.google.android.material.card.MaterialCardView
+                 android:id="@+id/card_system"
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginHorizontal="16dp"
+                 app:cardElevation="0dp"
+                 app:strokeWidth="0dp"
+                 app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+                 app:cardCornerRadius="16dp">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical">
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_owner" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_permissions" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginBottom="4dp"
+                 android:gravity="end"
+                 android:textAppearance="?attr/textAppearanceLabelSmall"
+                 android:layout_marginHorizontal="20dp"
+                 android:textColor="?attr/colorPrimary"
+                 android:layout_marginTop="16dp"
+                 android:text="@string/props_section_analysis" />
+
+            <com.google.android.material.card.MaterialCardView
+                 android:id="@+id/card_analysis"
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginHorizontal="16dp"
+                 app:cardElevation="0dp"
+                 app:strokeWidth="0dp"
+                 app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+                 app:cardCornerRadius="16dp">
+
+                <include
+                     layout="@layout/item_props_row"
+                     android:id="@+id/row_contents" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:visibility="gone"
+             android:orientation="vertical"
+             android:id="@+id/layout_multi">
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginBottom="4dp"
+                 android:gravity="end"
+                 android:textAppearance="?attr/textAppearanceLabelSmall"
+                 android:layout_marginHorizontal="20dp"
+                 android:textColor="?attr/colorPrimary"
+                 android:layout_marginTop="16dp"
+                 android:text="@string/props_section_summary" />
+
+            <com.google.android.material.card.MaterialCardView
+                 android:id="@+id/card_multi"
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginHorizontal="16dp"
+                 app:cardElevation="0dp"
+                 app:strokeWidth="0dp"
+                 app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+                 app:cardCornerRadius="16dp">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical">
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_selected_count" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_total_size" />
+
+                    <com.google.android.material.divider.MaterialDivider
+                         android:layout_height="wrap_content"
+                         android:layout_width="match_parent"
+                         android:layout_marginHorizontal="16dp" />
+
+                    <include
+                         layout="@layout/item_props_row"
+                         android:id="@+id/row_total_contents" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginHorizontal="16dp"
+             android:layout_marginTop="20dp"
+             android:id="@+id/btn_close"
+             android:text="@string/props_close" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

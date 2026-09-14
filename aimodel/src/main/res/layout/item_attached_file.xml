@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A single chip shown in the horizontal "attached files" RecyclerView.
+  • Images  → shows a thumbnail (ivPreview)
+  • Text    → shows a file icon + name (ivFileIcon + tvFileName)
+  The ✕ button removes the attachment.
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="80dp"
+    android:layout_height="80dp"
+    android:layout_marginEnd="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+    <!-- Image preview (visible for images) -->
+    <ImageView
+        android:id="@+id/iv_file_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="Image preview"
+        android:visibility="gone" />
+
+    <!-- Text-file placeholder (visible for text files) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="6dp">
+
+        <ImageView
+            android:id="@+id/iv_file_icon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_attach_file"
+            android:tint="?attr/colorPrimary"
+            android:contentDescription="File"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_file_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="10sp"
+            android:maxLines="2"
+            android:ellipsize="middle"
+            android:gravity="center"
+            android:textColor="?attr/colorOnSurface"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Remove button (always visible, top-right corner) -->
+    <ImageButton
+        android:id="@+id/btn_remove_file"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="4dp"
+        android:src="@drawable/ic_close"
+        android:background="@drawable/bg_remove_button"
+        android:padding="2dp"
+        android:contentDescription="Remove attachment" />
+
+</com.google.android.material.card.MaterialCardView>

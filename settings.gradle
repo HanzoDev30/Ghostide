@@ -1,0 +1,34 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url 'https://maven.myket.ir' }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://maven.myket.ir' }
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = "Ghostide"
+
+include(":app", ":logcat", ":terminal-emulator", ":terminal-view")
+include(':editor')
+include(':components')
+include(':materialfileicon')
+include(':aimodel')
+include(':jgit')
+include(':prddownloader')
+include ':musicpreview'
+include(':plugin-api')
+include(':ide-api')
+include(':ide-ui-api')
+include ':thememanager'
+//include(':proot')

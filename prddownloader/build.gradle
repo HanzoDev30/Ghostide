@@ -1,0 +1,41 @@
+plugins {
+    id "com.android.library"
+}
+
+android {
+    namespace "com.downloader"
+    compileSdk 36
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 36
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation project(":components")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.gson)
+    implementation(libs.okhttp)
+    implementation(libs.utilcode)
+    implementation(libs.markwon.core)
+    implementation(libs.markwon.ext.strikethrough)
+    implementation(libs.markwon.linkify)
+    implementation(libs.markwon.recycler)
+    implementation(libs.markwon.html)
+    implementation(libs.markwon.ext.tables)
+    implementation(libs.markwon.ext.tasklist)
+    implementation(libs.markwon.image)
+}

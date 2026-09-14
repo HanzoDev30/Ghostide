@@ -1,0 +1,45 @@
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace 'ir.ghostide.proot'
+    ndkVersion '28.0.13004108'
+    compileSdk {
+        version = release(36)
+    }
+
+    defaultConfig {
+        minSdk = 26
+        consumerProguardFiles('consumer-rules.pro')
+        externalNativeBuild {
+            cmake {
+                cppFlags('')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles(
+                    getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro',
+            )
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path('src/main/cpp/CMakeLists.txt')
+            version = '3.22.1'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+
+}

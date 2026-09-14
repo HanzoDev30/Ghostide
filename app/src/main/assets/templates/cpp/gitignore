@@ -1,0 +1,6 @@
+build/
+*.o
+*.out
+{{PROJECT_NAME_LOWER}}
+CMakeCache.txt
+CMakeFiles/

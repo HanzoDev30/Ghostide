@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:gravity="end"
+     android:padding="6dp"
+     android:orientation="horizontal">
+
+    <com.google.android.material.card.MaterialCardView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:orientation="vertical"
+         app:cardElevation="1dp"
+         app:cardBackgroundColor="?attr/colorPrimaryContainer"
+         app:cardCornerRadius="20dp"
+         android:minWidth="100dp">
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:padding="8dp"
+             android:orientation="vertical">
+
+            <ImageView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:visibility="gone"
+                 android:layout_marginBottom="4dp"
+                 android:adjustViewBounds="true"
+                 android:scaleType="centerInside"
+                 android:id="@+id/iv_user_image" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:visibility="gone"
+                 android:textSize="14sp"
+                 android:textColor="?attr/colorOnPrimaryContainer"
+                 android:lineSpacingExtra="2dp"
+                 android:id="@+id/tv_message_user" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat
+        android:id="@+id/glassView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:cornerRadius="24dp"
+        app:glassMaterial="regular"
+        app:refractionHeight="66dp"
+        app:bevelWidth="14dp"
+        app:dispersionStrength="0.12"
+        app:sensorHighlight="false"
+        app:adaptiveTint="true">
+
+        <LinearLayout
+            android:id="@+id/contentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat>
+
+</FrameLayout>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:maxHeight="500dp"
+     android:padding="16dp"
+     android:orientation="vertical">
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="12dp"
+         android:textSize="20sp"
+         android:text="Chat History"
+         android:textStyle="bold" />
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:gravity="center_horizontal|center_vertical"
+         android:orientation="vertical"
+         android:id="@+id/emptyview">
+
+        <ImageView
+             android:layout_height="150dp"
+             android:layout_width="150dp"
+             android:src="@drawable/ic_ai_robot"
+             android:scaleType="centerInside" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:padding="8dp"
+             android:textSize="16sp"
+             android:id="@+id/empty"
+             android:text="This Empty" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+         android:layout_height="0dp"
+         android:layout_width="match_parent"
+         android:nestedScrollingEnabled="false"
+         android:layout_weight="1"
+         android:id="@+id/rvhistory" />
+
+    <ProgressBar
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:visibility="gone"
+         android:id="@+id/progresshistory"
+         android:layout_gravity="center" />
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:orientation="horizontal"
+         android:layout_marginTop="16dp">
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             style="@style/Widget.Material3.Button.OutlinedButton"
+             android:layout_weight="1"
+             android:id="@+id/btndeleteselected"
+             android:text="Delete Selected" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             style="@style/Widget.Material3.Button.TextButton"
+             android:layout_weight="1"
+             android:id="@+id/btncancel"
+             android:text="Cancel" />
+
+    </LinearLayout>
+
+</LinearLayout>

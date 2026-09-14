@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:gravity="center"
+     android:orientation="horizontal">
+
+    <ImageView
+         android:layout_height="20dp"
+         android:layout_width="20dp"
+         android:src="@drawable/ic_back"
+         android:scaleType="fitCenter"
+         android:id="@+id/tab_icon" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginEnd="4dp"
+         android:ellipsize="end"
+         android:textSize="14sp"
+         android:singleLine="true"
+         android:layout_marginStart="4dp"
+         android:id="@+id/tab_title" />
+
+    <ImageView
+         android:layout_height="20dp"
+         android:layout_width="20dp"
+         android:visibility="visible"
+         android:src="@drawable/round_push_pin"
+         android:id="@+id/tab_pin_icon" />
+
+</LinearLayout>

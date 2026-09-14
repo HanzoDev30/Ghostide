@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:hint="Stash message (optional)"
+            android:id="@+id/editStashMessage" />
+
+        <Button
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="8dp"
+            android:id="@+id/btnStashSave"
+            android:text="Stash" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:text="Saved Stashes"
+        android:textAppearance="?attr/textAppearanceTitleSmall" />
+
+    <FrameLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:id="@+id/recyclerViewStash" />
+
+        <ir.hanzodev1375.components.views.EmptyView
+            android:id="@+id/emptyView"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            app:emptyIcon="@drawable/ic_empty_state"
+            app:emptyTitle="@string/git_empty_stash_title"
+            app:emptyDescription="@string/git_empty_stash_desc" />
+
+    </FrameLayout>
+
+</LinearLayout>

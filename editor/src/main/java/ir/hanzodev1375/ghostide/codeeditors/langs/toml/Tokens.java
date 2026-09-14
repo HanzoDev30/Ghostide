@@ -1,0 +1,31 @@
+package ir.hanzodev1375.ghostide.codeeditors.langs.toml;
+
+public enum Tokens {
+  WHITESPACE,
+  NEWLINE,
+  UNKNOWN,
+  EOF,
+  LINE_COMMENT,
+  LBRACK,
+  RBRACK,
+  LBRACE,
+  RBRACE,
+  COMMA,
+  DOT,
+  EQ,
+  KEY,
+  STRING_LITERAL,
+  INTEGER_LITERAL,
+  FLOATING_POINT_LITERAL,
+  BOOLEAN_LITERAL,
+  DATETIME_LITERAL,
+  TABLE_HEADER,
+  ARRAY_TABLE_HEADER,
+  TRUE,
+  FALSE,
+  GROUP,
+  MODULE,
+  NAME,
+  VERSION,
+  REF
+}

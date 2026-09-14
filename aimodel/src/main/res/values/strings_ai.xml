@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_chat_title">Ghost AI</string>
+    <string name="ai_settings_title">AI Settings</string>
+    <string name="ai_input_hint">Message…</string>
+    <string name="ai_send">Send</string>
+    <string name="ai_clear_chat">Clear Chat</string>
+    <string name="ai_settings_menu">AI Settings</string>
+    <string name="ai_no_api_key">Please set the API key in Settings → AI Settings.</string>
+    <string name="ai_thinking">Thinking…</string>
+    <string name="ai_key_saved">API key saved.</string>
+    <string name="ai_save">Save</string>
+
+    <!-- Provider names -->
+    <string name="provider_claude">Claude (Anthropic)</string>
+    <string name="provider_chatgpt">ChatGPT (OpenAI)</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_gemini">Gemini (Google)</string>
+
+    <!-- API Key hints -->
+    <string name="hint_claude_key">Claude API Key</string>
+    <string name="hint_chatgpt_key">OpenAI API Key</string>
+    <string name="hint_deepseek_key">DeepSeek API Key</string>
+    <string name="hint_gemini_key">Google AI API Key</string>
+</resources>

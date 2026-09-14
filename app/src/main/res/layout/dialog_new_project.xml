@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_height="wrap_content"
+  android:layout_width="match_parent"
+  android:padding="16dp"
+  android:orientation="vertical">
+
+  <TextView
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:textAppearance="?textAppearanceLabelLarge"
+    android:text="@string/project_type" />
+
+  <com.google.android.material.chip.ChipGroup
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_marginBottom="16dp"
+    app:singleSelection="true"
+    app:selectionRequired="true"
+    android:id="@+id/chipGroupType">
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipHtml"
+      android:text="HTML" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipNodejs"
+      android:text="Node.js" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipJava"
+      android:text="Java" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipFlutter"
+      android:text="Flutter" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipPython"
+      android:text="Python" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipPythonC"
+      android:text="PythonC" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipPhp"
+      android:text="PHP" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipC"
+      android:text="C" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipCpp"
+      android:text="C++" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipRuby"
+      android:text="Ruby" />
+
+    <com.google.android.material.chip.Chip
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      style="@style/Widget.Material3.Chip.Filter"
+      android:id="@+id/chipAndroidModule"
+      android:text="Android Module" />
+
+  </com.google.android.material.chip.ChipGroup>
+
+  <com.google.android.material.textfield.TextInputLayout
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_marginBottom="12dp"
+    app:endIconMode="clear_text"
+    android:hint="@string/project_name_hint"
+    android:id="@+id/tilProjectName">
+
+    <com.google.android.material.textfield.TextInputEditText
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:singleLine="true"
+      android:inputType="text"
+      android:id="@+id/etProjectName" />
+
+  </com.google.android.material.textfield.TextInputLayout>
+
+  <com.google.android.material.textfield.TextInputLayout
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:visibility="gone"
+    app:endIconMode="clear_text"
+    android:hint="@string/project_package_hint"
+    android:id="@+id/tilPackageName">
+
+    <com.google.android.material.textfield.TextInputEditText
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:singleLine="true"
+      android:inputType="text"
+      android:id="@+id/etPackageName"
+      android:text="com.example" />
+
+  </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

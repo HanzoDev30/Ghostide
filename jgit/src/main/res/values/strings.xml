@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- General -->
+    <string name="app_name">GhostIDE Git</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="close">Close</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="loading">Loading…</string>
+
+    <!-- Tabs -->
+    <string name="tab_changes">Changes</string>
+    <string name="tab_history">History</string>
+    <string name="tab_branches">Branches</string>
+    <string name="tab_remotes">Remotes</string>
+    <string name="tab_stash">Stash</string>
+    <string name="tab_conflicts">Conflicts</string>
+    <string name="tab_diff">Diff</string>
+    <string name="tab_reset">Reset</string>
+    <string name="tab_tags">Tags</string>
+    <string name="tab_gitignore">Gitignore</string>
+
+    <!-- Branches -->
+    <string name="branch_new_hint">New branch name</string>
+    <string name="branch_create">Create</string>
+    <string name="branch_checkout">Checkout</string>
+    <string name="branch_merge">Merge</string>
+    <string name="branch_rebase">Rebase</string>
+    <string name="branch_delete">Delete</string>
+    <string name="branch_delete_confirm_title">Delete Branch</string>
+    <string name="branch_delete_confirm_msg">Delete branch \'%s\'?</string>
+    <string name="branch_merge_confirm_title">Merge Branch</string>
+    <string name="branch_merge_confirm_msg">Merge \'%1$s\' into \'%2$s\'?</string>
+    <string name="branch_rebase_confirm_title">Rebase</string>
+    <string name="branch_rebase_confirm_msg">Rebase \'%1$s\' onto \'%2$s\'?\n\nThis rewrites commit history.</string>
+
+    <!-- Remotes -->
+    <string name="remote_add">Add Remote</string>
+    <string name="remote_remove">Remove</string>
+    <string name="remote_remove_confirm_title">Remove Remote</string>
+    <string name="remote_remove_confirm_msg">Remove \'%s\'?</string>
+    <string name="remote_push">Push</string>
+    <string name="remote_pull">Pull</string>
+    <string name="remote_fetch">Fetch</string>
+    <string name="remote_no_token">GitHub token not found. Please login first.</string>
+    <string name="remote_uncommitted_title">Uncommitted changes</string>
+    <string name="remote_uncommitted_push_msg">You have uncommitted changes. Please commit them before pushing.</string>
+    <string name="remote_uncommitted_pull_msg">You have uncommitted changes. Pull may cause conflicts. Continue anyway?</string>
+    <string name="remote_fetching">Fetching from %s…</string>
+
+    <!-- Stash -->
+    <string name="stash_message_hint">Stash message (optional)</string>
+    <string name="stash_save">Stash</string>
+    <string name="stash_pop">Pop</string>
+    <string name="stash_apply">Apply</string>
+    <string name="stash_drop">Drop</string>
+    <string name="stash_pop_confirm_title">Pop Stash</string>
+    <string name="stash_pop_confirm_msg">Apply stash@{%d} and remove it?</string>
+    <string name="stash_drop_confirm_title">Drop Stash</string>
+    <string name="stash_drop_confirm_msg">Delete stash@{%d}? This cannot be undone.</string>
+    <string name="stash_saved_title">Saved Stashes</string>
+
+    <!-- Conflicts -->
+    <string name="conflict_title">Conflicting Files</string>
+    <string name="conflict_no_conflicts">✅ No conflicts</string>
+    <string name="conflict_use_ours">Use Ours</string>
+    <string name="conflict_use_theirs">Use Theirs</string>
+    <string name="conflict_edit">Edit</string>
+    <string name="conflict_use_ours_title">Use Ours</string>
+    <string name="conflict_use_ours_msg">Keep your local version of:\n%s?</string>
+    <string name="conflict_use_theirs_title">Use Theirs</string>
+    <string name="conflict_use_theirs_msg">Use incoming version of:\n%s?</string>
+    <string name="conflict_manual_title">Manual Resolve: %s</string>
+    <string name="conflict_dialog_title">⚠️ Merge Conflict</string>
+    <string name="conflict_dialog_msg">Conflicts were detected.\n\nConflicting files are marked in the Changes tab.\nPlease resolve each conflict manually, then stage and commit.\n\nDetails: %s</string>
+    <string name="conflict_go_to_changes">Go to Changes</string>
+    <string name="conflict_dismiss">Dismiss</string>
+
+    <!-- Reset -->
+    <string name="reset_title">Reset</string>
+    <string name="reset_soft">Soft</string>
+    <string name="reset_mixed">Mixed</string>
+    <string name="reset_hard">Hard</string>
+    <string name="reset_soft_desc">Keep changes staged</string>
+    <string name="reset_mixed_desc">Keep changes unstaged</string>
+    <string name="reset_hard_desc">Discard all changes</string>
+    <string name="reset_confirm_title">Confirm Reset</string>
+    <string name="reset_confirm_msg">Reset to previous commit?\n\nMode: %s\n\nThis cannot be undone.</string>
+    <string name="reset_steps_label">Steps back</string>
+
+    <!-- Tags -->
+    <string name="tag_title">Tags</string>
+    <string name="tag_name_hint">Tag name (e.g. v1.0.0)</string>
+    <string name="tag_message_hint">Tag message (optional)</string>
+    <string name="tag_create">Create Tag</string>
+    <string name="tag_delete">Delete</string>
+    <string name="tag_delete_confirm_title">Delete Tag</string>
+    <string name="tag_delete_confirm_msg">Delete tag \'%s\'?</string>
+    <string name="tag_no_tags">No tags yet</string>
+
+    <!-- Gitignore -->
+    <string name="gitignore_title">.gitignore Editor</string>
+    <string name="gitignore_hint">Enter patterns, one per line…</string>
+    <string name="gitignore_save">Save</string>
+    <string name="gitignore_add_pattern">Add pattern</string>
+    <string name="gitignore_pattern_hint">e.g. *.log, build/, .DS_Store</string>
+    <string name="gitignore_saved">Gitignore saved</string>
+    <string name="gitignore_failed">Failed to save gitignore</string>
+    <string name="gitignore_templates">Templates</string>
+
+    <string name="tab_blame">Blame</string>
+
+    <string name="git_empty_changes_title">No changes</string>
+    <string name="git_empty_changes_desc">Your working tree is clean. Edited or new files will show up here.</string>
+    <string name="git_empty_history_title">No commits yet</string>
+    <string name="git_empty_history_desc">Make your first commit and its history will appear here.</string>
+    <string name="git_empty_branches_title">No branches</string>
+    <string name="git_empty_branches_desc">Create a branch to start working.</string>
+    <string name="git_empty_remotes_title">No remotes</string>
+    <string name="git_empty_remotes_desc">Add a remote (e.g. origin) to push your commits.</string>
+    <string name="git_empty_stash_title">Nothing stashed</string>
+    <string name="git_empty_stash_desc">Stash your changes to keep them safe for later.</string>
+    <string name="git_empty_tags_title">No tags</string>
+    <string name="git_empty_tags_desc">Create a tag to mark important points in history.</string>
+</resources>

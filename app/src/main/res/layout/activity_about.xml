@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent">
+
+    <FrameLayout
+         android:id="@+id/contentAreaAbout"
+         android:layout_height="match_parent"
+         android:layout_width="match_parent">
+
+        <ir.hanzodev1375.components.childern.ViewChilder
+             android:id="@+id/backgroundIconAbout"
+             android:layout_height="match_parent"
+             android:layout_width="match_parent"
+             android:importantForAccessibility="no"
+             android:visibility="gone" />
+
+    </FrameLayout>
+
+    <ScrollView
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:scrollbars="none"
+     android:background="?attr/colorSurface"
+     android:fillViewport="true"
+     android:clipToPadding="false"
+     android:id="@+id/root_scroll">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:orientation="vertical"
+         android:paddingBottom="24dp"
+         android:paddingHorizontal="16dp"
+         android:paddingTop="12dp">
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:gravity="center"
+             android:orientation="vertical">
+
+            <ImageView
+                 android:layout_height="150dp"
+                 android:layout_width="150dp"
+                 android:src="@drawable/ic_lego_app"
+                 android:scaleType="centerInside"
+                 android:gravity="center" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_marginBottom="20dp"
+                 android:gravity="center"
+                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                 android:textColor="?attr/colorOnSurface"
+                 android:text="@string/diag_title" />
+
+        </LinearLayout>
+
+        <ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="12dp"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/card_device_info"
+             app:cornerRadius="24dp"
+             app:aberrationIntensity="2"
+             app:saturation="140"
+             app:blurAmount="0.0625" >
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:padding="16dp"
+                 android:orientation="vertical">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:layout_marginBottom="12dp"
+                     android:gravity="center_vertical"
+                     android:orientation="horizontal">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="0dp"
+                         android:textAppearance="?attr/textAppearanceTitleMedium"
+                         android:textColor="?attr/colorOnSurfaceVariant"
+                         android:layout_weight="1"
+                         android:text="@string/diag_device_info" />
+
+                    <ImageView
+                         android:layout_height="40dp"
+                         android:layout_width="40dp"
+                         android:src="@drawable/ic_expand"
+                         android:scaleType="centerInside"
+                         android:clickable="false"
+                         android:padding="0dp"
+                         android:id="@+id/arrow_device_info" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical"
+                     android:clipChildren="true"
+                     android:id="@+id/body_device_info">
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_model" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_manufacturer" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_device" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_brand" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_sdk" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_android" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_arch" />
+
+                    <include
+                         layout="@layout/item_diag_row_double"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_hardware" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_abis" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat>
+
+        <ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="12dp"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/card_display"
+             app:cornerRadius="24dp"
+             app:aberrationIntensity="2"
+             app:saturation="140"
+             app:blurAmount="0.0625" >
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:padding="16dp"
+                 android:orientation="vertical">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:layout_marginBottom="12dp"
+                     android:gravity="center_vertical"
+                     android:orientation="horizontal">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="0dp"
+                         android:textAppearance="?attr/textAppearanceTitleMedium"
+                         android:textColor="?attr/colorOnSurfaceVariant"
+                         android:layout_weight="1"
+                         android:text="@string/diag_display" />
+
+                    <ImageView
+                         android:layout_height="40dp"
+                         android:layout_width="40dp"
+                         android:src="@drawable/ic_expand"
+                         android:scaleType="centerInside"
+                         android:clickable="false"
+                         android:padding="0dp"
+                         android:id="@+id/arrow_display" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical"
+                     android:id="@+id/body_display">
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_refresh" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_opengl" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_vulkan" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_hdr" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_wide_color" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat>
+
+        <ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="12dp"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/card_memory"
+             app:cornerRadius="24dp"
+             app:aberrationIntensity="2"
+             app:saturation="140"
+             app:blurAmount="0.0625" >
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:padding="16dp"
+                 android:orientation="vertical">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:layout_marginBottom="12dp"
+                     android:gravity="center_vertical"
+                     android:orientation="horizontal">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="0dp"
+                         android:textAppearance="?attr/textAppearanceTitleMedium"
+                         android:textColor="?attr/colorOnSurfaceVariant"
+                         android:layout_weight="1"
+                         android:text="@string/diag_memory" />
+
+                    <ImageView
+                         android:layout_height="40dp"
+                         android:layout_width="40dp"
+                         android:src="@drawable/ic_expand"
+                         android:scaleType="centerInside"
+                         android:clickable="false"
+                         android:padding="0dp"
+                         android:id="@+id/arrow_memory" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical"
+                     android:id="@+id/body_memory">
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_total_memory" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_low_ram" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_large_heap" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_runtime" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat>
+
+        <ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginBottom="12dp"
+             android:clickable="true"
+             android:focusable="true"
+             android:id="@+id/card_storage"
+             app:cornerRadius="24dp"
+             app:aberrationIntensity="2"
+             app:saturation="140"
+             app:blurAmount="0.0625" >
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:padding="16dp"
+                 android:orientation="vertical">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:layout_marginBottom="12dp"
+                     android:gravity="center_vertical"
+                     android:orientation="horizontal">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="0dp"
+                         android:textAppearance="?attr/textAppearanceTitleMedium"
+                         android:textColor="?attr/colorOnSurfaceVariant"
+                         android:layout_weight="1"
+                         android:text="@string/diag_storage" />
+
+                    <ImageView
+                         android:layout_height="40dp"
+                         android:layout_width="40dp"
+                         android:src="@drawable/ic_expand"
+                         android:scaleType="centerInside"
+                         android:clickable="false"
+                         android:padding="0dp"
+                         android:id="@+id/arrow_storage" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:orientation="vertical"
+                     android:id="@+id/body_storage">
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_internal_total" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_internal_free" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_external_total" />
+
+                    <include
+                         layout="@layout/item_diag_row_single"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:id="@+id/row_external_free" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat>
+
+    </LinearLayout>
+
+</ScrollView>
+
+</FrameLayout>

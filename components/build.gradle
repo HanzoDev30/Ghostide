@@ -1,0 +1,47 @@
+plugins {
+    id('com.android.library')
+}
+
+android {
+    namespace = 'ir.hanzodev1375.components'
+    compileSdk = 36
+    defaultConfig {
+        minSdk = 26
+        targetSdk = 36
+    }
+
+    compileOptions {
+        encoding = "UTF-8"
+        sourceCompatibility =  JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        aidl = true
+        viewBinding = true
+    }
+}
+
+dependencies {
+    implementation(libs.material)
+    implementation(libs.glide)
+    implementation(libs.powermenu)
+    implementation(libs.commons.net)
+    implementation(libs.okhttp)
+    implementation(libs.gson)
+    implementation(libs.palette)
+    implementation(libs.utilcode)
+    implementation project(":materialfileicon")
+
+    implementation('com.hierynomus:sshj:0.34.0') {
+        exclude group: 'org.bouncycastle'
+    }
+
+    implementation('eu.agno3.jcifs:jcifs-ng:2.1.9') {
+        exclude group: 'org.bouncycastle'
+    }
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.78' 
+    api(libs.glass)
+    implementation(libs.eventbus)
+    implementation project(':thememanager')
+    implementation(libs.markwon.core)
+}

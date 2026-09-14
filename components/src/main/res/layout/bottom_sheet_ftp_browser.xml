@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+         android:layout_height="?attr/actionBarSize"
+         android:layout_width="match_parent"
+         app:title="@string/ftp_browser_title"
+         android:id="@+id/toolbar">
+
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <HorizontalScrollView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:scrollbars="none"
+         android:paddingEnd="16dp"
+         android:background="?attr/colorSurfaceVariant"
+         android:paddingBottom="4dp"
+         android:paddingStart="16dp"
+         android:paddingTop="4dp">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textAppearance="?attr/textAppearanceLabelMedium"
+             android:fontFamily="monospace"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:id="@+id/tvPath"
+             android:text="/" />
+
+    </HorizontalScrollView>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:visibility="gone"
+         android:indeterminate="true"
+         app:trackCornerRadius="4dp"
+         android:id="@+id/progressBar" />
+
+    <androidx.recyclerview.widget.RecyclerView
+         android:layout_height="0dp"
+         android:layout_width="match_parent"
+         android:paddingBottom="80dp"
+         android:clipToPadding="false"
+         android:layout_weight="1"
+         android:id="@+id/rvFiles" />
+
+    <LinearLayout
+         android:layout_height="0dp"
+         android:layout_width="match_parent"
+         android:visibility="gone"
+         android:gravity="center"
+         android:orientation="vertical"
+         android:layout_weight="1"
+         android:id="@+id/llEmpty">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textAppearance="?attr/textAppearanceBodyLarge"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:text="@string/ftp_empty_folder" />
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         app:icon="@android:drawable/stat_sys_download"
+         android:visibility="gone"
+         android:layout_margin="16dp"
+         android:id="@+id/fabDownload"
+         android:layout_gravity="bottom|end"
+         android:text="@string/ftp_btn_download" />
+
+</LinearLayout>

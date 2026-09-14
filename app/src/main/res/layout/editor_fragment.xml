@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:id="@+id/coordinator">
+
+    <ir.hanzodev1375.ghostide.codeeditors.IdeEditor
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         android:id="@+id/editor" />
+
+    <ProgressBar
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginTop="5dp"
+         android:layout_marginStart="10dp"
+         android:id="@+id/prograssLoading" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginEnd="8dp"
+         android:background="@drawable/bg_position_indicator"
+         android:paddingVertical="6dp"
+         android:textSize="12sp"
+         android:layout_marginTop="8dp"
+         android:paddingHorizontal="12dp"
+         android:id="@+id/tvCursorPosition"
+         android:layout_gravity="top|end"
+         android:text="Ln 1, Col 1" />
+
+    <ImageView
+         android:layout_height="30dp"
+         android:layout_width="30dp"
+         android:layout_marginEnd="9dp"
+         android:padding="2dp"
+         android:layout_marginTop="25dp"
+         android:layout_gravity="top|end"
+         android:layout_marginBottom="9dp"
+         android:scaleType="centerInside"
+         android:paddingVertical="7dp"
+         android:paddingHorizontal="12dp"
+         android:clickable="true"
+         android:focusable="true"
+         android:contentDescription="@string/diagnostics_title"
+         android:id="@+id/dlch" />
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:visibility="gone"
+         android:background="@drawable/bg_position_indicator"
+         android:gravity="center_vertical"
+         android:paddingVertical="6dp"
+         android:orientation="horizontal"
+         android:layout_marginTop="8dp"
+         android:layout_marginStart="8dp"
+         android:paddingHorizontal="12dp"
+         android:id="@+id/llWrapIndicator"
+         android:layout_gravity="top|start">
+
+        <ir.hanzodev1375.components.views.ImageViewAnimator
+             android:layout_height="18dp"
+             android:layout_width="18dp"
+             android:src="@drawable/ic_back"
+             android:id="@+id/ivWrapToggle1" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginHorizontal="8dp"
+             android:textSize="12sp"
+             android:id="@+id/tvWrapInfo"
+             android:text="Page 1/1" />
+
+        <ir.hanzodev1375.components.views.ImageViewAnimator
+             android:layout_height="18dp"
+             android:layout_width="18dp"
+             android:src="@drawable/ic_arrow_forward"
+             android:id="@+id/ivWrapToggle2" />
+
+    </LinearLayout>
+
+</FrameLayout>

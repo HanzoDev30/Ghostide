@@ -1,0 +1,49 @@
+package ir.hanzodev1375.components.childern;
+
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
+
+import ir.theme.M3Theme;
+
+public class GifChild implements IChild {
+
+  private final ImageView imageView;
+  private final String path;
+
+  public GifChild(Context context, String path, float blurSize) {
+    this.path = path;
+    this.imageView = new ImageView(context);
+    this.imageView.setLayoutParams(
+        new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    this.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+    this.imageView.setTag(M3Theme.TAG_SKIP_TINT);
+    if (blurSize == 0f) {
+      Glide.with(context).asGif().load(path).into(imageView);
+    } else
+      Glide.with(context)
+          .asGif()
+          .load(path)
+          .transform(new StackBlurTransformation((int) blurSize))
+          .into(imageView);
+  }
+
+  @Override
+  public View view() {
+    return imageView;
+  }
+
+  @Override
+  public String pathTheme() {
+    return path;
+  }
+
+  @Override
+  public void release() {
+    Glide.with(imageView).clear(imageView);
+  }
+}
