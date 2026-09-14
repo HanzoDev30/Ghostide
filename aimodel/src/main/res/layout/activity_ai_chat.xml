@@ -100,15 +100,27 @@
     </ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat>
 
     <!-- Chat messages list -->
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rv_chat"
+    <FrameLayout
       android:layout_width="match_parent"
       android:layout_height="0dp"
-      android:layout_weight="1"
-      android:clipToPadding="false"
-      android:paddingHorizontal="8dp"
-      android:paddingVertical="12dp"
-      android:scrollbars="vertical" />
+      android:layout_weight="1">
+
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="12dp"
+        android:scrollbars="vertical" />
+
+      <ir.hanzodev1375.ghostide.ai.chat.ChatFadeView
+        android:id="@+id/chat_fade_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    </FrameLayout>
 
     <!-- ── Bottom input area (glass) ──────────────────────────────────── -->
     <ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat

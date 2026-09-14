@@ -166,6 +166,43 @@ public class AiPreferencesUtils {
         .apply();
   }
 
+  // ========== OpenCode ==========
+  public String getOpencodeUrl() {
+    return getPrefs()
+        .getString(
+            AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_URL,
+            AiConstants.ApiEndpoints.OPENCODE_BASE_URL);
+  }
+
+  public void setOpencodeUrl(String url) {
+    getPrefs()
+        .edit()
+        .putString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_URL, url)
+        .apply();
+  }
+
+  public String getOpencodeUsername() {
+    return getPrefs().getString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_USERNAME, "");
+  }
+
+  public void setOpencodeUsername(String username) {
+    getPrefs()
+        .edit()
+        .putString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_USERNAME, username)
+        .apply();
+  }
+
+  public String getOpencodePassword() {
+    return getPrefs().getString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_PASSWORD, "");
+  }
+
+  public void setOpencodePassword(String password) {
+    getPrefs()
+        .edit()
+        .putString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_PASSWORD, password)
+        .apply();
+  }
+
   // ========== Selected Provider ==========
   public String getSelectedProvider() {
     return getPrefs()
@@ -193,6 +230,8 @@ public class AiPreferencesUtils {
         return hasGeminiApiKey();
       case AiConstants.AiProvider.OPENROUTER:
         return hasOpenRouterApiKey();
+      case AiConstants.AiProvider.OPENCODE:
+        return true;
       default:
         return false;
     }

@@ -54,6 +54,11 @@ public class AiClientFactory {
             AiConstants.AiProvider.OPENROUTER);
       case AiConstants.AiProvider.GEMINI:
         return new GeminiClient(prefs.getGeminiApiKey(), prefs.getGeminiModel());
+      case AiConstants.AiProvider.OPENCODE:
+        return new OpencodeClient(
+            prefs.getOpencodeUrl(),
+            prefs.getOpencodeUsername(),
+            prefs.getOpencodePassword());
       default:
         return new ClaudeClient(prefs.getClaudeApiKey(), prefs.getClaudeModel());
     }

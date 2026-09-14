@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,9 +23,14 @@ import ir.theme.M3Theme;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
   private final List<ChatMessage> messages;
+  private boolean animateNextBind;
 
   public ChatAdapter(List<ChatMessage> messages) {
     this.messages = messages;
+  }
+
+  public void animateNextInsert() {
+    animateNextBind = true;
   }
 
   @Override
@@ -81,6 +87,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
       ((ErrorViewHolder) holder).tvError.setText(msg.getContent());
     }
     M3Theme.listCard(holder.itemView);
+    if (animateNextBind) {
+      animateNextBind = false;
+      animateIn(holder.itemView, holder.getBindingAdapterPosition());
+    }
+  }
+
+  private void animateIn(View view, int position) {
+    float offset = 24 * view.getResources().getDisplayMetrics().density;
+    view.animate().cancel();
+    view.setAlpha(0f);
+    view.setTranslationY(offset);
+    view.animate()
+        .alpha(1f)
+        .translationY(0f)
+        .setDuration(280)
+        .setInterpolator(new DecelerateInterpolator())
+        .setStartDelay(Math.max(position, 0) * 40L)
+        .start();
   }
 
   @Override

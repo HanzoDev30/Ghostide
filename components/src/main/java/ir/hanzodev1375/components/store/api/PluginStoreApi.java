@@ -23,7 +23,7 @@ import okhttp3.Response;
 public class PluginStoreApi {
 
   private static final String OPEN_JSON_URL =
-      "https://raw.githubusercontent.com/HanzoDev1375/ghostideplugins/main/open.json";
+      "https://raw.githubusercontent.com/HanzoDev30/plugins/main/open.json";
 
   private static final OkHttpClient CLIENT =
       new OkHttpClient.Builder()

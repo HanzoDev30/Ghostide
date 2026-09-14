@@ -143,6 +143,10 @@
     <string name="chatgpt_api_key">ChatGPT API Key</string>
     <string name="deepseek_api_key">DeepSeek API Key</string>
     <string name="gemini_api_key">Gemini API Key</string>
+    <string name="opencode_server">OpenCode Server</string>
+    <string name="opencode_server_desc">Local opencode server URL (no API key needed)</string>
+    <string name="opencode_password">OpenCode Server Password</string>
+    <string name="opencode_password_desc">Optional, leave empty if the server has no password</string>
     <string name="not_set">Not set</string>
     <string name="key_saved">API key saved</string>
     <string name="key_cleared">API key cleared</string>

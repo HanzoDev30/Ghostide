@@ -222,6 +222,10 @@ public class SettingActivity extends BaseCompat {
             showApiKeyDialog("gemini", aiAdapter);
           } else if (position == 5) {
             showApiKeyDialog("openrouter", aiAdapter);
+          } else if (position == 6) {
+            showOpencodeServerDialog(aiAdapter);
+          } else if (position == 7) {
+            showOpencodePasswordDialog(aiAdapter);
           }
         });
 
@@ -270,6 +274,9 @@ public class SettingActivity extends BaseCompat {
       case AiConstants.AiProvider.OPENROUTER:
         providerDisplay = "OpenRouter";
         break;
+      case AiConstants.AiProvider.OPENCODE:
+        providerDisplay = "OpenCode";
+        break;
     }
     items.add(
         new SettingItem(
@@ -311,6 +318,23 @@ public class SettingActivity extends BaseCompat {
         new SettingItem(
             getString(R.string.pref_openrouter_api_key),
             aiPrefs.hasOpenRouterApiKey() ? "*********" : getString(R.string.not_set),
+            false,
+            0,
+            null));
+    // OpenCode (local, no API key)
+    items.add(
+        new SettingItem(
+            getString(R.string.opencode_server),
+            aiPrefs.getOpencodeUrl(),
+            false,
+            0,
+            null));
+    items.add(
+        new SettingItem(
+            getString(R.string.opencode_password),
+            aiPrefs.getOpencodePassword().isEmpty()
+                ? getString(R.string.not_set)
+                : "*********",
             false,
             0,
             null));
@@ -1197,13 +1221,16 @@ public class SettingActivity extends BaseCompat {
   }
 
   private void showProviderDialog(SettingsAdapter adapter) {
-    String[] providers = {"Claude", "ChatGPT", "DeepSeek", "Gemini", "OpenRouter"};
+    String[] providers = {
+      "Claude", "ChatGPT", "DeepSeek", "Gemini", "OpenRouter", "OpenCode (Local)"
+    };
     String[] values = {
       AiConstants.AiProvider.CLAUDE,
       AiConstants.AiProvider.CHATGPT,
       AiConstants.AiProvider.DEEPSEEK,
       AiConstants.AiProvider.GEMINI,
-      AiConstants.AiProvider.OPENROUTER
+      AiConstants.AiProvider.OPENROUTER,
+      AiConstants.AiProvider.OPENCODE
     };
     int checked = 0;
     String current = aiPrefs.getSelectedProvider();
@@ -1322,6 +1349,50 @@ public class SettingActivity extends BaseCompat {
               }
             })
         .show(getSupportFragmentManager(), "api_key_dialog");
+  }
+
+  private void showOpencodeServerDialog(SettingsAdapter adapter) {
+    String current = aiPrefs.getOpencodeUrl();
+    TextInputDialogFragment.newInstance(
+            getString(R.string.opencode_server),
+            getString(R.string.opencode_server_desc),
+            current.isEmpty() ? null : current)
+        .setCallback(
+            text -> {
+              if (text.isEmpty()) {
+                aiPrefs.setOpencodeUrl("");
+                aiPrefs.setOpencodePassword("");
+                GhostToast.makeText(this, R.string.key_cleared, GhostToast.LENGTH_SHORT).show();
+              } else {
+                aiPrefs.setOpencodeUrl(text.trim());
+                GhostToast.makeText(this, R.string.key_saved, GhostToast.LENGTH_SHORT).show();
+              }
+              SettingItem item = adapter.getItemAtPosition(6);
+              if (item != null) {
+                item.setDescription(aiPrefs.getOpencodeUrl());
+                adapter.notifyItemChangedByOriginalPosition(6);
+              }
+            })
+        .show(getSupportFragmentManager(), "opencode_server_dialog");
+  }
+
+  private void showOpencodePasswordDialog(SettingsAdapter adapter) {
+    TextInputDialogFragment.newInstance(
+            getString(R.string.opencode_password),
+            getString(R.string.opencode_password_desc),
+            null)
+        .setCallback(
+            text -> {
+              aiPrefs.setOpencodePassword(text.trim());
+              GhostToast.makeText(this, R.string.key_saved, GhostToast.LENGTH_SHORT).show();
+              SettingItem item = adapter.getItemAtPosition(7);
+              if (item != null) {
+                item.setDescription(
+                    text.isEmpty() ? getString(R.string.opencode_password_desc) : "*********");
+                adapter.notifyItemChangedByOriginalPosition(7);
+              }
+            })
+        .show(getSupportFragmentManager(), "opencode_password_dialog");
   }
 
   @Override

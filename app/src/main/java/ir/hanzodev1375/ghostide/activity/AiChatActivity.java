@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.ai.chat.AttachedFilesAdapter;
 import ir.hanzodev1375.ghostide.ai.chat.ChatAdapter;
+import ir.hanzodev1375.ghostide.ai.chat.ChatFadeView;
 import ir.hanzodev1375.ghostide.ai.chat.HistoryBottomSheetFragment;
 import ir.hanzodev1375.ghostide.ai.database.ChatRepository;
 import ir.hanzodev1375.ghostide.ai.model.AttachedFile;
@@ -59,6 +60,7 @@ public class AiChatActivity extends BaseCompat {
   private RecyclerView rvAttachedFiles;
   private ViewChilder child;
   private ChatAdapter adapter;
+  private ChatFadeView chatFadeView;
   private ImageView booticon;
   private AttachedFilesAdapter attachedFilesAdapter;
   private final List<ChatMessage> messages = new ArrayList<>();
@@ -77,10 +79,11 @@ public class AiChatActivity extends BaseCompat {
     AiConstants.AiProvider.CHATGPT,
     AiConstants.AiProvider.DEEPSEEK,
     AiConstants.AiProvider.GEMINI,
-    AiConstants.AiProvider.OPENROUTER
+    AiConstants.AiProvider.OPENROUTER,
+    AiConstants.AiProvider.OPENCODE
   };
   private static final String[] PROVIDER_LABELS = {
-    "Claude (Anthropic)", "ChatGPT (OpenAI)", "DeepSeek", "Gemini (Google)", "OpenRouter"
+    "Claude (Anthropic)", "ChatGPT (OpenAI)", "DeepSeek", "Gemini (Google)", "OpenRouter", "OpenCode (Local)"
   };
 
   @NonNull
@@ -100,6 +103,10 @@ public class AiChatActivity extends BaseCompat {
 
     prefs = new AiPreferencesUtils(this);
     chatRepository = new ChatRepository(this);
+
+    chatFadeView = findViewById(R.id.chat_fade_view);
+    chatFadeView.setFadeHeightsDp(44, 36);
+    M3Theme.refreshOnThemeChange(chatFadeView);
 
     Toolbar toolbar = findViewById(R.id.toolbar_ai_chat);
     setSupportActionBar(toolbar);
@@ -232,10 +239,17 @@ public class AiChatActivity extends BaseCompat {
 
   private void setupChatRecyclerView() {
     adapter = new ChatAdapter(messages);
+    recyclerView.setItemAnimator(null);
     LinearLayoutManager lm = new LinearLayoutManager(this);
     lm.setStackFromEnd(true);
     recyclerView.setLayoutManager(lm);
     recyclerView.setAdapter(adapter);
+  }
+
+  private boolean isNearBottom() {
+    LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+    if (lm == null) return false;
+    return lm.findFirstVisibleItemPosition() <= 1;
   }
 
   private void setupAttachedFilesRecyclerView() {
@@ -444,8 +458,12 @@ public class AiChatActivity extends BaseCompat {
           }
 
           messages.add(message);
+          adapter.animateNextInsert();
           adapter.notifyItemInserted(messages.size() - 1);
-          recyclerView.smoothScrollToPosition(messages.size() - 1);
+          boolean scrollToBottom = message.getType() == ChatMessage.TYPE_USER || isNearBottom();
+          if (scrollToBottom) {
+            recyclerView.smoothScrollToPosition(messages.size() - 1);
+          }
           if (message.getType() != ChatMessage.TYPE_LOADING
               && message.getType() != ChatMessage.TYPE_ERROR) {
             chatRepository.saveMessage(currentChatId, message);

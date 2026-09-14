@@ -62,8 +62,8 @@ Ghost IDE is an advanced mobile development environment built for Android develo
 
 # Lsp 
 
-- how in install lsp? [click](https://github.com/HanzoDev1375/GhostIdes/blob/main/Lsp.md)
-- نحوه نصب زبان سرور فارسی [click](https://github.com/HanzoDev1375/GhostIdes/blob/main/Lspfa.md)
+- how in install lsp? [click](https://github.com/HanzoDev30/GhostIde/blob/main/Lsp.md)
+- نحوه نصب زبان سرور فارسی [click](https://github.com/HanzoDev30/GhostIde/blob/main/Lspfa.md)
 
 ## Terminal 
 
@@ -141,8 +141,8 @@ The editor supports deep UI customization, including:
 
 ### Make your own theme
 
-- 📘 English guide — [click here to learn how to create a theme](https://github.com/HanzoDev1375/GhostIdes/blob/main/ThemeMakerEn.md)
-- 📙 راهنمای فارسی — برای ساخت تم [اینجا کلیک کنید](https://github.com/HanzoDev1375/GhostIdes/blob/main/ThemeMakerFa.md)
+- 📘 English guide — [click here to learn how to create a theme](https://github.com/HanzoDev30/GhostIde/blob/main/ThemeMakerEn.md)
+- 📙 راهنمای فارسی — برای ساخت تم [اینجا کلیک کنید](https://github.com/HanzoDev30/GhostIde/blob/main/ThemeMakerFa.md)
 
 > Create a theme quickly: copy any `.gth` file, rename it, open it in the File Manager and choose **Edit**. The Theme Editor's 4 tabs (Activity · Editor · Widget · M3Color) let you pick every color visually.
 
@@ -179,6 +179,5 @@ The editor supports deep UI customization, including:
 
 ## Plugin 
 
-- how in install Plugin? [click](https://github.com/HanzoDev1375/GhostIdes/blob/main/Plugin.md)
-- نحوه پیاده سازی پلاگین [click](https://github.com/HanzoDev1375/GhostIdes/blob/main/Pluginfa.md)
-- or see website [click](https://hanzodev1375.github.io/plugin-doc-ghost-ide/)
+- how in install Plugin? [click](./Plugin.md)
+- نحوه پیاده سازی پلاگین [click](/Pluginfa.md)

@@ -32,7 +32,7 @@ public class UpadteAppView {
 
   private AppUpdateCallBack call;
   private final String constLinkGithub =
-      "https://raw.githubusercontent.com/HanzoDev1375/GhostIdes/main/update.json";
+      "https://raw.githubusercontent.com/HanzoDev30/GhostIde/main/update.json";
   private AppUpdateModel model;
 
   private final OkHttpClient okHttpClient =

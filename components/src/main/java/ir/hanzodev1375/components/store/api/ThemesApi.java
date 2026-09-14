@@ -22,9 +22,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ThemesApi {
-
   public static final String REPO_BASE =
-      "https://raw.githubusercontent.com/HanzoDev1375/ghostidetheme/main/";
+      "https://raw.githubusercontent.com/HanzoDev30/themes/main/";
   private static final String THEMES_URL = REPO_BASE + "theme.json";
 
   private static final OkHttpClient client =

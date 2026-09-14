@@ -8,6 +8,7 @@ public class AiConstants {
         public static final String DEEPSEEK = "deepseek";
         public static final String GEMINI = "gemini";
         public static final String OPENROUTER = "openrouter";
+        public static final String OPENCODE = "opencode";
 
         private AiProvider() {
             throw new UnsupportedOperationException("Utility class");
@@ -20,6 +21,9 @@ public class AiConstants {
         public static final String KEY_AI_DEEPSEEK_API_KEY = "pref_ai_deepseek_api_key";
         public static final String KEY_AI_GEMINI_API_KEY = "pref_ai_gemini_api_key";
         public static final String KEY_AI_OPENROUTER_API_KEY = "pref_ai_openrouter_api_key";
+        public static final String KEY_AI_OPENCODE_URL = "pref_ai_opencode_url";
+        public static final String KEY_AI_OPENCODE_USERNAME = "pref_ai_opencode_username";
+        public static final String KEY_AI_OPENCODE_PASSWORD = "pref_ai_opencode_password";
 
         public static final String KEY_AI_SELECTED_PROVIDER = "pref_ai_selected_provider";
         public static final String KEY_AI_CLAUDE_MODEL = "pref_ai_claude_model";
@@ -39,6 +43,7 @@ public class AiConstants {
         public static final String DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions";
         public static final String GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1/models/";
         public static final String OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions";
+        public static final String OPENCODE_BASE_URL = "http://127.0.0.1:4096";
 
         private ApiEndpoints() {
             throw new UnsupportedOperationException("Utility class");
