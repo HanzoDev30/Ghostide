@@ -20,6 +20,7 @@ import io.github.rosemoe.sora.lsp.client.languageserver.requestmanager.RequestMa
 import io.github.rosemoe.sora.lsp.editor.LspEditor;
 import io.github.rosemoe.sora.widget.CodeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.model.BreadcrumbItem;
+import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.model.OutlineSymbol;
 import ir.hanzodev1375.ghostide.ide.api.LspServerProvider;
 
 /**
@@ -255,6 +256,59 @@ public final class LspRouter {
       out.add(
           new BreadcrumbItem(
               symbol.getName(), symbol.getKind(), start.getLine(), start.getCharacter()));
+    }
+  }
+
+  public static List<OutlineSymbol> fetchOutline(LspEditor lspEditor, String filePath) {
+    if (lspEditor == null || !lspEditor.isConnected()) return Collections.emptyList();
+    if (filePath == null || filePath.isEmpty()) return Collections.emptyList();
+    RequestManager requestManager = lspEditor.getRequestManager();
+    if (requestManager == null) return Collections.emptyList();
+    String documentUri = new File(filePath).toURI().toString();
+    DocumentSymbolParams params = new DocumentSymbolParams(new TextDocumentIdentifier(documentUri));
+    List<Either<SymbolInformation, DocumentSymbol>> symbols;
+    try {
+      CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> future =
+          requestManager.documentSymbol(params);
+      symbols = future == null ? null : future.get(BREADCRUMB_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+    } catch (Exception e) {
+      Log.e(TAG, "documentSymbol request failed", e);
+      return Collections.emptyList();
+    }
+    if (symbols == null || symbols.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<OutlineSymbol> out = new ArrayList<>();
+    if (symbols.get(0).isRight()) {
+      for (Either<SymbolInformation, DocumentSymbol> item : symbols) {
+        if (item.isRight()) flattenDocumentSymbol(item.getRight(), 0, out);
+      }
+    } else {
+      for (Either<SymbolInformation, DocumentSymbol> item : symbols) {
+        if (!item.isLeft()) continue;
+        SymbolInformation info = item.getLeft();
+        if (info.getName() == null || info.getLocation() == null) continue;
+        Position start = info.getLocation().getRange().getStart();
+        out.add(
+            new OutlineSymbol(
+                info.getName(), info.getKind().getValue(), 0, start.getLine(), start.getCharacter()));
+      }
+    }
+    return out;
+  }
+
+  private static void flattenDocumentSymbol(
+      DocumentSymbol symbol, int depth, List<OutlineSymbol> out) {
+    if (symbol == null || symbol.getName() == null) return;
+    Range selection =
+        symbol.getSelectionRange() != null ? symbol.getSelectionRange() : symbol.getRange();
+    Position start = selection.getStart();
+    out.add(
+        new OutlineSymbol(symbol.getName(), symbol.getKind().getValue(), depth, start.getLine(), start.getCharacter()));
+    if (symbol.getChildren() != null) {
+      for (DocumentSymbol child : symbol.getChildren()) {
+        flattenDocumentSymbol(child, depth + 1, out);
+      }
     }
   }
 

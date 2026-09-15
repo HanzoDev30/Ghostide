@@ -33,7 +33,6 @@ import ir.hanzodev1375.ghostide.appicon.AppIconChooserDialogBuilder;
 import ir.hanzodev1375.ghostide.appicon.AppIconManager;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
-import ir.hanzodev1375.ghostide.codeeditors.ui.power.PowerModeEffectManager;
 import ir.hanzodev1375.ghostide.codeeditors.util.TranslateLanguages;
 import ir.hanzodev1375.ghostide.customui.ExpandableLayout;
 import ir.hanzodev1375.ghostide.jgit.GitHubClient;
@@ -1542,31 +1541,6 @@ public class SettingActivity extends BaseCompat {
   }
 
   private void showPowerModeEffectDialog() {
-    String[] names = PowerModeEffectManager.EffectType.getAllName();
-    String current = prefs.getPowerModeEffectType();
-    int checked = 0;
-    for (int i = 0; i < names.length; i++) {
-      if (names[i].equalsIgnoreCase(current)) {
-        checked = i;
-        break;
-      }
-    }
-    new DialogCompat(this)
-        .setTitle(R.string.pref_power_mode_effect)
-        .setSingleChoiceItems(
-            names,
-            checked,
-            (dialog, which) -> {
-              prefs.setPowerModeEffectType(names[which]);
-              dialog.dismiss();
-              SettingItem item = editorAdapter.getItemAtPosition(25);
-              if (item != null) {
-                item.setDescription(
-                    getString(R.string.pref_power_mode_effect_desc) + "\n" + names[which]);
-                editorAdapter.notifyItemChangedByOriginalPosition(25);
-              }
-            })
-        .setNegativeButton(R.string.cancel, null)
-        .show();
+    
   }
 }

@@ -76,6 +76,13 @@ import ir.hanzodev1375.ghostide.adapters.ToolbarListAdapter;
 import ir.hanzodev1375.ghostide.adapters.PluginPopupAdapter;
 import ir.hanzodev1375.ghostide.adapters.BreadcrumbAdapter;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
+import io.github.rosemoe.sora.lang.completion.snippet.CodeSnippet;
+import io.github.rosemoe.sora.lang.completion.snippet.parser.CodeSnippetParser;
+
+import ir.hanzodev1375.ghostide.dialogs.CommandPaletteSheet;
+import ir.hanzodev1375.ghostide.commands.CommandPaletteRegistry;
+import ir.hanzodev1375.ghostide.dialogs.OutlineSheet;
+import ir.hanzodev1375.ghostide.dialogs.SnippetManagerSheet;
 import ir.hanzodev1375.ghostide.customui.GhostIdeEditorSearch;
 import ir.hanzodev1375.ghostide.databinding.ActivityEditorBinding;
 import ir.hanzodev1375.ghostide.fragments.EditorFragment;
@@ -637,7 +644,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     openFile(filePath, file.getName());
   }
 
-  private void stepFileTree() {
+  public void stepFileTree() {
     String currentPath = getCurrentFilePath();
     if (currentPath == null) {
       GhostToast.makeText(this, "هیچ فایلی باز نیست", GhostToast.LENGTH_SHORT).show();
@@ -961,7 +968,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     popupRef[0] = ObjectUtil.showGlassPopup(this, anchor, rv);
   }
 
-  void stepSearch() {
+  public void stepSearch() {
     binding.editorSearch.bindEditor(this::getEditor);
     binding.editorSearch.setCallBack(
         new GhostIdeEditorSearch.onViewChange() {
@@ -1126,6 +1133,9 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     List<EditorGlassMenu.GlassMenuItem> items = new ArrayList<>();
     items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.saveitemthis), R.drawable.save));
     items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.saveitemall), R.drawable.save));
+    items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.command_palette_title), R.drawable.outline_search));
+    items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.outline_title), R.drawable.round_account_tree));
+    items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.snippets_title), R.drawable.ic_edit));
     items.add(
         new EditorGlassMenu.GlassMenuItem(
             getString(R.string.webcolor), R.drawable.outline_color_lens));
@@ -1137,12 +1147,61 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
           switch (pos) {
             case 0 -> saveCurrentTab();
             case 1 -> saveAllTabs();
-            case 2 -> {
+            case 2 -> showCommandPaletteSheet();
+            case 3 -> showOutlineSheet();
+            case 4 -> showSnippetManagerSheet();
+            case 5 -> {
               var colors = new ColorPickerBottomSheet();
               colors.show(getSupportFragmentManager(), "");
             }
           }
         });
+  }
+
+  private void showCommandPaletteSheet() {
+    if (getEditor() == null) return;
+    CommandPaletteSheet sheet = CommandPaletteSheet.newInstance();
+    sheet.setCommands(CommandPaletteRegistry.buildCommands(this));
+    sheet.setOnCommandListener(
+        item -> {
+          if (item.id() != null) {
+            CommandPaletteRegistry.execute(this, item.id());
+          }
+        });
+    sheet.show(getSupportFragmentManager(), CommandPaletteSheet.TAG);
+  }
+
+  private void showOutlineSheet() {
+    String currentPath = getCurrentFilePath();
+    if (currentPath == null || getEditor() == null) return;
+    OutlineSheet sheet = OutlineSheet.newInstance(currentPath);
+    sheet.setEditorSupplier(() -> getEditor());
+    sheet.setOnSymbolClickListener(
+        (line, column) -> {
+          IdeEditor editor = getEditor();
+          if (editor != null) {
+            editor.gotoLine(line);
+          }
+        });
+    sheet.show(getSupportFragmentManager(), OutlineSheet.TAG);
+  }
+
+  private void showSnippetManagerSheet() {
+    if (getEditor() == null) return;
+    SnippetManagerSheet sheet = new SnippetManagerSheet();
+    sheet.setOnInsertSnippetListener(
+        entry -> {
+          IdeEditor editor = getEditor();
+          if (editor == null) return;
+          try {
+            CodeSnippet snippet = CodeSnippetParser.parse(entry.body);
+            editor.getSnippetController()
+                .startSnippet(editor.getCursor().getLeft(), snippet, "");
+          } catch (Exception ignored) {
+            editor.commitText(entry.body);
+          }
+        });
+    sheet.show(getSupportFragmentManager(), SnippetManagerSheet.TAG);
   }
 
   private void toggleOrShowSplitPopup(View anchor) {
@@ -1490,7 +1549,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     switchToTab(0);
   }
 
-  private void closeAllTabs() {
+  public void closeAllTabs() {
     List<TabModel> pinned = new ArrayList<>();
     for (TabModel tab : tabsList) {
       if (tab.isPinned()) pinned.add(tab);
@@ -1587,7 +1646,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     }
   }
 
-  private void saveAllTabs() {
+  public void saveAllTabs() {
     if (adapter == null || adapter.getItemCount() == 0) {
       GhostToast.makeText(this, "هیچ فایلی باز نیست", GhostToast.LENGTH_SHORT).show();
       return;
@@ -1618,7 +1677,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     refreshGitStatus();
   }
 
-  private void saveCurrentTab() {
+  public void saveCurrentTab() {
     if (binding.viewPager == null || adapter == null || adapter.getItemCount() == 0) {
       GhostToast.makeText(this, getString(R.string.editorac_notopenfile), GhostToast.LENGTH_SHORT)
           .show();

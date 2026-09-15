@@ -40,8 +40,6 @@ import ir.hanzodev1375.ghostide.codeeditors.ui.CustomEditorAutoCompletion;
 import ir.hanzodev1375.ghostide.codeeditors.ui.CustomEditorCompletionAdapter;
 import ir.hanzodev1375.ghostide.codeeditors.ui.GhostDiagnosticTooltipLayout;
 import ir.hanzodev1375.ghostide.codeeditors.ui.GhostTextCompletionManager;
-import ir.hanzodev1375.ghostide.codeeditors.ui.power.PowerModeEffectManager;
-import ir.hanzodev1375.ghostide.codeeditors.ui.power.custom.CustomEffect;
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -64,8 +62,6 @@ public class IdeEditor extends CodeEditor
   private PreferencesUtils setting;
   private WebColorIde webColorIde;
   private ImagePreviewIde imagePreviewIde;
-  private PowerModeEffectManager mPowerModeEffectManager;
-  private boolean powerModeEnabled = false;
   private UrlPreviewIde urlPreviewIde;
   private StringResourceExtractorIde stringresourceextractoride;
   private XmlAttrPreviewIde xmlAttrPreviewIde;
@@ -155,7 +151,6 @@ public class IdeEditor extends CodeEditor
     setWebIdeColor(true);
     imagePreviewIde = new ImagePreviewIde(this);
     imagePreviewIde.attach();
-    mPowerModeEffectManager = new PowerModeEffectManager(this);
     var editorAutoCompletion = new CustomEditorAutoCompletion(this);
     urlPreviewIde = new UrlPreviewIde(this);
     urlPreviewIde.attach();
@@ -194,7 +189,6 @@ public class IdeEditor extends CodeEditor
     updateEditorMiniMap();
     updateEditorTypeFace();
     editorBinder();
-    updateEditorPowerMode();
     updateEditorBlockLine();
     setCursorAnimationEnabled(true);
     setStickyTextSelection(true);
@@ -207,21 +201,7 @@ public class IdeEditor extends CodeEditor
             return String.valueOf(editor.getCursor().getLeftLine() + 1);
           }
         });
-    subscribeEvent(
-        ContentChangeEvent.class,
-        (ev, un) -> {
-          if (isPowerModeEnabled() && getText().toString().length() > 0) {
-            mPowerModeEffectManager.spawnEffectAtCursor();
-          }
-        });
-    subscribeEvent(
-        ScrollEvent.class,
-        (ev, un) -> {
-          if (mPowerModeEffectManager != null) {
-            mPowerModeEffectManager.onEditorScrolled(
-                ev.getStartX(), ev.getStartY(), ev.getEndX(), ev.getEndY());
-          }
-        });
+
     subscribeEvent(DoubleClickEvent.class, (ev, un) -> selectWord(ev.getLine(), ev.getColumn()));
     subscribeEvent(
         EditorKeyEvent.class,
@@ -300,7 +280,7 @@ public class IdeEditor extends CodeEditor
     boolean enabled = setting.enableBlockLine();
     setHighlightCurrentBlock(enabled);
     setBlockLineEnabled(enabled);
-    //setBlockLineWidth(3.0f);
+    // setBlockLineWidth(3.0f);
   }
 
   /** رفتن به خط مشخص (شماره خط از ۱ شروع میشود ولی داخل سورا صفر-مبناست). */
@@ -498,18 +478,6 @@ public class IdeEditor extends CodeEditor
    */
   public void setInlayHintsRaw(@Nullable InlayHintsContainer inlayHints) {
     super.setInlayHints(inlayHints);
-  }
-
-  private void updateEditorPowerMode() {
-    setPowerModeEnabled(setting.enablePowerMode());
-    updateEditorPowerModeEffectType();
-  }
-
-  private void updateEditorPowerModeEffectType() {
-    if (mPowerModeEffectManager != null) {
-      mPowerModeEffectManager.setEffect(
-          PowerModeEffectManager.EffectType.fromString(setting.getPowerModeEffectType()));
-    }
   }
 
   private void updateEditorPinLineNumber() {
@@ -746,12 +714,6 @@ public class IdeEditor extends CodeEditor
       case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_FONT:
         updateEditorTypeFace();
         break;
-      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_POWER_MODE:
-        setPowerModeEnabled(setting.enablePowerMode());
-        break;
-      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_POWER_MODE_EFFECT:
-        updateEditorPowerModeEffectType();
-        break;
       case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_BLOCK_LINE:
         updateEditorBlockLine();
         break;
@@ -767,9 +729,6 @@ public class IdeEditor extends CodeEditor
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    if (mPowerModeEffectManager != null) {
-      mPowerModeEffectManager.drawEffects(canvas);
-    }
   }
 
   @Override
@@ -786,63 +745,5 @@ public class IdeEditor extends CodeEditor
       setting.getDefaultPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
     super.onDetachedFromWindow();
-    if (mPowerModeEffectManager != null) {
-      mPowerModeEffectManager.clearEffects();
-    }
-  }
-
-  public boolean registerCustomEffect(CustomEffect effect) {
-    if (mPowerModeEffectManager != null) {
-      return mPowerModeEffectManager.registerCustomEffect(effect);
-    }
-    return false;
-  }
-
-  public boolean unregisterCustomEffect(String effectName) {
-    if (mPowerModeEffectManager != null) {
-      return mPowerModeEffectManager.unregisterCustomEffect(effectName);
-    }
-    return false;
-  }
-
-  public List<CustomEffect> getCustomEffects() {
-    if (mPowerModeEffectManager != null) {
-      return mPowerModeEffectManager.getCustomEffects();
-    }
-    return new ArrayList<>();
-  }
-
-  public void spawnCustomEffect(String effectName, float x, float y) {
-    if (mPowerModeEffectManager != null) {
-      mPowerModeEffectManager.spawnCustomEffect(effectName, x, y);
-      invalidate();
-    }
-  }
-
-  /**
-   * Get the PowerMode effect manager for this editor
-   *
-   * @return The PowerMode effect manager instance
-   */
-  public PowerModeEffectManager getPowerModeEffectManager() {
-    return mPowerModeEffectManager;
-  }
-
-  public void setPowerModeEnabled(boolean enabled) {
-    this.powerModeEnabled = enabled;
-    if (enabled) {
-      if (mPowerModeEffectManager == null) {
-        mPowerModeEffectManager = new PowerModeEffectManager(this);
-      }
-    } else {
-      if (mPowerModeEffectManager != null) {
-        mPowerModeEffectManager.clearEffects();
-      }
-    }
-    invalidate();
-  }
-
-  public boolean isPowerModeEnabled() {
-    return powerModeEnabled && mPowerModeEffectManager != null;
   }
 }
