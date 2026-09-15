@@ -114,12 +114,6 @@
         android:paddingVertical="12dp"
         android:scrollbars="vertical" />
 
-      <ir.hanzodev1375.ghostide.ai.chat.ChatFadeView
-        android:id="@+id/chat_fade_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no" />
-
     </FrameLayout>
 
     <!-- ── Bottom input area (glass) ──────────────────────────────────── -->

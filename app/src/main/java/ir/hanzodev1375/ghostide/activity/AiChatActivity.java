@@ -38,7 +38,6 @@ import java.util.concurrent.Executors;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.ai.chat.AttachedFilesAdapter;
 import ir.hanzodev1375.ghostide.ai.chat.ChatAdapter;
-import ir.hanzodev1375.ghostide.ai.chat.ChatFadeView;
 import ir.hanzodev1375.ghostide.ai.chat.HistoryBottomSheetFragment;
 import ir.hanzodev1375.ghostide.ai.database.ChatRepository;
 import ir.hanzodev1375.ghostide.ai.model.AttachedFile;
@@ -60,7 +59,6 @@ public class AiChatActivity extends BaseCompat {
   private RecyclerView rvAttachedFiles;
   private ViewChilder child;
   private ChatAdapter adapter;
-  private ChatFadeView chatFadeView;
   private ImageView booticon;
   private AttachedFilesAdapter attachedFilesAdapter;
   private final List<ChatMessage> messages = new ArrayList<>();
@@ -74,6 +72,8 @@ public class AiChatActivity extends BaseCompat {
 
   private long currentChatId = -1;
 
+  private static final long MAX_TEXT_FILE_SIZE = 2 * 1024 * 1024;
+
   private static final String[] PROVIDERS = {
     AiConstants.AiProvider.CLAUDE,
     AiConstants.AiProvider.CHATGPT,
@@ -83,7 +83,12 @@ public class AiChatActivity extends BaseCompat {
     AiConstants.AiProvider.OPENCODE
   };
   private static final String[] PROVIDER_LABELS = {
-    "Claude (Anthropic)", "ChatGPT (OpenAI)", "DeepSeek", "Gemini (Google)", "OpenRouter", "OpenCode (Local)"
+    "Claude (Anthropic)",
+    "ChatGPT (OpenAI)",
+    "DeepSeek",
+    "Gemini (Google)",
+    "OpenRouter",
+    "OpenCode (Local)"
   };
 
   @NonNull
@@ -103,10 +108,6 @@ public class AiChatActivity extends BaseCompat {
 
     prefs = new AiPreferencesUtils(this);
     chatRepository = new ChatRepository(this);
-
-    chatFadeView = findViewById(R.id.chat_fade_view);
-    chatFadeView.setFadeHeightsDp(44, 36);
-    M3Theme.refreshOnThemeChange(chatFadeView);
 
     Toolbar toolbar = findViewById(R.id.toolbar_ai_chat);
     setSupportActionBar(toolbar);
@@ -309,9 +310,28 @@ public class AiChatActivity extends BaseCompat {
     intent.putExtra(
         Intent.EXTRA_MIME_TYPES,
         new String[] {
-          "image/*", "text/plain", "text/x-java-source", "text/x-kotlin",
-          "application/json", "application/xml", "text/html", "text/css",
-          "application/javascript", "application/pdf"
+          "image/*",
+          "text/*",
+          "application/json",
+          "application/xml",
+          "application/javascript",
+          "application/x-javascript",
+          "application/typescript",
+          "application/x-sh",
+          "application/x-shellscript",
+          "application/x-python",
+          "application/x-php",
+          "application/x-ruby",
+          "application/x-perl",
+          "application/x-lua",
+          "application/yaml",
+          "application/x-yaml",
+          "application/toml",
+          "application/sql",
+          "application/graphql",
+          "application/ini",
+          "application/properties",
+          "application/pdf"
         });
     intent.addCategory(Intent.CATEGORY_OPENABLE);
     filePicker.launch(Intent.createChooser(intent, "Attach file"));
@@ -339,6 +359,20 @@ public class AiChatActivity extends BaseCompat {
               if (isFinishing() || isDestroyed()) return;
               file.setBase64Data(b64);
             } else {
+              long size = queryFileSize(uri);
+              if (size > MAX_TEXT_FILE_SIZE) {
+                if (isFinishing() || isDestroyed()) return;
+                runOnUiThread(
+                    () ->
+                        GhostToast.makeText(
+                                this,
+                                "File too large for AI (max "
+                                    + (MAX_TEXT_FILE_SIZE / 1024 / 1024)
+                                    + "MB)",
+                                GhostToast.LENGTH_SHORT)
+                            .show());
+                return;
+              }
               String text = FileReadUtils.readTextFile(this, uri);
               if (isFinishing() || isDestroyed()) return;
               file.setTextContent(text);
@@ -359,6 +393,19 @@ public class AiChatActivity extends BaseCompat {
                         .show());
           }
         });
+  }
+
+  private long queryFileSize(Uri uri) {
+    try (android.database.Cursor cursor =
+        getContentResolver()
+            .query(uri, new String[] {android.provider.OpenableColumns.SIZE}, null, null, null)) {
+      if (cursor != null && cursor.moveToFirst()) {
+        int idx = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+        if (idx >= 0 && !cursor.isNull(idx)) return cursor.getLong(idx);
+      }
+    } catch (Exception ignored) {
+    }
+    return -1;
   }
 
   private String resolveFileName(Uri uri) {

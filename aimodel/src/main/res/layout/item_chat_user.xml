@@ -8,14 +8,11 @@
      android:padding="6dp"
      android:orientation="horizontal">
 
-    <com.google.android.material.card.MaterialCardView
+    <ir.hanzodev1375.ghostide.ai.chat.ChatFadeView
          android:layout_height="wrap_content"
          android:layout_width="wrap_content"
-         android:orientation="vertical"
-         app:cardElevation="1dp"
-         app:cardBackgroundColor="?attr/colorPrimaryContainer"
-         app:cardCornerRadius="20dp"
-         android:minWidth="100dp">
+         android:id="@+id/chat_fade_view"
+         android:importantForAccessibility="no">
 
         <LinearLayout
              android:layout_height="wrap_content"
@@ -43,6 +40,6 @@
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </ir.hanzodev1375.ghostide.ai.chat.ChatFadeView>
 
 </LinearLayout>

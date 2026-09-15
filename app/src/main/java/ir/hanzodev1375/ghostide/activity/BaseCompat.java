@@ -324,10 +324,14 @@ public class BaseCompat extends AppCompatActivity
           ActivityOptions.makeSceneTransitionAnimation(this, sharedView, transitionName);
       MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.Z, false);
       exit.setDuration(350);
+      MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.Y, true);
+      reenter.setDuration(350);
       getWindow().setExitTransition(exit);
+      getWindow().setReenterTransition(reenter);
       super.startActivity(intent, op.toBundle());
     } else {
       getWindow().setExitTransition(null);
+      getWindow().setReenterTransition(null);
       super.startActivity(intent);
     }
   }

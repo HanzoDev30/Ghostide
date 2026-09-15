@@ -24,9 +24,35 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
   private final List<ChatMessage> messages;
   private boolean animateNextBind;
+  private RecyclerView attachedTo;
+
+  private final RecyclerView.OnScrollListener scrollInvalidator =
+      new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+          for (int i = 0; i < rv.getChildCount(); i++) {
+            View child = rv.getChildAt(i);
+            if (child instanceof ChatFadeView) {
+              child.invalidate();
+            }
+          }
+        }
+      };
 
   public ChatAdapter(List<ChatMessage> messages) {
     this.messages = messages;
+  }
+
+  @Override
+  public void onAttachedToRecyclerView(@NonNull RecyclerView rv) {
+    attachedTo = rv;
+    rv.addOnScrollListener(scrollInvalidator);
+  }
+
+  @Override
+  public void onDetachedFromRecyclerView(@NonNull RecyclerView rv) {
+    rv.removeOnScrollListener(scrollInvalidator);
+    attachedTo = null;
   }
 
   public void animateNextInsert() {
@@ -61,7 +87,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     if (holder instanceof UserViewHolder) {
       UserViewHolder userHolder = (UserViewHolder) holder;
 
-      // نمایش متن
       if (!TextUtils.isEmpty(msg.getContent())) {
         userHolder.tvMessage.setText(msg.getContent());
         userHolder.tvMessage.setVisibility(View.VISIBLE);
@@ -69,7 +94,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         userHolder.tvMessage.setVisibility(View.GONE);
       }
 
-      // نمایش عکس
       if (msg.getImageUri() != null && !msg.getImageUri().isEmpty()) {
         userHolder.ivImage.setVisibility(View.VISIBLE);
         Glide.with(userHolder.itemView.getContext())
@@ -81,8 +105,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
       }
 
     } else if (holder instanceof AiViewHolder) {
-      ((AiViewHolder) holder).tvMessage.setText(msg.getContent());
-      ((AiViewHolder) holder).tvProvider.setText(msg.getProvider().toUpperCase());
+      AiViewHolder aiHolder = (AiViewHolder) holder;
+      aiHolder.tvMessage.setText(msg.getContent());
+      aiHolder.tvProvider.setText(msg.getProvider().toUpperCase());
     } else if (holder instanceof ErrorViewHolder) {
       ((ErrorViewHolder) holder).tvError.setText(msg.getContent());
     }
@@ -115,22 +140,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   static class UserViewHolder extends RecyclerView.ViewHolder {
     TextView tvMessage;
     ImageView ivImage;
+    ChatFadeView chatFadeView;
 
     UserViewHolder(@NonNull View itemView) {
       super(itemView);
       tvMessage = itemView.findViewById(R.id.tv_message_user);
       ivImage = itemView.findViewById(R.id.iv_user_image);
+      chatFadeView = itemView.findViewById(R.id.chat_fade_view);
+      chatFadeView.setFadeHeightsDp(44, 36);
     }
   }
 
   static class AiViewHolder extends RecyclerView.ViewHolder {
     TextView tvMessage;
     TextView tvProvider;
+    ChatFadeView chatFadeView;
 
     AiViewHolder(@NonNull View itemView) {
       super(itemView);
       tvMessage = itemView.findViewById(R.id.tv_message_ai);
       tvProvider = itemView.findViewById(R.id.tv_provider_label);
+      chatFadeView = itemView.findViewById(R.id.chat_fade_view_ai);
+      chatFadeView.setFadeHeightsDp(44, 36);
     }
   }
 

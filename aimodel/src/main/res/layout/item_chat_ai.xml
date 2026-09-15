@@ -8,39 +8,47 @@
     android:gravity="start"
     android:padding="6dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
+    <ir.hanzodev1375.ghostide.ai.chat.ChatFadeView
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="?attr/colorSecondaryContainer"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="1dp"
-        style="@style/Widget.Material3.CardView.Elevated">
+        android:layout_width="wrap_content"
+        android:id="@+id/chat_fade_view_ai"
+        android:importantForAccessibility="no">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
+            app:cardBackgroundColor="?attr/colorSecondaryContainer"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="1dp"
+            style="@style/Widget.Material3.CardView.Elevated">
 
-            <TextView
-                android:id="@+id/tv_provider_label"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
-                android:layout_marginBottom="4dp" />
+                android:orientation="vertical"
+                android:padding="12dp">
 
-            <TextView
-                android:id="@+id/tv_message_ai"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorOnSecondaryContainer"
-                android:textSize="14sp"
-                android:lineSpacingExtra="2dp" />
+                <TextView
+                    android:id="@+id/tv_provider_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginBottom="4dp" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_message_ai"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/colorOnSecondaryContainer"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp" />
 
-    </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </ir.hanzodev1375.ghostide.ai.chat.ChatFadeView>
 
 </LinearLayout>
