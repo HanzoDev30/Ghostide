@@ -842,4 +842,106 @@ public class PreferencesUtils {
   public void setGlassTint(float value) {
     getDefaultPreferences().edit().putFloat("m3glassTint", value).apply();
   }
+
+  // ========== Custom Handle Style ==========
+
+  public boolean enableCustomHandle() {
+    return getDefaultPreferences()
+        .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CUSTOM_HANDLE, false);
+  }
+
+  public void setCustomHandle(boolean enabled) {
+    getDefaultPreferences()
+        .edit()
+        .putBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CUSTOM_HANDLE, enabled)
+        .apply();
+  }
+
+  public String getCustomHandleCursorName() {
+    return getDefaultPreferences()
+        .getString(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CUSTOM_HANDLE_CURSOR, "ghostcur");
+  }
+
+  public void setCustomHandleCursorName(String cursorName) {
+    getDefaultPreferences()
+        .edit()
+        .putString(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CUSTOM_HANDLE_CURSOR, cursorName)
+        .apply();
+  }
+
+  // ========== Cursor width & Divider ==========
+
+  public float getCursorWidth() {
+    return getDefaultPreferences()
+        .getFloat(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CURSOR_WIDTH, 1.5f);
+  }
+
+  public void setCursorWidth(float width) {
+    getDefaultPreferences()
+        .edit()
+        .putFloat(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CURSOR_WIDTH, width)
+        .apply();
+  }
+
+  public float getDividerWidth() {
+    return getDefaultPreferences()
+        .getFloat(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DIVIDER_WIDTH, 1f);
+  }
+
+  public void setDividerWidth(float width) {
+    getDefaultPreferences()
+        .edit()
+        .putFloat(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DIVIDER_WIDTH, width)
+        .apply();
+  }
+
+  public float getDividerMargin() {
+    return getDefaultPreferences()
+        .getFloat(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DIVIDER_MARGIN, 2f);
+  }
+
+  public void setDividerMargin(float margin) {
+    getDefaultPreferences()
+        .edit()
+        .putFloat(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DIVIDER_MARGIN, margin)
+        .apply();
+  }
+
+  // ========== Sticky scroll ==========
+
+  public boolean stickyScrollPreferInnerScope() {
+    return getDefaultPreferences()
+        .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_PREFER_INNER, false);
+  }
+
+  public void setStickyScrollPreferInnerScope(boolean enabled) {
+    getDefaultPreferences()
+        .edit()
+        .putBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_PREFER_INNER, enabled)
+        .apply();
+  }
+
+  public boolean stickyScrollAutoCollapse() {
+    return getDefaultPreferences()
+        .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_AUTO_COLLAPSE, true);
+  }
+
+  public void setStickyScrollAutoCollapse(boolean enabled) {
+    getDefaultPreferences()
+        .edit()
+        .putBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_AUTO_COLLAPSE, enabled)
+        .apply();
+  }
+
+  public boolean stickyLineIndicator() {
+    return getDefaultPreferences()
+        .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_LINE_INDICATOR, true);
+  }
+
+  public void setStickyLineIndicator(boolean enabled) {
+    getDefaultPreferences()
+        .edit()
+        .putBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_LINE_INDICATOR, enabled)
+        .apply();
+  }
 }

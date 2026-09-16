@@ -21,6 +21,8 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
 
   private LayoutSwitchPerfenceBinding binding;
   private boolean value = false;
+  private int lastListPosition = -1;
+  private int lastListTotal = -1;
   
 
   public PreferenceSwitchGroup(Context context) {
@@ -61,6 +63,11 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
   }
 
   public void setListPosition(int position, int totalCount) {
+    if (position == lastListPosition && totalCount == lastListTotal) {
+      return;
+    }
+    lastListPosition = position;
+    lastListTotal = totalCount;
     Drawable background = getListBackground(position, totalCount);
     if (background != null) {
       setBackground(background);

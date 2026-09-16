@@ -50,8 +50,25 @@
     <string name="tab_size_8">8 spaces</string>
     <string name="pref_ghost_text">Ghost text completion</string>
     <string name="pref_ghost_text_desc">Preview auto-completion text while typing</string>
+    <string name="pref_custom_handle">Custom Handle</string>
+    <string name="pref_custom_handle_desc">Use custom PNG handles for selection</string>
+    <string name="pref_handle_cursor">Handle Cursor</string>
+    <string name="pref_handle_cursor_desc">Cursor pack: %s</string>
+    <string name="pref_handle_cursor_empty">No cursor packs found. Restart the app.</string>
     <string name="pref_show_whitespace">Show whitespace characters</string>
     <string name="pref_show_whitespace_desc">Show spaces and line-break markers</string>
+    <string name="pref_cursor_width">Cursor width</string>
+    <string name="pref_cursor_width_desc">Insert cursor thickness</string>
+    <string name="pref_divider_width">Divider width</string>
+    <string name="pref_divider_width_desc">Thickness of the gutter divider line</string>
+    <string name="pref_divider_margin">Divider margin</string>
+    <string name="pref_divider_margin_desc">Space around the gutter divider</string>
+    <string name="pref_sticky_prefer_inner">Sticky scroll: prefer inner scopes</string>
+    <string name="pref_sticky_prefer_inner_desc">Prefer the innermost scope when sticky scrolling</string>
+    <string name="pref_sticky_auto_collapse">Sticky scroll auto-collapse</string>
+    <string name="pref_sticky_auto_collapse_desc">Hide sticky lines when text is selected</string>
+    <string name="pref_sticky_line_indicator">Sticky divider indicator</string>
+    <string name="pref_sticky_line_indicator_desc">Show a divider below the stuck lines</string>
 
     <string name="pref_line_height">Line height</string>
     <string name="pref_line_height_desc">Line spacing</string>

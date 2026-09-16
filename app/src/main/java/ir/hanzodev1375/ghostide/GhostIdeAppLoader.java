@@ -25,6 +25,11 @@ import ir.hanzodev1375.ghostide.shizuku.ShizukuManager;
 import ir.theme.M3Theme;
 import ir.theme.ThemeManager;
 import ir.theme.ThemeUtils;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class GhostIdeAppLoader extends Application {
 
@@ -75,6 +80,8 @@ public class GhostIdeAppLoader extends Application {
         });
     GplInstalledPlugins.loadAll(this, GplPluginLoader.getInstance(this));
 
+    extractCursorZip();
+
     Thread.setDefaultUncaughtExceptionHandler(
         new Thread.UncaughtExceptionHandler() {
           @Override
@@ -121,5 +128,35 @@ public class GhostIdeAppLoader extends Application {
 
   public ThemeUtils getThemeUtils() {
     return theme;
+  }
+
+  private void extractCursorZip() {
+    try {
+      File cursorDir = new File("/storage/emulated/0/ghostide/cursor");
+      File jsonMarker = new File(cursorDir, "cursor.json");
+      if (cursorDir.exists() && jsonMarker.exists()) {
+        return;
+      }
+      cursorDir.mkdirs();
+      InputStream is = getAssets().open("cursor.zip");
+      ZipInputStream zis = new ZipInputStream(is);
+      ZipEntry entry;
+      byte[] buffer = new byte[4096];
+      while ((entry = zis.getNextEntry()) != null) {
+        if (entry.isDirectory()) continue;
+        String name = entry.getName();
+        File outFile = new File(cursorDir, name);
+        FileOutputStream fos = new FileOutputStream(outFile);
+        int len;
+        while ((len = zis.read(buffer)) > 0) {
+          fos.write(buffer, 0, len);
+        }
+        fos.close();
+        zis.closeEntry();
+      }
+      zis.close();
+      is.close();
+    } catch (Exception ignored) {
+    }
   }
 }

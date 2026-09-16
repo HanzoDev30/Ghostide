@@ -14,7 +14,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import ir.hanzodev1375.components.R;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat;
 import ir.hanzodev1375.components.databinding.BaseBlurBottomSheetBinding;
-import ir.hanzodev1375.components.utils.ComponentsPrefs;
 import ir.theme.M3Theme;
 
 /** root has LinearLayout pls adding call contentContainer.addView(#View,ViewGroup.LayoutParam) */
@@ -22,7 +21,6 @@ public abstract class BaseBlurBottomSheet extends BottomSheetDialogFragment {
 
   protected BaseBlurBottomSheetBinding binding;
   private boolean hasPeekMod = false;
-  private ComponentsPrefs app;
 
   @Nullable
   @Override
@@ -38,7 +36,6 @@ public abstract class BaseBlurBottomSheet extends BottomSheetDialogFragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     View root = binding.getRoot();
-    app = new ComponentsPrefs(requireContext());
     float cornerRadius = getResources().getDimension(R.dimen.bottom_sheet_corner_radius);
     requireDialog().getWindow().setStatusBarColor(Color.TRANSPARENT);
     requireDialog().getWindow().setNavigationBarColor(Color.TRANSPARENT);
@@ -53,19 +50,16 @@ public abstract class BaseBlurBottomSheet extends BottomSheetDialogFragment {
       BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
       behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
       behavior.setSkipCollapsed(true);
-
-      if (app.isBlurMod()) {
-        bottomSheet.post(
-            () -> {
-              if (binding == null) return;
-              Activity activity = getActivity();
-              if (activity == null) return;
-              bottomSheet.setBackgroundColor(Color.TRANSPARENT);
-              GlassCompat glass = binding.glassView;
-              glass.setBackdropSource(activity.findViewById(android.R.id.content));
-              glass.setEnableDynamicBackground(true);
-            });
-      }
+      bottomSheet.post(
+          () -> {
+            if (binding == null) return;
+            Activity activity = getActivity();
+            if (activity == null) return;
+            bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+            GlassCompat glass = binding.glassView;
+            glass.setBackdropSource(activity.findViewById(android.R.id.content));
+            glass.setEnableDynamicBackground(true);
+          });
     }
   }
 

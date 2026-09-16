@@ -24,6 +24,7 @@ import io.github.rosemoe.sora.widget.component.EditorContextMenuCreator;
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow;
 import io.github.rosemoe.sora.widget.component.Magnifier;
 import io.github.rosemoe.sora.widget.CodeEditor;
+import io.github.rosemoe.sora.widget.DirectAccessProps;
 import ir.hanzodev1375.ghostide.codeeditors.ui.EditorContextMenu;
 import ir.hanzodev1375.ghostide.codeeditors.colorrender.WebColorIde;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.LspRouter;
@@ -35,6 +36,8 @@ import ir.hanzodev1375.ghostide.codeeditors.preview.url.UrlPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.preview.xmlattr.XmlAttrPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.setting.Constants;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
+import ir.hanzodev1375.ghostide.codeeditors.style.BitmapHandleStyle;
+import io.github.rosemoe.sora.widget.style.builtin.HandleStyleSideDrop;
 import ir.hanzodev1375.ghostide.codeeditors.stringres.StringResourceExtractorIde;
 import ir.hanzodev1375.ghostide.codeeditors.ui.CustomEditorAutoCompletion;
 import ir.hanzodev1375.ghostide.codeeditors.ui.CustomEditorCompletionAdapter;
@@ -74,6 +77,7 @@ public class IdeEditor extends CodeEditor
   private Runnable onSaveRequest;
   private Runnable onSearchRequest;
   private Runnable onGotoLineRequest;
+  private OnDrawCanvas draw;
 
   /** پیشوند کامنت تک خطی برای زبان ای شناخته شده، کلیدش پسوند فایل است (بدون نقطه). */
   private static final Map<String, String> COMMENT_PREFIX_BY_EXTENSION = new HashMap<>();
@@ -190,6 +194,10 @@ public class IdeEditor extends CodeEditor
     updateEditorTypeFace();
     editorBinder();
     updateEditorBlockLine();
+    updateEditorHandleStyle();
+    updateEditorCursorWidth();
+    updateEditorDivider();
+    updateEditorSymbolPairAutoCompletion();
     setCursorAnimationEnabled(true);
     setStickyTextSelection(true);
     setFirstLineNumberAlwaysVisible(true);
@@ -281,6 +289,32 @@ public class IdeEditor extends CodeEditor
     setHighlightCurrentBlock(enabled);
     setBlockLineEnabled(enabled);
     // setBlockLineWidth(3.0f);
+  }
+
+  private void updateEditorHandleStyle() {
+    if (setting.enableCustomHandle()) {
+      String cursorName = setting.getCustomHandleCursorName();
+      BitmapHandleStyle style = new BitmapHandleStyle(getContext(), cursorName);
+      if (style.isAvailable()) {
+        setSelectionHandleStyle(style);
+        return;
+      }
+    }
+    setSelectionHandleStyle(new HandleStyleSideDrop(getContext()));
+  }
+
+  private void updateEditorCursorWidth() {
+    setCursorWidth(setting.getCursorWidth() * getDpUnit());
+  }
+
+  private void updateEditorDivider() {
+    setDividerWidth(setting.getDividerWidth() * getDpUnit());
+    float margin = setting.getDividerMargin() * getDpUnit();
+    setDividerMargin(margin, margin);
+  }
+
+  private void updateEditorSymbolPairAutoCompletion() {
+    getProps().symbolPairAutoCompletion = setting.enableBracketAutoClosing();
   }
 
   /** رفتن به خط مشخص (شماره خط از ۱ شروع میشود ولی داخل سورا صفر-مبناست). */
@@ -505,6 +539,13 @@ public class IdeEditor extends CodeEditor
     getProps().stickyScroll = enabled;
     setStickyScroll(enabled);
     setStickyScrollMaxLines(4);
+    getProps().stickyScrollPreferInnerScope = setting.stickyScrollPreferInnerScope();
+    getProps().stickyScrollAutoCollapse = setting.stickyScrollAutoCollapse();
+    getProps().stickyLineIndicator =
+        setting.stickyLineIndicator()
+            ? DirectAccessProps.STICKY_LINE_INDICATOR_LINE
+                | DirectAccessProps.STICKY_LINE_INDICATOR_SHADOW
+            : 0;
   }
 
   private void updateEditorTypeFace() {
@@ -722,6 +763,25 @@ public class IdeEditor extends CodeEditor
           ghostCompletionManager.setEnabled(setting.enableGhostTextCompletion());
         }
         break;
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CUSTOM_HANDLE:
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CUSTOM_HANDLE_CURSOR:
+        updateEditorHandleStyle();
+        break;
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_CURSOR_WIDTH:
+        updateEditorCursorWidth();
+        break;
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DIVIDER_WIDTH:
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DIVIDER_MARGIN:
+        updateEditorDivider();
+        break;
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_AUTO_CLOSE_BRACKET:
+        updateEditorSymbolPairAutoCompletion();
+        break;
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_PREFER_INNER:
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_AUTO_COLLAPSE:
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_STICKY_LINE_INDICATOR:
+        updateEditorStickyScroll();
+        break;
       default:
     }
   }
@@ -729,6 +789,9 @@ public class IdeEditor extends CodeEditor
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
+    if (draw != null) {
+      draw.onDrawView(canvas);
+    }
   }
 
   @Override
@@ -745,5 +808,13 @@ public class IdeEditor extends CodeEditor
       setting.getDefaultPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
     super.onDetachedFromWindow();
+  }
+
+  public OnDrawCanvas getDraw() {
+    return this.draw;
+  }
+
+  public void setDraw(OnDrawCanvas draw) {
+    this.draw = draw;
   }
 }

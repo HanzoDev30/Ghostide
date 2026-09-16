@@ -68,6 +68,19 @@ public class Constants {
     public static final String KEY_PARALLAX = "app_parallax";
     public static final String KEY_CONSTZOOM = "app_const_zoommod";
     public static final String Key_langColor = "editor_tabcolor";
+    public static final String KEY_CODE_EDITOR_CUSTOM_HANDLE =
+        "pref_code_editor_custom_handle";
+    public static final String KEY_CODE_EDITOR_CUSTOM_HANDLE_CURSOR =
+        "pref_code_editor_custom_handle_cursor";
+    public static final String KEY_CODE_EDITOR_CURSOR_WIDTH = "pref_code_editor_cursor_width";
+    public static final String KEY_CODE_EDITOR_DIVIDER_WIDTH = "pref_code_editor_divider_width";
+    public static final String KEY_CODE_EDITOR_DIVIDER_MARGIN = "pref_code_editor_divider_margin";
+    public static final String KEY_CODE_EDITOR_STICKY_PREFER_INNER =
+        "pref_code_editor_sticky_prefer_inner";
+    public static final String KEY_CODE_EDITOR_STICKY_AUTO_COLLAPSE =
+        "pref_code_editor_sticky_auto_collapse";
+    public static final String KEY_CODE_EDITOR_STICKY_LINE_INDICATOR =
+        "pref_code_editor_sticky_line_indicator";
 
     private SharedPreferenceKeys() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");

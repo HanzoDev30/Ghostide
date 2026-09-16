@@ -20,17 +20,14 @@ public class BaseSheet extends BottomSheetDialog {
 
   private BaseBlurBottomSheetBinding binding;
   private boolean hasPeekMod = false;
-  private final ComponentsPrefs app;
   private boolean contentAdded = false;
 
   public BaseSheet(@NonNull Context context) {
     super(context);
-    app = new ComponentsPrefs(context);
   }
 
   public BaseSheet(@NonNull Context context, int style) {
     super(context, style);
-    app = new ComponentsPrefs(context);
   }
 
   @Override
@@ -76,31 +73,29 @@ public class BaseSheet extends BottomSheetDialog {
       behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
       behavior.setSkipCollapsed(true);
 
-      if (app.isBlurMod()) {
-        bottomSheet.post(
-            () -> {
-              if (binding == null) return;
-              Activity activity = BlurBackdrop.findActivity(getContext());
-              if (activity == null) return;
-              bottomSheet.setBackgroundColor(Color.TRANSPARENT);
-              GlassCompat glass = binding.glassView;
-              glass.setBackdropSource(activity.findViewById(android.R.id.content));
-              glass.setEnableDynamicBackground(true);
-              behavior.addBottomSheetCallback(
-                  new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                      glass.invalidate();
-                    }
+      bottomSheet.post(
+          () -> {
+            if (binding == null) return;
+            Activity activity = BlurBackdrop.findActivity(getContext());
+            if (activity == null) return;
+            bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+            GlassCompat glass = binding.glassView;
+            glass.setBackdropSource(activity.findViewById(android.R.id.content));
+            glass.setEnableDynamicBackground(true);
+            behavior.addBottomSheetCallback(
+                new BottomSheetBehavior.BottomSheetCallback() {
+                  @Override
+                  public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                    glass.invalidate();
+                  }
 
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                      glass.invalidate();
-                    }
-                  });
-              setDismissWithAnimation(true);
-            });
-      }
+                  @Override
+                  public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                    glass.invalidate();
+                  }
+                });
+            setDismissWithAnimation(true);
+          });
     }
   }
 
