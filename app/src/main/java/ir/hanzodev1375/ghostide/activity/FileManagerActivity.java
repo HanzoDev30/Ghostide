@@ -12,14 +12,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.components.effect.ripple.WaterRipple;
@@ -38,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.ClipboardUtils;
 import com.bumptech.glide.Glide;
 import com.example.liquidglass.GlassMaterial;
+import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.theme.M3Theme;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat;
 import ir.ghostide.logcat.BottomSheetLogView;
@@ -53,8 +52,9 @@ import ir.hanzodev1375.components.sheet.customitemsheet.ui.CustomItemSheet;
 import ir.hanzodev1375.components.ui.ProfileView;
 import ir.hanzodev1375.ghostide.adapters.FileManagerAdapter;
 import ir.hanzodev1375.ghostide.adapters.ToolbarAdapter;
-import ir.hanzodev1375.ghostide.adapters.ZipBrowserAdapter;
-import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
+import ir.hanzodev1375.ghostide.helper.FileGitHelper;
+import ir.hanzodev1375.ghostide.helper.PluginPopupHelper;
+import ir.hanzodev1375.ghostide.helper.ZipModeHelper;
 import ir.hanzodev1375.ghostide.databinding.ActivityFilemanagerBinding;
 import ir.hanzodev1375.ghostide.databinding.SelectionPanelBinding;
 import ir.hanzodev1375.ghostide.dialogs.CopyProgressDialog;
@@ -63,17 +63,12 @@ import ir.hanzodev1375.ghostide.fragments.BatchRenameSheet;
 import ir.hanzodev1375.ghostide.fragments.FilePropertiesSheet;
 import ir.hanzodev1375.ghostide.jgit.GitHubClient;
 import ir.hanzodev1375.ghostide.jgit.GitHubProfileSheet;
-import ir.hanzodev1375.ghostide.jgit.fragments.GitBottomSheetFragment;
-import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitManager;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
-import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.FileChange;
 import ir.hanzodev1375.ghostide.models.FileManagerModel;
-import ir.hanzodev1375.ghostide.models.ZipEntryModel;
 import ir.hanzodev1375.ghostide.postman.PostManActivity;
 import ir.hanzodev1375.ghostide.refactor.rename.ui.RenamePackageBottomSheet;
 import ir.hanzodev1375.ghostide.bookmark.BookmarkBottomSheet;
 import ir.hanzodev1375.ghostide.bookmark.BookmarkViewModel;
-import ir.hanzodev1375.ghostide.models.ZipInfo;
 import ir.hanzodev1375.ghostide.project.NewProjectDialog;
 import ir.hanzodev1375.ghostide.history.HistoryBottomSheet;
 import ir.hanzodev1375.ghostide.history.HistoryViewModel;
@@ -81,47 +76,32 @@ import ir.hanzodev1375.ghostide.history.HistoryViewModel;
 import ir.hanzodev1375.ghostide.mvvm.viewmodel.FileViewModel;
 import ir.hanzodev1375.ghostide.adapters.FileManagerHostAdapter;
 import ir.hanzodev1375.ghostide.ide.ui.api.IdeHostServices;
-import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
 import ir.hanzodev1375.ghostide.plugin.PluginManager;
 import ir.hanzodev1375.ghostide.pulse.PulseBridge;
 import ir.hanzodev1375.ghostide.pulse.PulseListener;
 import ir.hanzodev1375.ghostide.pulse.PulseService;
 import ir.hanzodev1375.ghostide.plugin.api.Disposable;
 import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplInstalledPlugins;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplManifest;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplManifestReader;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplPluginLoader;
-import ir.hanzodev1375.ghostide.adapters.PluginPopupAdapter;
 import ir.hanzodev1375.ghostide.shizuku.ShizukuManager;
 import ir.hanzodev1375.ghostide.terminal.activity.TerminalActivity;
 import ir.hanzodev1375.ghostide.utils.MarginItemDecoration;
 import ir.hanzodev1375.ghostide.utils.NetworkChangeReceiver;
+import ir.hanzodev1375.ghostide.utils.FileExtensionUtils;
 import ir.hanzodev1375.ghostide.utils.ObjectUtil;
 import ir.hanzodev1375.ghostide.utils.ShapeUtil;
 import ir.hanzodev1375.ghostide.utils.ShortcutHelper;
 import ir.hanzodev1375.ghostide.utils.StorageUtils;
 import ir.hanzodev1375.ghostide.utils.ZipUtil;
-import ir.hanzodev1375.ghostide.utils.zip.ZipOperationManager;
 import ir.theme.themeeditor.ThemeEditorActivity;
-import ir.theme.M3Theme;
 import java.io.File;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import ir.hanzodev1375.ghostide.R;
-import java.util.Set;
 import ninja.coder.appuploader.main.ApkInstallerCompat;
 import ninja.coder.appuploader.main.appupdate.UpadteAppView;
-import net.lingala.zip4j.ZipFile;
 import ir.hanzodev1375.ghostide.translator.ui.StringsTranslatorSheet;
 import irhanzodev1375.musicpreview.MusicPlayerBottomSheetFragment;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.DialogCompat;
@@ -137,7 +117,7 @@ public class FileManagerActivity extends BaseCompat
   private FileViewModel viewModel;
   private Disposable fileManagerHostRegistration;
   private FileManagerAdapter adapter;
-  private ZipBrowserAdapter zipAdapter;
+  private ZipModeHelper zipModeHelper;
   private ThanosEffect thanosEffect;
   private ThanosItemAnimator thanosItemAnimator;
   private View selectionPanel;
@@ -146,9 +126,6 @@ public class FileManagerActivity extends BaseCompat
   private ImageView btnCopy, btnCut, btnDelete, btnPaste, btnClose, btnSelectall;
   private boolean isCutOperation = false;
   private List<FileManagerModel> pendingClipboard = new ArrayList<>();
-  private List<ZipEntryModel> zipClipboard = new ArrayList<>();
-  private String zipClipboardSource = null;
-  private boolean zipClipboardCut = false;
   private SelectionPanelBinding selectionPanelBinding;
   private FileManagerModel fileModels;
   private UpadteAppView app;
@@ -157,90 +134,13 @@ public class FileManagerActivity extends BaseCompat
   private PreferencesUtils appsetting;
   private ProfileView profileview;
   private NetworkChangeReceiver networkChangeReceiver;
-  private Set<String> itemname =
-      new HashSet<>(
-          Arrays.asList(
-              ".html",
-              ".java",
-              ".c",
-              ".cs",
-              ".cpp",
-              ".cxx",
-              ".hpp",
-              ".hxx",
-              ".cc",
-              ".h",
-              ".css",
-              ".js",
-              ".py",
-              ".json",
-              ".xml",
-              ".kt",
-              ".kts",
-              ".ts",
-              ".tsx",
-              ".toml",
-              ".groovy",
-              ".gradle",
-              ".sass",
-              ".scss",
-              ".md",
-              ".markdown",
-              ".yml",
-              ".yaml",
-              ".lua",
-              ".go",
-              ".php",
-              ".dart",
-              ".tsx",
-              ".jsx",
-              ".sql",
-              ".sh",
-              ".rc",
-              ".bash",
-              ".bashrc",
-              ".ash",
-              ".zsh",
-              ".zshrc",
-              ".rs",
-              ".rb",
-              ".g4",
-              ".ini",
-              ".zig",
-              ".vue",
-              ".asm",
-              ".s",
-              ".nasm",
-              ".swift",
-              ".scala",
-              ".sc",
-              ".pl",
-              ".pm",
-              ".jl",
-              ".r",
-              ".ex",
-              ".exs",
-              ".hs",
-              ".nim",
-              ".sol",
-              ".ninja")); // فلن برای تست است
-  private Set<String> images =
-      new HashSet<>(
-          Arrays.asList(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".avif", ".webp", ".svg"));
-  private Set<String> audio =
-      new HashSet<>(
-          Arrays.asList(".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aac", ".opus", ".wma"));
   private CopyProgressDialog copyProgressDialog;
   private DeleteProgressDialog deleteProgressDialog;
-  private boolean isZipMode = false;
-  private String currentZipFilePath = null;
   private HistoryViewModel historyViewModel;
   private BookmarkViewModel bookmarkViewModel;
-  private final ExecutorService gitStatusExecutor = Executors.newSingleThreadExecutor();
-  private Set<String> gitChangedAbsPaths = new HashSet<>();
   private GitViewModel gitViewModel;
-  private final AtomicBoolean gitStatusRunning = new AtomicBoolean(false);
-  private final AtomicBoolean gitStatusPending = new AtomicBoolean(false);
+  private FileGitHelper gitHelper;
+  private PluginPopupHelper pluginPopupHelper;
   private final ExecutorService ftpExecutor = Executors.newSingleThreadExecutor();
   private String currentDir;
   private int systemBarsBottomInset = 0;
@@ -312,13 +212,14 @@ public class FileManagerActivity extends BaseCompat
             .register(IdeHostServices.FILE_MANAGER_HOST, new FileManagerHostAdapter(this));
     historyViewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
     bookmarkViewModel = new ViewModelProvider(this).get(BookmarkViewModel.class);
+    gitHelper = new FileGitHelper(this, bind, () -> adapter, () -> viewModel.getCurrentPath().getValue());
     gitViewModel = new ViewModelProvider(this).get(GitViewModel.class);
     gitViewModel.changedFiles.observe(
         this,
         changes -> {
-          String repoRoot = findGitRepositoryPath();
+          String repoRoot = gitHelper.findGitRepositoryPathForCurrent();
           if (repoRoot == null) return;
-          applyChangedFiles(repoRoot, changes);
+          gitHelper.applyChangedFiles(repoRoot, changes);
         });
     adapter = new FileManagerAdapter(this);
     bind.rvfiles.setLayoutManager(
@@ -406,7 +307,7 @@ public class FileManagerActivity extends BaseCompat
                 bind.emptystates.setVisibility(View.GONE);
                 bind.rvfiles.setVisibility(View.VISIBLE);
               }
-              refreshGitStatus();
+              gitHelper.refreshGitStatus();
             });
 
     viewModel
@@ -466,14 +367,13 @@ public class FileManagerActivity extends BaseCompat
             bind.rvfiles.saveScrollPosition();
             viewModel.navigateTo(item.getPath());
           } else if (item.getPath().toLowerCase().endsWith(".zip")) {
-            enterZipMode(item.getPath());
+            zipModeHelper.enterZipMode(item.getPath());
           } else {
             setupClick(item.getPath(), item.getName(), view);
           }
           String currentPath = viewModel.getCurrentPath().getValue();
           if (currentPath != null) {
-            bind.gitActionButton.setVisibility(
-                isGitRepository(currentPath) ? View.VISIBLE : View.GONE);
+            gitHelper.updateGitActionVisibility(currentPath);
           }
           if (bind.ser.isShow()) {
             bind.ser.hide();
@@ -544,7 +444,7 @@ public class FileManagerActivity extends BaseCompat
         path -> {
           pendingAnimation = true;
           viewModel.navigateTo(path);
-          bind.gitActionButton.setVisibility(isGitRepository(path) ? View.VISIBLE : View.GONE);
+          gitHelper.updateGitActionVisibility(path);
         });
     bind.btnGoToDir.setOnClickListener(this::showGoToDirMenu);
 
@@ -555,7 +455,7 @@ public class FileManagerActivity extends BaseCompat
         new FileManagerAdapter.SelectionStateListener() {
           @Override
           public void onSelectionChanged(int count) {
-            if (count == 0 && pendingClipboard.isEmpty() && zipClipboard.isEmpty()) {
+            if (count == 0 && pendingClipboard.isEmpty() && !zipModeHelper.hasZipClipboard()) {
               hideSelectionPanel();
             } else if (count > 0) {
               showSelectionPanel();
@@ -584,260 +484,32 @@ public class FileManagerActivity extends BaseCompat
                 v,
                 ObjectUtil.TRANSITION_AI_CHAT));
 
-    bind.buttonPlugins.setOnClickListener(this::showPluginPopup);
+    pluginPopupHelper = new PluginPopupHelper();
+    bind.buttonPlugins.setOnClickListener(v -> pluginPopupHelper.show(this, v));
 
     setOnBackPress();
-    setupGitButton();
-    observePathForGit();
+    gitHelper.setupButton();
+    gitHelper.observe(this, viewModel.getCurrentPath());
     observePulseRoot();
-    initZipBrowserAdapter();
+    initZipModeHelper();
   }
 
-  private void initZipBrowserAdapter() {
-    zipAdapter = new ZipBrowserAdapter(this);
-    zipAdapter.setZipLoadListener(
-        new ZipBrowserAdapter.ZipLoadListener() {
-          @Override
-          public void onLoadStarted() {
-            bind.loadingprogass.setVisibility(View.VISIBLE);
-          }
+  private void initZipModeHelper() {
+    zipModeHelper = new ZipModeHelper(this, bind, viewModel, adapter);
+    zipModeHelper.setSelectionChangedListener(this::onZipSelectionChanged);
+    zipModeHelper.init();
+  }
 
-          @Override
-          public void onLoadFinished(String internalPath, boolean hasParent) {
-            bind.loadingprogass.setVisibility(View.GONE);
-            if (currentZipFilePath != null) {
-              bind.rvfiles.setLocationKey("zip:" + currentZipFilePath + "@" + internalPath);
-              bind.rvfiles.restoreScrollPosition();
-            }
-          }
-
-          @Override
-          public void onLoadError(String message) {
-            bind.loadingprogass.setVisibility(View.GONE);
-            GhostToast.makeText(
-                    FileManagerActivity.this, "خطا: " + message, GhostToast.LENGTH_SHORT)
-                .show();
-            exitZipMode();
-          }
-        });
-    zipAdapter.setOnItemClickListener(
-        (item, position) -> {
-          if (item.isDirectory()) {
-            if (currentZipFilePath != null) {
-              bind.rvfiles.setLocationKey(
-                  "zip:" + currentZipFilePath + "@" + zipAdapter.getCurrentInternalPath());
-              bind.rvfiles.saveScrollPosition();
-            }
-            zipAdapter.loadZip(currentZipFilePath, item.getEntryPath());
-          } else {
-            extractAndOpenZipEntry(item);
-          }
-        });
-    zipAdapter.setOnMoreClickListener(
-        (item, anchor, pos) -> {
-          List<String> items =
-              List.of(
-                  getString(R.string.removed),
-                  getString(R.string.rename),
-                  getString(R.string.zip_extract_here),
-                  getString(R.string.zip_extract_to),
-                  getString(R.string.zip_info));
-          ObjectUtil.showGlassMenu(
-              FileManagerActivity.this,
-              anchor,
-              items,
-              (index, title) -> {
-                ZipOperationManager zipOp = new ZipOperationManager();
-                String destDefault = new File(currentZipFilePath).getParent();
-                switch (index) {
-                  case 0 -> new DialogCompat(FileManagerActivity.this)
-                      .setTitle(getString(R.string.removed))
-                      .setMessage(getString(R.string.removedmassges, item.getName()))
-                      .setPositiveButton(
-                          getString(R.string.ok),
-                          (d, w) ->
-                              zipOp.deleteEntries(
-                                  currentZipFilePath,
-                                  item.getEntryPath(),
-                                  new ZipOperationManager.Callback() {
-                                    @Override
-                                    public void onSuccess(String msg) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_deleted_ok),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                      zipAdapter.loadZip(
-                                          currentZipFilePath, zipAdapter.getCurrentInternalPath());
-                                    }
-
-                                    @Override
-                                    public void onError(String err) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_error_prefix, err),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                    }
-                                  }))
-                      .setNegativeButton(getString(R.string.cancel), null)
-                      .show();
-                  case 1 -> {
-                    RenameDialogFragment dialog =
-                        RenameDialogFragment.getInstance(
-                            item.getName(),
-                            (prefix, extension) -> {
-                              String newName =
-                                  (extension != null && !extension.isEmpty())
-                                      ? prefix + "." + extension
-                                      : prefix;
-                              zipOp.renameEntry(
-                                  currentZipFilePath,
-                                  item.getEntryPath(),
-                                  newName,
-                                  new ZipOperationManager.Callback() {
-                                    @Override
-                                    public void onSuccess(String msg) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_renamed_ok),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                      zipAdapter.loadZip(
-                                          currentZipFilePath, zipAdapter.getCurrentInternalPath());
-                                    }
-
-                                    @Override
-                                    public void onError(String err) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_error_prefix, err),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                    }
-                                  });
-                            });
-                    dialog.show(getSupportFragmentManager(), RenameDialogFragment.TAG);
-                  }
-                  case 2 -> zipOp.extractSingle(
-                      currentZipFilePath,
-                      item.getEntryPath(),
-                      destDefault,
-                      new ZipOperationManager.Callback() {
-                        @Override
-                        public void onSuccess(String msg) {
-                          GhostToast.makeText(
-                                  FileManagerActivity.this,
-                                  getString(R.string.zip_extracted_ok),
-                                  GhostToast.LENGTH_SHORT)
-                              .show();
-                        }
-
-                        @Override
-                        public void onError(String err) {
-                          GhostToast.makeText(
-                                  FileManagerActivity.this,
-                                  getString(R.string.zip_error_prefix, err),
-                                  GhostToast.LENGTH_SHORT)
-                              .show();
-                        }
-                      });
-                  case 3 -> new DialogCompat(FileManagerActivity.this)
-                      .setTitle(getString(R.string.zip_extract_to))
-                      .setMessage(getString(R.string.zip_extract_dest, destDefault))
-                      .setPositiveButton(
-                          getString(R.string.ok),
-                          (d, w) ->
-                              zipOp.extractSingle(
-                                  currentZipFilePath,
-                                  item.getEntryPath(),
-                                  destDefault,
-                                  new ZipOperationManager.Callback() {
-                                    @Override
-                                    public void onSuccess(String msg) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_extracted_ok),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                    }
-
-                                    @Override
-                                    public void onError(String err) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_error_prefix, err),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                    }
-                                  }))
-                      .setNegativeButton(getString(R.string.cancel), null)
-                      .show();
-                  case 4 -> zipOp.getZipInfo(
-                      currentZipFilePath,
-                      new ZipOperationManager.ZipInfoCallback() {
-                        @Override
-                        public void onInfo(ZipInfo info) {
-
-                          new DialogCompat(FileManagerActivity.this)
-                              .setTitle(getString(R.string.zip_info))
-                              .setMessage(
-                                  getString(R.string.zip_info_files, info.fileCount)
-                                      + "\n"
-                                      + getString(R.string.zip_info_dirs, info.dirCount)
-                                      + "\n"
-                                      + getString(
-                                          R.string.zip_info_original,
-                                          formatSize(info.totalUncompressed))
-                                      + "\n"
-                                      + getString(
-                                          R.string.zip_info_compressed,
-                                          formatSize(info.totalCompressed))
-                                      + "\n"
-                                      + getString(R.string.zip_info_ratio, info.compressionRatio)
-                                      + "\n"
-                                      + getString(
-                                          R.string.zip_info_encrypted,
-                                          info.isEncrypted
-                                              ? getString(R.string.zip_info_yes)
-                                              : getString(R.string.zip_info_no)))
-                              .setPositiveButton(getString(R.string.ok), null)
-                              .show();
-                        }
-
-                        @Override
-                        public void onError(String err) {
-                          GhostToast.makeText(
-                                  FileManagerActivity.this,
-                                  getString(R.string.zip_error_prefix, err),
-                                  GhostToast.LENGTH_SHORT)
-                              .show();
-                        }
-                      });
-                }
-              });
-        });
-    zipAdapter.setSelectionStateListener(
-        new ZipBrowserAdapter.SelectionStateListener() {
-          @Override
-          public void onSelectionChanged(int count) {
-            if (count == 0 && pendingClipboard.isEmpty() && zipClipboard.isEmpty()) {
-              hideSelectionPanel();
-            } else if (count > 0) {
-              showSelectionPanel();
-              selectionCount.setText(getString(R.string.selected_items_count, count));
-            } else if (count == 0 && !pendingClipboard.isEmpty()) {
-              selectionCount.setText("0");
-              showSelectionPanel();
-            }
-          }
-
-          @Override
-          public void onSelectionModeStarted() {}
-
-          @Override
-          public void onSelectionModeEnded() {}
-        });
+  private void onZipSelectionChanged(int count) {
+    if (count == 0 && pendingClipboard.isEmpty() && !zipModeHelper.hasZipClipboard()) {
+      hideSelectionPanel();
+    } else if (count > 0) {
+      showSelectionPanel();
+      selectionCount.setText(getString(R.string.selected_items_count, count));
+    } else if (count == 0 && !pendingClipboard.isEmpty()) {
+      selectionCount.setText("0");
+      showSelectionPanel();
+    }
   }
 
   private void setupThanosEffect() {
@@ -861,74 +533,6 @@ public class FileManagerActivity extends BaseCompat
     if (thanosItemAnimator == null) return;
     snapArmed = true;
     thanosItemAnimator.setSnapDeletionPending(true);
-  }
-
-  private void enterZipMode(String zipFilePath) {
-    isZipMode = true;
-    currentZipFilePath = zipFilePath;
-    String dirPath = viewModel.getCurrentPath().getValue();
-    if (dirPath != null) {
-      bind.rvfiles.setLocationKey("dir:" + dirPath);
-      bind.rvfiles.saveScrollPosition();
-    }
-    bind.rvfiles.setLocationKey("zip:" + zipFilePath);
-    bind.rvfiles.setAdapter(zipAdapter);
-    zipAdapter.setupSelectionTracker(bind.rvfiles);
-    zipAdapter.loadZip(zipFilePath, "");
-    setFabVisible(false);
-    bind.gitActionButton.setVisibility(View.GONE);
-    // bind.navmodel.setVisibility(View.GONE);
-  }
-
-  private void exitZipMode() {
-    if (currentZipFilePath != null) {
-      bind.rvfiles.setLocationKey(
-          "zip:" + currentZipFilePath + "@" + zipAdapter.getCurrentInternalPath());
-      bind.rvfiles.saveScrollPosition();
-    }
-    isZipMode = false;
-    currentZipFilePath = null;
-    zipAdapter.clearSelection();
-    resetZipClipboard();
-    bind.rvfiles.setAdapter(adapter);
-    adapter.setupSelectionTracker(bind.rvfiles);
-    viewModel.loadFiles(viewModel.getCurrentPath().getValue());
-    setFabVisible(true);
-    // bind.navmodel.setVisibility(View.VISIBLE);
-    String currentPath = viewModel.getCurrentPath().getValue();
-    if (currentPath != null) {
-      bind.gitActionButton.setVisibility(isGitRepository(currentPath) ? View.VISIBLE : View.GONE);
-    }
-  }
-
-  private void extractAndOpenZipEntry(ZipEntryModel entry) {
-    File cacheDir = new File(getCacheDir(), "zip_extract");
-    if (!cacheDir.exists()) cacheDir.mkdirs();
-    File outFile = new File(cacheDir, entry.getName());
-    new Thread(
-            () -> {
-              try (ZipFile zipFile = new ZipFile(entry.getParentZipPath())) {
-                zipFile.extractFile(
-                    entry.getEntryPath(), cacheDir.getAbsolutePath(), entry.getName());
-                runOnUiThread(
-                    () -> {
-                      if (entry.isEncrypted()) {
-                        GhostToast.makeText(
-                                FileManagerActivity.this,
-                                "File Has Encrypted",
-                                GhostToast.LENGTH_LONG)
-                            .show();
-                      } else setupClick(outFile.getAbsolutePath(), entry.getName(), null);
-                    });
-              } catch (Exception e) {
-                runOnUiThread(
-                    () ->
-                        GhostToast.makeText(
-                                FileManagerActivity.this, "Error to UnZip", GhostToast.LENGTH_SHORT)
-                            .show());
-              }
-            })
-        .start();
   }
 
   private void setupSearchLayoutInsets() {
@@ -976,9 +580,8 @@ public class FileManagerActivity extends BaseCompat
   }
 
   public void setupClick(String path, String name, View sourceItemView) {
-    int lastDot = name.lastIndexOf(".");
-    String extension = (lastDot > 0) ? name.substring(lastDot).toLowerCase() : "";
-    if (itemname.contains(extension)) {
+    String extension = FileExtensionUtils.getExtension(name);
+    if (FileExtensionUtils.isCodeFile(extension)) {
       Intent intent = new Intent(FileManagerActivity.this, EditorActivity.class);
       intent.putExtra("file_path", path);
       intent.putExtra("file_name", name);
@@ -1009,7 +612,7 @@ public class FileManagerActivity extends BaseCompat
           });
       sheets.show();
 
-    } else if (images.contains(extension)) {
+    } else if (FileExtensionUtils.isImageFile(extension)) {
       String currentDir = new File(path).getParent();
       File dir = new File(currentDir);
       File[] allFiles = dir.listFiles();
@@ -1019,10 +622,8 @@ public class FileManagerActivity extends BaseCompat
         for (int i = 0; i < allFiles.length; i++) {
           File f = allFiles[i];
           if (f.isFile()) {
-            String ext = "";
-            int dot = f.getName().lastIndexOf(".");
-            if (dot > 0) ext = f.getName().substring(dot).toLowerCase();
-            if (images.contains(ext)) {
+            String ext = FileExtensionUtils.getExtension(f.getName());
+            if (FileExtensionUtils.isImageFile(ext)) {
               imagePaths.add(f.getAbsolutePath());
               if (f.getAbsolutePath().equals(path)) currentIndex = imagePaths.size() - 1;
             }
@@ -1042,7 +643,7 @@ public class FileManagerActivity extends BaseCompat
       } else {
         GhostToast.makeText(this, "No image found", GhostToast.LENGTH_SHORT).show();
       }
-    } else if (audio.contains(extension)) {
+    } else if (FileExtensionUtils.isAudioFile(extension)) {
       showMusicPreview(path);
     } else if (extension.equals(".apk")) {
       installApk(path);
@@ -1051,109 +652,6 @@ public class FileManagerActivity extends BaseCompat
               this, getString(R.string.error_file_format_not_supported), GhostToast.LENGTH_SHORT)
           .show();
     }
-  }
-
-  private void setupGitButton() {
-    bind.gitActionButton.setOnClickListener(
-        v -> {
-          String repoPath = findGitRepositoryPath();
-          if (repoPath == null) {
-            GhostToast.makeText(this, "Git dir not found", GhostToast.LENGTH_LONG).show();
-            return;
-          }
-          GitBottomSheetFragment.newInstance(repoPath)
-              .show(getSupportFragmentManager(), "git_bottom_sheet");
-        });
-  }
-
-  private String findGitRepositoryPath() {
-    String currentDir = viewModel.getCurrentPath().getValue();
-    if (currentDir == null) return null;
-    File dir = new File(currentDir);
-    while (dir != null) {
-      File gitDir = new File(dir, ".git");
-      if (gitDir.exists() && gitDir.isDirectory()) return dir.getAbsolutePath();
-      dir = dir.getParentFile();
-    }
-    return null;
-  }
-
-  private void observePathForGit() {
-    viewModel
-        .getCurrentPath()
-        .observe(
-            this,
-            path -> {
-              if (path != null && isGitRepository(path)) {
-                bind.gitActionButton.setVisibility(View.VISIBLE);
-              } else {
-                bind.gitActionButton.setVisibility(View.GONE);
-              }
-            });
-  }
-
-  private boolean isGitRepository(String path) {
-    File gitDir = new File(path, ".git");
-    return gitDir.exists() && gitDir.isDirectory();
-  }
-
-  /**
-   * Refreshes the git status of the repository that the current directory belongs to and highlights
-   * files/folders with uncommitted changes in the file list. Call this whenever the visible
-   * directory may have changed on disk (navigation, returning to the activity, after commit/push,
-   * etc).
-   */
-  private void refreshGitStatus() {
-    String repoRoot = findGitRepositoryPath();
-    if (repoRoot == null) {
-      gitStatusPending.set(false);
-      if (!gitChangedAbsPaths.isEmpty()) {
-        gitChangedAbsPaths = new HashSet<>();
-        if (adapter != null && bind != null) {
-          Set<String> empty = gitChangedAbsPaths;
-          bind.rvfiles.post(() -> adapter.setGitChangedPaths(empty));
-        }
-      }
-      return;
-    }
-    if (!gitStatusRunning.compareAndSet(false, true)) {
-      // A scan is already running; make sure it re-runs once more after it finishes
-      // so the latest state on disk is reflected.
-      gitStatusPending.set(true);
-      return;
-    }
-    gitStatusExecutor.execute(
-        () -> {
-          try {
-            GitManager manager = new GitManager(repoRoot);
-            if (manager.openRepository()) {
-              applyChangedFiles(repoRoot, manager.getChangedFiles());
-            }
-          } finally {
-            gitStatusRunning.set(false);
-            if (gitStatusPending.compareAndSet(true, false)) {
-              refreshGitStatus();
-            }
-          }
-        });
-  }
-
-  private void applyChangedFiles(String repoRoot, List<FileChange> changes) {
-    Set<String> absPaths = new HashSet<>();
-    if (changes != null) {
-      for (FileChange change : changes) {
-        if (change.getPath() != null) {
-          absPaths.add(new File(repoRoot, change.getPath()).getAbsolutePath());
-        }
-      }
-    }
-    runOnUiThread(
-        () -> {
-          gitChangedAbsPaths = absPaths;
-          if (adapter != null && bind != null) {
-            bind.rvfiles.post(() -> adapter.setGitChangedPaths(gitChangedAbsPaths));
-          }
-        });
   }
 
   private void showSelectionPanel() {
@@ -1192,7 +690,7 @@ public class FileManagerActivity extends BaseCompat
     return (int) (value * getResources().getDisplayMetrics().density);
   }
 
-  private void setFabVisible(boolean visible) {
+  public void setFabVisible(boolean visible) {
     if (bind.fab == null) return;
     if (visible) {
       if (bind.fab.getVisibility() == View.VISIBLE) return;
@@ -1222,6 +720,22 @@ public class FileManagerActivity extends BaseCompat
     }
   }
 
+  public void updateGitActionVisibility(String path) {
+    gitHelper.updateGitActionVisibility(path);
+  }
+
+  public void markPasteAvailable() {
+    if (btnPaste != null) btnPaste.setColorFilter(0xff00ff00);
+  }
+
+  public void clearPasteAvailable() {
+    if (btnPaste != null) btnPaste.clearColorFilter();
+  }
+
+  public void setSelectionCount(String text) {
+    if (selectionCount != null) selectionCount.setText(text);
+  }
+
   private void setupSelectionPanel() {
     selectionPanelBinding = bind.selectionPanel;
     selectionPanel = selectionPanelBinding.getRoot();
@@ -1236,17 +750,8 @@ public class FileManagerActivity extends BaseCompat
     var selectionMore = selectionPanelBinding.selectionmore;
     btnCopy.setOnClickListener(
         v -> {
-          if (isZipMode) {
-            List<ZipEntryModel> selected = zipAdapter.getSelectedItems();
-            if (!selected.isEmpty()) {
-              zipClipboard = new ArrayList<>(selected);
-              zipClipboardSource = currentZipFilePath;
-              zipClipboardCut = false;
-              zipAdapter.clearSelection();
-              btnPaste.setColorFilter(0xff00ff00);
-              selectionCount.setText("0");
-              showSelectionPanel();
-            }
+          if (zipModeHelper.isZipMode()) {
+            zipModeHelper.copySelection();
             return;
           }
           List<FileManagerModel> selected = adapter.getSelectedItems();
@@ -1262,17 +767,8 @@ public class FileManagerActivity extends BaseCompat
 
     btnCut.setOnClickListener(
         v -> {
-          if (isZipMode) {
-            List<ZipEntryModel> selected = zipAdapter.getSelectedItems();
-            if (!selected.isEmpty()) {
-              zipClipboard = new ArrayList<>(selected);
-              zipClipboardSource = currentZipFilePath;
-              zipClipboardCut = true;
-              zipAdapter.clearSelection();
-              btnPaste.setColorFilter(0xff00ff00);
-              selectionCount.setText("0");
-              showSelectionPanel();
-            }
+          if (zipModeHelper.isZipMode()) {
+            zipModeHelper.cutSelection();
             return;
           }
           List<FileManagerModel> selected = adapter.getSelectedItems();
@@ -1288,44 +784,8 @@ public class FileManagerActivity extends BaseCompat
 
     btnDelete.setOnClickListener(
         v -> {
-          if (isZipMode) {
-            List<ZipEntryModel> selected = zipAdapter.getSelectedItems();
-            if (selected.isEmpty()) return;
-            List<String> entryPaths = new ArrayList<>();
-            for (ZipEntryModel e : selected) entryPaths.add(e.getEntryPath());
-            new DialogCompat(this)
-                .setTitle(getString(R.string.removed))
-                .setMessage(getString(R.string.removedmassges, selected.size()))
-                .setPositiveButton(
-                    getString(R.string.ok),
-                    (d, w) ->
-                        new ZipOperationManager()
-                            .deleteEntries(
-                                currentZipFilePath,
-                                entryPaths,
-                                new ZipOperationManager.Callback() {
-                                  @Override
-                                  public void onSuccess(String msg) {
-                                    GhostToast.makeText(
-                                            FileManagerActivity.this,
-                                            getString(R.string.zip_deleted_ok),
-                                            GhostToast.LENGTH_SHORT)
-                                        .show();
-                                    zipAdapter.loadZip(
-                                        currentZipFilePath, zipAdapter.getCurrentInternalPath());
-                                  }
-
-                                  @Override
-                                  public void onError(String err) {
-                                    GhostToast.makeText(
-                                            FileManagerActivity.this,
-                                            getString(R.string.zip_error_prefix, err),
-                                            GhostToast.LENGTH_SHORT)
-                                        .show();
-                                  }
-                                }))
-                .setNegativeButton(getString(R.string.cancel), null)
-                .show();
+          if (zipModeHelper.isZipMode()) {
+            zipModeHelper.deleteSelection();
             return;
           }
           List<FileManagerModel> selected = adapter.getSelectedItems();
@@ -1347,65 +807,8 @@ public class FileManagerActivity extends BaseCompat
 
     btnPaste.setOnClickListener(
         v -> {
-          if (isZipMode) {
-            if (zipClipboard.isEmpty()) return;
-            String destDir = viewModel.getCurrentPath().getValue();
-            if (destDir == null) return;
-            List<String> entryPaths = new ArrayList<>();
-            for (ZipEntryModel e : zipClipboard) entryPaths.add(e.getEntryPath());
-            String sourceZip = zipClipboardSource;
-            boolean cut = zipClipboardCut;
-            new ZipOperationManager()
-                .extractMultiple(
-                    currentZipFilePath,
-                    entryPaths,
-                    destDir,
-                    new ZipOperationManager.ProgressCallback() {
-                      @Override
-                      public void onProgress(int percent, String fileName) {}
-
-                      @Override
-                      public void onSuccess(String msg) {
-                        GhostToast.makeText(
-                                FileManagerActivity.this,
-                                getString(R.string.zip_extracted_ok),
-                                GhostToast.LENGTH_SHORT)
-                            .show();
-                        zipAdapter.clearSelection();
-                        resetZipClipboard();
-                        if (cut && sourceZip != null && sourceZip.equals(currentZipFilePath)) {
-                          new ZipOperationManager()
-                              .deleteEntries(
-                                  sourceZip,
-                                  entryPaths,
-                                  new ZipOperationManager.Callback() {
-                                    @Override
-                                    public void onSuccess(String msg1) {
-                                      zipAdapter.loadZip(
-                                          currentZipFilePath, zipAdapter.getCurrentInternalPath());
-                                    }
-
-                                    @Override
-                                    public void onError(String err) {
-                                      GhostToast.makeText(
-                                              FileManagerActivity.this,
-                                              getString(R.string.zip_error_prefix, err),
-                                              GhostToast.LENGTH_SHORT)
-                                          .show();
-                                    }
-                                  });
-                        }
-                      }
-
-                      @Override
-                      public void onError(String err) {
-                        GhostToast.makeText(
-                                FileManagerActivity.this,
-                                getString(R.string.zip_error_prefix, err),
-                                GhostToast.LENGTH_SHORT)
-                            .show();
-                      }
-                    });
+          if (zipModeHelper.isZipMode()) {
+            zipModeHelper.pasteClipboard();
             return;
           }
           if (pendingClipboard.isEmpty()) return;
@@ -1430,8 +833,8 @@ public class FileManagerActivity extends BaseCompat
 
     btnSelectall.setOnClickListener(
         v -> {
-          if (isZipMode) {
-            zipAdapter.selectAll();
+          if (zipModeHelper.isZipMode()) {
+            zipModeHelper.selectAll();
             return;
           }
           adapter.selectAll();
@@ -1446,14 +849,14 @@ public class FileManagerActivity extends BaseCompat
         v -> {
           pendingClipboard.clear();
           adapter.clearSelection();
-          zipAdapter.clearSelection();
-          resetZipClipboard();
+          zipModeHelper.clearSelection();
+          zipModeHelper.resetZipClipboard();
           btnPaste.clearColorFilter();
           hideSelectionPanel();
         });
     selectionMore.setOnClickListener(
         v -> {
-          if (isZipMode) return;
+          if (zipModeHelper.isZipMode()) return;
           List<FileManagerModel> selected = adapter.getSelectedItems();
           if (selected.isEmpty()) return;
 
@@ -1522,13 +925,6 @@ public class FileManagerActivity extends BaseCompat
     }
     glass.addView(inner);
     container.addView(glass);
-  }
-
-  private void resetZipClipboard() {
-    zipClipboard.clear();
-    zipClipboardSource = null;
-    zipClipboardCut = false;
-    btnPaste.clearColorFilter();
   }
 
   private void setupInsets() {
@@ -1618,7 +1014,7 @@ public class FileManagerActivity extends BaseCompat
     bind.musicPreview.release();
     bind = null;
     this.unregisterReceiver(networkChangeReceiver);
-    gitStatusExecutor.shutdownNow();
+    gitHelper.shutdown();
     ftpExecutor.shutdownNow();
     if (fileManagerHostRegistration != null) {
       fileManagerHostRegistration.dispose();
@@ -1653,9 +1049,9 @@ public class FileManagerActivity extends BaseCompat
                 }
                 if (bind.musicPreview.getVisibility() == View.VISIBLE) {
                   hideMusicPreview();
-                } else if (isZipMode) {
-                  if (!zipAdapter.navigateUp()) {
-                    exitZipMode();
+                } else if (zipModeHelper.isZipMode()) {
+                  if (!zipModeHelper.navigateUp()) {
+                    zipModeHelper.exitZipMode();
                   }
                 } else {
                   String path = viewModel.getCurrentPath().getValue();
@@ -1666,8 +1062,7 @@ public class FileManagerActivity extends BaseCompat
                     viewModel.navigateUp();
                     String currentPath = viewModel.getCurrentPath().getValue();
                     if (currentPath != null) {
-                      bind.gitActionButton.setVisibility(
-                          isGitRepository(currentPath) ? View.VISIBLE : View.GONE);
+                      gitHelper.updateGitActionVisibility(currentPath);
                     }
                   } else {
                     new DialogCompat(FileManagerActivity.this)
@@ -1958,14 +1353,13 @@ public class FileManagerActivity extends BaseCompat
               bind.rvfiles.saveScrollPosition();
               viewModel.navigateTo(item.getPath());
             } else if (item.getPath().toLowerCase().endsWith(".zip")) {
-              enterZipMode(item.getPath());
+              zipModeHelper.enterZipMode(item.getPath());
             } else {
               setupClick(item.getPath(), item.getName());
             }
             String currentPath = viewModel.getCurrentPath().getValue();
             if (currentPath != null) {
-              bind.gitActionButton.setVisibility(
-                  isGitRepository(currentPath) ? View.VISIBLE : View.GONE);
+              gitHelper.updateGitActionVisibility(currentPath);
             }
             if (bind.ser.isShow()) {
               bind.ser.hide();
@@ -1978,7 +1372,7 @@ public class FileManagerActivity extends BaseCompat
           new FileManagerAdapter.SelectionStateListener() {
             @Override
             public void onSelectionChanged(int count) {
-              if (count == 0 && pendingClipboard.isEmpty() && zipClipboard.isEmpty()) {
+              if (count == 0 && pendingClipboard.isEmpty() && !zipModeHelper.hasZipClipboard()) {
                 hideSelectionPanel();
               } else if (count > 0) {
                 showSelectionPanel();
@@ -2006,12 +1400,12 @@ public class FileManagerActivity extends BaseCompat
       if (currentPath != null) viewModel.loadFiles(currentPath);
     }
 
-    if (!isZipMode) {
+    if (!zipModeHelper.isZipMode()) {
       String currentPath = viewModel.getCurrentPath().getValue();
       if (currentPath != null) {
-        bind.gitActionButton.setVisibility(isGitRepository(currentPath) ? View.VISIBLE : View.GONE);
+        gitHelper.updateGitActionVisibility(currentPath);
       }
-      refreshGitStatus();
+      gitHelper.refreshGitStatus();
     }
   }
 
@@ -2166,129 +1560,11 @@ public class FileManagerActivity extends BaseCompat
         });
   }
 
-  private void showPluginPopup(View anchor) {
-    var installedFiles = GplInstalledPlugins.listInstalled(this);
-
-    if (installedFiles.isEmpty()) {
-      GhostToast.makeText(this, R.string.no_plugins, GhostToast.LENGTH_SHORT).show();
-      return;
-    }
-
-    var loader = GplPluginLoader.getInstance(this);
-    for (var f : installedFiles) {
-      try {
-        var manifest = GplManifestReader.read(f);
-        if (manifest == null) continue;
-        if (!loader.isLoaded(manifest.id())) {
-          loader.load(f);
-        }
-      } catch (Exception e) {
-        Log.e("FileManagerActivity", "showPluginPopup: failed to load " + f.getName(), e);
-      }
-    }
-
-    var registeredScreens =
-        GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.PLUGIN_SCREEN);
-
-    var pluginItems =
-        installedFiles.stream()
-            .map(
-                f -> {
-                  try {
-                    GplManifest manifest = GplManifestReader.read(f);
-                    if (manifest == null) {
-                      return Optional.<PluginPopupAdapter.PluginItem>empty();
-                    }
-
-                    var ownerScreens = PluginPopupAdapter.screensOf(manifest.id());
-                    if (!ownerScreens.isEmpty()) {
-                      var screen = ownerScreens.get(0);
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              screen.getId(), screen.getTitle(), f, manifest));
-                    }
-
-                    var matchingScreen =
-                        registeredScreens.stream()
-                            .filter(s -> manifest.id().equals(s.getId()))
-                            .findFirst();
-
-                    if (matchingScreen.isPresent()) {
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              matchingScreen.get().getId(),
-                              matchingScreen.get().getTitle(),
-                              f,
-                              manifest));
-                    } else {
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              manifest.id(), manifest.name(), f, manifest));
-                    }
-                  } catch (Exception e) {
-                    Log.e(
-                        "FileManagerActivity", "showPluginPopup: error reading: " + f.getName(), e);
-                    return Optional.<PluginPopupAdapter.PluginItem>empty();
-                  }
-                })
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .toList();
-
-    if (pluginItems.isEmpty()) {
-      GhostToast.makeText(this, R.string.no_plugins, GhostToast.LENGTH_SHORT).show();
-      return;
-    }
-
-    var rv = new RecyclerView(this);
-    rv.setLayoutManager(new LinearLayoutManager(this));
-    var popupRef = new PopupWindow[1];
-    rv.setAdapter(
-        new PluginPopupAdapter(
-            (view, item, pos) -> {
-              if (popupRef[0] != null) popupRef[0].dismiss();
-              String ownerId = item.manifest() != null ? item.manifest().id() : item.id();
-
-              var ownerScreens = PluginPopupAdapter.screensOf(ownerId);
-              if (!ownerScreens.isEmpty()) {
-                startActivity(PluginScreenActivity.createIntent(this, ownerScreens.get(0).getId()));
-                return;
-              }
-
-              var allScreens =
-                  GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.PLUGIN_SCREEN);
-
-              var matchingScreen =
-                  allScreens.stream()
-                      .filter(
-                          s ->
-                              item.id().equals(s.getId())
-                                  || (item.manifest() != null
-                                      && item.manifest().id().equals(s.getId())))
-                      .findFirst();
-              if (matchingScreen.isPresent()) {
-                startActivity(
-                    PluginScreenActivity.createIntent(this, matchingScreen.get().getId()));
-                return;
-              }
-
-              GhostToast.makeText(
-                      this,
-                      getString(R.string.plugin_manager_installed_toast, item.name()),
-                      GhostToast.LENGTH_SHORT)
-                  .show();
-            }));
-
-    ((PluginPopupAdapter) rv.getAdapter()).submit(pluginItems);
-
-    popupRef[0] = ObjectUtil.showGlassPopup(this, anchor, rv);
-  }
-
   private void navigateToPath(String path) {
     if (path == null || path.isEmpty()) return;
     pendingAnimation = true;
     viewModel.navigateTo(path);
-    bind.gitActionButton.setVisibility(isGitRepository(path) ? View.VISIBLE : View.GONE);
+    gitHelper.updateGitActionVisibility(path);
   }
 
   @Override
@@ -2307,8 +1583,8 @@ public class FileManagerActivity extends BaseCompat
           if (currentPath != null) {
             viewModel.loadFiles(currentPath);
           }
-          if (isZipMode && zipAdapter != null && currentZipFilePath != null) {
-            zipAdapter.loadZip(currentZipFilePath, zipAdapter.getCurrentInternalPath());
+          if (zipModeHelper.isZipMode()) {
+            zipModeHelper.reloadCurrentEntry();
           }
         });
   }
@@ -2352,7 +1628,7 @@ public class FileManagerActivity extends BaseCompat
   }
 
   private void echoTreeChange(String mutated) {
-    if (isFinishing() || isZipMode) return;
+    if (isFinishing() || zipModeHelper.isZipMode()) return;
     String shown = viewModel.getCurrentPath().getValue();
     if (shown == null) return;
     if (affectsVisibleList(mutated, shown)) {
@@ -2368,13 +1644,6 @@ public class FileManagerActivity extends BaseCompat
     return parent != null && parent.getAbsolutePath().equals(shown);
   }
 
-  private String formatSize(long bytes) {
-    if (bytes >= 1024 * 1024)
-      return String.format(Locale.getDefault(), "%.2f MB", bytes / (1024.0 * 1024.0));
-    else if (bytes >= 1024) return String.format(Locale.getDefault(), "%.1f KB", bytes / 1024.0);
-    else return bytes + " B";
-  }
-
   private void showFtpConnectSheet() {
     FtpConnectSheet sheet = FtpConnectSheet.newInstance();
     sheet.setOnConnectedListener(this::openFtpBrowser);
@@ -2385,7 +1654,7 @@ public class FileManagerActivity extends BaseCompat
     StorageUtils.StorageEntry sdCard = StorageUtils.getSdCardVolume(this);
     if (sdCard != null) {
       viewModel.navigateTo(sdCard.path);
-      bind.gitActionButton.setVisibility(isGitRepository(sdCard.path) ? View.VISIBLE : View.GONE);
+      gitHelper.updateGitActionVisibility(sdCard.path);
       GhostToast.makeText(
               this,
               getString(
