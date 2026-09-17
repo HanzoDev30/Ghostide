@@ -41,7 +41,11 @@ public class TerminalFragment extends Fragment implements GhostTerminalViewClien
     viewModel = new ViewModelProvider(requireActivity()).get(OnboardingViewModel.class);
     styleColors();
     setupTerminalView();
-    viewModel.setInvalidator(() -> binding.terminalView.invalidate());
+    viewModel.setInvalidator(
+        () -> {
+          if (binding == null) return;
+          binding.terminalView.invalidate();
+        });
 
     binding.btnInstall.setOnClickListener(v -> viewModel.startInstall());
     binding.btnSkip.setOnClickListener(v -> viewModel.next());
@@ -190,6 +194,7 @@ public class TerminalFragment extends Fragment implements GhostTerminalViewClien
   @Override
   public void onDestroyView() {
     if (binding != null) binding.terminalView.setTerminalViewClient(null);
+    if (viewModel != null) viewModel.setInvalidator(null);
     super.onDestroyView();
     binding = null;
   }
