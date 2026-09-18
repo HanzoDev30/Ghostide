@@ -10,6 +10,12 @@
 </p>
 
 
+[![GitHub Release](https://img.shields.io/github/v/release/HanzoDev30/Ghostide?style=for-the-badge&logo=github&logoColor=white&color=FF6B6B)](https://github.com/HanzoDev30/Ghostide/releases)
+[![Downloads](https://img.shields.io/github/downloads/HanzoDev30/Ghostide/latest/total?style=for-the-badge&logo=github&logoColor=white&color=4ECDC4)](https://github.com/HanzoDev30/Ghostide/releases/latest)
+[![License](https://img.shields.io/github/license/HanzoDev30/Ghostide?style=for-the-badge&logo=opensourceinitiative&logoColor=white&color=A78BFA)](LICENSE)
+[![Telegram](https://img.shields.io/badge/Telegram-ghost__web__ide?style=for-the-badge&logo=telegram&logoColor=white&color=4A90E2)](https://t.me/ghost_web_ide)
+
+
 ## 📖 Overview
 
 Ghost IDE is an advanced mobile development environment built for Android developers, web developers, and scripting workflows. Unlike many mobile editors, Ghost IDE provides real tooling and compiler integrations directly inside the application.
