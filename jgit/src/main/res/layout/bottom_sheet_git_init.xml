@@ -3,20 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:paddingTop="8dp"
+    android:paddingBottom="16dp">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/tvInitInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         android:text="@string/git_init_info"
-        android:textSize="13sp"
+        android:textAppearance="?attr/textAppearanceBodySmall"
         android:lineSpacingExtra="3dp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilRepoUrl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="16dp"
         android:hint="@string/git_init_hint">
 
@@ -32,6 +44,8 @@
         android:id="@+id/tilCommitMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="8dp"
         android:hint="@string/git_init_commit_hint">
 
@@ -48,9 +62,35 @@
         android:id="@+id/tvInitStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="12dp"
         android:visibility="gone"
         android:textSize="14sp"
         android:lineSpacingExtra="3dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:orientation="horizontal"
+        android:gravity="end|center_vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel" />
+
+        <ir.hanzodev1375.components.views.ButtonProgress
+            android:id="@+id/bpStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -171,11 +171,10 @@ public class GitViewModel extends ViewModel {
 
   /**
    * یک مخزن گیت از نو با لینک گیت‌هاب می‌سازد. معادل دستورهای صفحه "Quick setup" گیت‌هاب:
-   * ساخت README.md (فقط اگر هیچ فایل .md دیگری در پوشه نباشد)، git init، git add README.md،
-   * git commit -m &lt;پیام کاربر&gt;, git branch -M main، git remote add origin و
-   * git push -u origin main. فقط README/فایل مارک‌داون موجود staged می‌شود و بقیه فایل‌های کاربر
-   * دست‌نخورده می‌مانند. اگر توکن وارد نشود، ساخت محلی و کامیت انجام می‌شود ولی push اسکیپ
-   * می‌شود تا کاربر بعداً از تب Remotes انجامش بدهد.
+   * ساخت README.md (فقط اگر هیچ فایل .md دیگری در پوشه نباشد)، git init، git add . (تمام
+   * فایل‌های پروژه با احترام به .gitignore)، git commit -m &lt;پیام کاربر&gt;, git branch -M main،
+   * git remote add origin و git push -u origin main. اگر توکن وارد نشود، ساخت محلی و کامیت
+   * انجام می‌شود ولی push اسکیپ می‌شود تا کاربر بعداً از تب Remotes انجامش بدهد.
    */
   public void gitInitFromRemote(
       String path,
@@ -221,9 +220,9 @@ public class GitViewModel extends ViewModel {
               gitManager.setUserConfig(userName.trim(), userEmail.trim());
             }
 
-            String readmeFile = chooseReadmeFile(path, remoteUrl);
-            _progressMessage.postValue("Staging " + readmeFile + "...");
-            OperationResult stage = gitManager.stageFile(readmeFile);
+            chooseReadmeFile(path, remoteUrl);
+            _progressMessage.postValue("Staging all files...");
+            OperationResult stage = gitManager.stageAllFiles();
             if (!stage.isSuccess()) {
               _progressMessage.postValue(null);
               _gitInitResult.postValue(new OperationResult(false, stage.getMessage()));

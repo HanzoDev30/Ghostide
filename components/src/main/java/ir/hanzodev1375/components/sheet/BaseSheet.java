@@ -76,25 +76,28 @@ public class BaseSheet extends BottomSheetDialog {
       bottomSheet.post(
           () -> {
             if (binding == null) return;
-            Activity activity = BlurBackdrop.findActivity(getContext());
-            if (activity == null) return;
-            bottomSheet.setBackgroundColor(Color.TRANSPARENT);
-            GlassCompat glass = binding.glassView;
-            glass.setBackdropSource(activity.findViewById(android.R.id.content));
-            glass.setEnableDynamicBackground(true);
-            behavior.addBottomSheetCallback(
-                new BottomSheetBehavior.BottomSheetCallback() {
-                  @Override
-                  public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                    glass.invalidate();
-                  }
+            try {
+              Activity activity = BlurBackdrop.findActivity(getContext());
+              if (activity == null) return;
+              bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+              GlassCompat glass = binding.glassView;
+              glass.setBackdropSource(activity.findViewById(android.R.id.content));
+              glass.setEnableDynamicBackground(true);
+              behavior.addBottomSheetCallback(
+                  new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                      glass.invalidate();
+                    }
 
-                  @Override
-                  public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                    glass.invalidate();
-                  }
-                });
-            setDismissWithAnimation(true);
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                      glass.invalidate();
+                    }
+                  });
+              setDismissWithAnimation(true);
+            } catch (Exception ignored) {
+            }
           });
     }
   }

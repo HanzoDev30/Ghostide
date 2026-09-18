@@ -8,7 +8,7 @@ import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.activity.FileManagerActivity;
 import ir.hanzodev1375.ghostide.adapters.FileManagerAdapter;
 import ir.hanzodev1375.ghostide.databinding.ActivityFilemanagerBinding;
-import ir.hanzodev1375.ghostide.jgit.dialogs.GitInitDialogFragment;
+import ir.hanzodev1375.ghostide.jgit.fragments.GitInitSheet;
 import ir.hanzodev1375.ghostide.jgit.fragments.GitBottomSheetFragment;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitManager;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.FileChange;
@@ -54,6 +54,11 @@ public class FileGitHelper {
   private final AtomicBoolean gitStatusRunning = new AtomicBoolean(false);
   private final AtomicBoolean gitStatusPending = new AtomicBoolean(false);
 
+  private static final long GIT_SCAN_CACHE_TTL_MS = 4000L;
+  private volatile long lastGitScanTime = 0L;
+  private volatile String lastGitScanRepo = null;
+  private volatile Set<String> lastGitScanPaths = new HashSet<>();
+
   public FileGitHelper(
       FileManagerActivity activity,
       ActivityFilemanagerBinding bind,
@@ -79,13 +84,13 @@ public class FileGitHelper {
             GhostToast.makeText(activity, "Git dir not found", GhostToast.LENGTH_LONG).show();
             return;
           }
-          GitInitDialogFragment dialog = GitInitDialogFragment.newInstance(dir);
-          dialog.setOnGitInitListener(
+          GitInitSheet sheet = GitInitSheet.newInstance(dir);
+          sheet.setOnGitInitListener(
               success -> {
                 updateGitActionVisibility(pathSupplier.get());
                 refreshGitStatus();
               });
-          dialog.show(activity.getSupportFragmentManager(), "git_init_dialog");
+          sheet.show(activity.getSupportFragmentManager(), "git_init_sheet");
         });
   }
 
@@ -135,6 +140,13 @@ public class FileGitHelper {
         Set<String> empty = gitChangedAbsPaths;
         bind.rvfiles.post(() -> setGitChangedPaths(empty));
       }
+      lastGitScanRepo = null;
+      return;
+    }
+    long now = System.currentTimeMillis();
+    if (repoRoot.equals(lastGitScanRepo) && now - lastGitScanTime < GIT_SCAN_CACHE_TTL_MS) {
+      Set<String> cached = new HashSet<>(lastGitScanPaths);
+      bind.rvfiles.post(() -> setGitChangedPaths(cached));
       return;
     }
     if (!gitStatusRunning.compareAndSet(false, true)) {
@@ -168,6 +180,9 @@ public class FileGitHelper {
         }
       }
     }
+    lastGitScanRepo = repoRoot;
+    lastGitScanTime = System.currentTimeMillis();
+    lastGitScanPaths = new HashSet<>(absPaths);
     activity.runOnUiThread(() -> setGitChangedPaths(absPaths));
   }
 

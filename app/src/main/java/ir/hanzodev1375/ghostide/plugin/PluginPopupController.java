@@ -2,22 +2,30 @@ package ir.hanzodev1375.ghostide.plugin;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.PopupWindow;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import ir.hanzodev1375.components.sheet.PluginSetupSheet;
+import ir.hanzodev1375.components.store.model.PluginSetupActionData;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.activity.PluginScreenActivity;
 import ir.hanzodev1375.ghostide.adapters.PluginPopupAdapter;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
 import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
+import ir.hanzodev1375.ghostide.plugin.api.PluginSetupAction;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplInstalledPlugins;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplManifest;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplManifestReader;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplPluginLoader;
+import ir.hanzodev1375.ghostide.plugin.gpl.LoadedGplPlugin;
+import ir.hanzodev1375.ghostide.terminal.activity.TerminalActivity;
 import ir.hanzodev1375.ghostide.utils.ObjectUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public final class PluginPopupController {
@@ -202,15 +210,56 @@ public final class PluginPopupController {
                 return;
               }
 
-              GhostToast.makeText(
-                      context,
-                      context.getString(R.string.plugin_manager_installed_toast, item.name()),
-                      GhostToast.LENGTH_SHORT)
-                  .show();
+              if (!showSetupSheet(item)) {
+                GhostToast.makeText(
+                        context,
+                        context.getString(R.string.plugin_manager_installed_toast, item.name()),
+                        GhostToast.LENGTH_SHORT)
+                    .show();
+              }
             }));
 
     ((PluginPopupAdapter) rv.getAdapter()).submit(pluginItems);
 
     popupRef[0] = ObjectUtil.showGlassPopup((Activity) context, anchor, rv);
+  }
+
+  private boolean showSetupSheet(PluginPopupAdapter.PluginItem item) {
+    if (item.gplFile() == null) {
+      return false;
+    }
+    try {
+      GplPluginLoader loader = GplPluginLoader.getInstance(context);
+      LoadedGplPlugin loaded = loader.load(item.gplFile());
+      List<PluginSetupAction> setupActions = loaded.getPlugin().getSetupActions();
+      if (setupActions == null || setupActions.isEmpty()) {
+        return false;
+      }
+      List<PluginSetupActionData> data = new ArrayList<>();
+      for (PluginSetupAction action : setupActions) {
+        data.add(
+            new PluginSetupActionData(
+                action.id(), action.label(), action.command(), action.description()));
+      }
+      String name = item.manifest() != null ? item.manifest().name() : item.name();
+      new PluginSetupSheet(
+              (Activity) context,
+              name,
+              null,
+              data,
+              command -> {
+                if (command == null || command.trim().isEmpty()) {
+                  return;
+                }
+                Intent intent = new Intent(context, TerminalActivity.class);
+                intent.putExtra(TerminalActivity.EXTRA_COMMAND, command);
+                context.startActivity(intent);
+              })
+          .show();
+      return true;
+    } catch (Exception e) {
+      Log.e(TAG, "showSetupSheet failed", e);
+      return false;
+    }
   }
 }

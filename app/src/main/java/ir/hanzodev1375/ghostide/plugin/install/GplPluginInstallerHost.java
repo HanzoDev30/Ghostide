@@ -141,13 +141,24 @@ public class GplPluginInstallerHost {
         file = repository.downloadGplSync(context, item);
       } catch (IOException e) {
         Log.e(TAG, "setup fallback download failed", e);
+        postFailure(
+            item,
+            e.getMessage() == null ? "setup download failed" : e.getMessage());
         return;
       }
+    }
+    if (file == null) {
+      postFailure(item, "setup file not found");
+      return;
     }
     emitSetupFromFile(item, file);
   }
 
   private File findInstalledFile(PluginItem item) {
+    if (item == null || item.name() == null || item.name().trim().isEmpty()) {
+      return null;
+    }
+    String target = item.name().trim();
     File dir = GplInstalledPlugins.installDir(context);
     File[] files = dir.listFiles((d, name) -> name.endsWith(GPL_EXTENSION));
     if (files != null) {
@@ -156,9 +167,9 @@ public class GplPluginInstallerHost {
           GplManifest manifest = GplManifestReader.read(file);
           String fileName = file.getName().substring(0, file.getName().length() - GPL_EXTENSION.length());
           if (manifest != null
-              && (manifest.name().equals(item.name())
-                  || manifest.id().equalsIgnoreCase(item.name())
-                  || fileName.equalsIgnoreCase(item.name()))) {
+              && (target.equalsIgnoreCase(manifest.name())
+                  || target.equalsIgnoreCase(manifest.id())
+                  || target.equalsIgnoreCase(fileName))) {
             return file;
           }
         } catch (RuntimeException e) {
@@ -179,6 +190,9 @@ public class GplPluginInstallerHost {
           GplManifest manifest = GplManifestReader.read(file);
           if (manifest != null) {
             ids.add(manifest.name());
+            if (manifest.id() != null && !manifest.id().isEmpty()) {
+              ids.add(manifest.id());
+            }
           }
         } catch (RuntimeException e) {
           Log.w(TAG, "skip unreadable manifest " + file, e);
