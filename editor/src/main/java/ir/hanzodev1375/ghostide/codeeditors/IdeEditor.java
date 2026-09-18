@@ -36,6 +36,7 @@ import ir.hanzodev1375.ghostide.codeeditors.preview.url.UrlPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.preview.xmlattr.XmlAttrPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.setting.Constants;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
+import ir.hanzodev1375.ghostide.codeeditors.snippets.UserSnippetProvider;
 import ir.hanzodev1375.ghostide.codeeditors.style.BitmapHandleStyle;
 import io.github.rosemoe.sora.widget.style.builtin.HandleStyleSideDrop;
 import ir.hanzodev1375.ghostide.codeeditors.stringres.StringResourceExtractorIde;
@@ -71,6 +72,8 @@ public class IdeEditor extends CodeEditor
   private GradleDependencyCheckerIde gradleDependencyCheckerIde;
   private TomlDependencyCheckerIde tomlDependencyCheckerIde;
   private String currentFilePath;
+  @Nullable private UserSnippetProvider userSnippetProvider;
+  private static volatile UserSnippetProvider defaultUserSnippetProvider;
   private volatile LspEditor lspEditor;
   @Nullable private GhostLspStatusListener lspStatusListener;
   private GhostTextCompletionManager ghostCompletionManager;
@@ -408,6 +411,21 @@ public class IdeEditor extends CodeEditor
 
   public String getCurrentFilePath() {
     return currentFilePath;
+  }
+
+  /** Provider پیش‌فرض سراسری که همه IdeEditorها (مگر override شوند) استفاده می‌کنند. */
+  public static void setDefaultUserSnippetProvider(@Nullable UserSnippetProvider provider) {
+    defaultUserSnippetProvider = provider;
+  }
+
+  /** Provider اسنیپت این ادیتور؛ جابه‌جایی به default سراسری. */
+  @Nullable
+  public UserSnippetProvider getUserSnippetProvider() {
+    return userSnippetProvider != null ? userSnippetProvider : defaultUserSnippetProvider;
+  }
+
+  public void setUserSnippetProvider(@Nullable UserSnippetProvider provider) {
+    this.userSnippetProvider = provider;
   }
 
   /**

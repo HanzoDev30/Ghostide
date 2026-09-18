@@ -2,14 +2,13 @@ package ir.hanzodev1375.ghostide.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Rect;
-import android.app.AlertDialog;
 import android.text.InputType;
 import android.widget.FrameLayout;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.LiquidGlassDialogBuilderJava;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplManifest;
-import ir.hanzodev1375.ghostide.utils.ObjectUtil;
+import ir.hanzodev1375.ghostide.utils.EditorFileStats;
+import ir.hanzodev1375.ghostide.utils.EditorGitStatus;
+import ir.hanzodev1375.ghostide.utils.UriFileImporter;
 import ir.hanzodev1375.ghostide.utils.EditorGlassMenu;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -18,11 +17,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.provider.OpenableColumns;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.PopupWindow;
 import ir.hanzodev1375.components.views.GhostToast;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.ViewCompat;
@@ -37,8 +33,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.blankj.utilcode.util.FileIOUtils;
-import io.github.rosemoe.sora.event.ContentChangeEvent;
 import io.github.rosemoe.sora.lsp.editor.LspEditorStatus;
 import ir.hanzodev1375.components.colors.ColorPickerBottomSheet;
 import ir.hanzodev1375.filetreelib.widget.FileTreeView;
@@ -51,29 +45,14 @@ import ir.hanzodev1375.ghostide.fragments.MarkDownPreview;
 import ir.hanzodev1375.ghostide.jgit.GitHubClient;
 import ir.hanzodev1375.ghostide.jgit.GitHubProfileSheet;
 import ir.hanzodev1375.ghostide.jgit.fragments.GitBottomSheetFragment;
-import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitManager;
-import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.FileChange;
 import ir.hanzodev1375.ghostide.runer.CodeRuner;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.adapters.EditorPagerAdapter;
 import ir.hanzodev1375.ghostide.adapters.ToolbarListAdapter;
-import ir.hanzodev1375.ghostide.adapters.PluginPopupAdapter;
 import ir.hanzodev1375.ghostide.adapters.BreadcrumbAdapter;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
 import io.github.rosemoe.sora.lang.completion.snippet.CodeSnippet;
@@ -95,26 +74,25 @@ import ir.hanzodev1375.ghostide.ide.ui.api.CodeRunnerHost;
 import ir.hanzodev1375.ghostide.ide.ui.api.FileEvent;
 import ir.hanzodev1375.ghostide.ide.ui.api.IdeEvents;
 import ir.hanzodev1375.ghostide.ide.ui.api.IdeHostServices;
-import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
 import ir.hanzodev1375.ghostide.plugin.PluginManager;
 import ir.hanzodev1375.ghostide.plugin.PluginPanelHost;
+import ir.hanzodev1375.ghostide.plugin.PluginPopupController;
 import ir.hanzodev1375.ghostide.plugin.api.Disposable;
 import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplInstalledPlugins;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplManifestReader;
-import ir.hanzodev1375.ghostide.plugin.gpl.GplPluginLoader;
 import ir.theme.ThemeManager;
 import ir.theme.ThemeUtils;
 import android.view.ViewTreeObserver;
 import ir.hanzodev1375.ghostide.splitlayout.EditorPaneFragment;
 import ir.hanzodev1375.ghostide.splitlayout.SplitLayoutPopup;
+import ir.hanzodev1375.ghostide.splitlayout.SplitPaneContainerLayout;
 import ir.hanzodev1375.ghostide.refactor.rename.FileRenameNotifier;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.DialogCompat;
 
-public class EditorActivity extends BaseCompat implements FileRenameNotifier.Listener {
+public class EditorActivity extends BaseCompat
+    implements FileRenameNotifier.Listener, EditorGitStatus.Host {
 
   private ActivityEditorBinding binding;
   private EditorPagerAdapter adapter;
@@ -131,19 +109,15 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
   private ToolbarListAdapter listAdapter;
   private boolean isShowSys = false;
   private List<ToolbarModel> toolbarModel = new ArrayList<>();
-  private final ExecutorService gitStatusExecutor = Executors.newSingleThreadExecutor();
-  private String gitStatusRepoPath;
-  private Set<String> gitChangedPaths = new HashSet<>();
+  private EditorGitStatus gitStatus;
   private ViewTreeObserver.OnGlobalLayoutListener keyboardLayoutListener;
-  private long lastGitRefreshTime = 0;
-  private static final long GIT_REFRESH_DEBOUNCE_MS = 1500;
   private SplitLayoutPopup splitLayoutPopup;
   private boolean isSplitViewActive = false;
   private PreferencesUtils settings;
   private int lastSplitRows = 1, lastSplitCols = 2;
   private EditorPaneFragment activePane = null;
+  private PluginPopupController pluginPopupController;
   private static final long LSP_STATUS_POLL_INTERVAL_MS = 1500;
-  private static final long STATS_MAX_SCAN_BYTES = 8L * 1024 * 1024;
   private final Handler lspStatusHandler = new Handler(Looper.getMainLooper());
   private BreadcrumbAdapter breadcrumbAdapter;
   private Disposable editorHostRegistration;
@@ -191,6 +165,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     ThemeManager manager = new ThemeManager(this);
     theme = new ThemeUtils(manager);
     EventBus.getDefault().register(this);
+    gitStatus = new EditorGitStatus(this);
     setupViewPager();
     setupTabLayout();
     breadcrumbAdapter = new BreadcrumbAdapter();
@@ -214,11 +189,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     codeRunnerHostRegistration =
         GlobalRegistry.services()
             .register(IdeHostServices.CODE_RUNNER_HOST, new CodeRunnerHostAdapter(this));
-    theme.applyActivity(this);
-    theme.applyFab(binding.fabineditor);
-    theme.applyView(binding.mainContent);
-    theme.applyImageBackground(binding.backgroundicon);
-    theme.applyGhostIdeEditorSearch(binding.editorSearch);
+    applyThemeInternal(false);
 
     handleIncomingIntent(getIntent());
 
@@ -228,6 +199,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
       openFile(path, name);
     }
     pluginPanelHost = new PluginPanelHost(this, this::getCurrentFilePath);
+    pluginPopupController = new PluginPopupController(this, pluginPanelHost);
     stepToolbar();
     theme.applyTabLayout(binding.tab, getCurrentFilePath());
     setupKeyboardListener();
@@ -264,101 +236,8 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     binding.symbolBarContainer.bindEditor(this::getEditor);
     theme.applyEditorStatusBar(binding.editorStatusBar);
 
-    ViewCompat.setOnApplyWindowInsetsListener(
-        binding.getRoot(),
-        (v, insets) -> {
-          int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-          int navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-          int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
-          if (navBarHeight == 0) {
-            navBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-          }
-
-          if (binding.mainContent != null) {
-            binding.mainContent.setPadding(0, statusBarHeight, 0, navBarHeight);
-          }
-
-          int gapFromKeyboardDp = 8;
-          int gapPx =
-              (int)
-                  TypedValue.applyDimension(
-                      TypedValue.COMPLEX_UNIT_DIP,
-                      gapFromKeyboardDp,
-                      getResources().getDisplayMetrics());
-
-          int editorStatusBarHeightPx =
-              (int)
-                  TypedValue.applyDimension(
-                      TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics());
-          boolean willShowEditorStatusBar = imeHeight <= 0 && !binding.editorSearch.isShowing;
-
-          CoordinatorLayout.LayoutParams fabParams =
-              (CoordinatorLayout.LayoutParams) binding.fabineditor.getLayoutParams();
-          int originalFabBottomMarginDp = 20;
-          int originalFabBottomMarginPx =
-              (int)
-                  TypedValue.applyDimension(
-                      TypedValue.COMPLEX_UNIT_DIP,
-                      originalFabBottomMarginDp,
-                      getResources().getDisplayMetrics());
-          int newFabMargin = navBarHeight + originalFabBottomMarginPx;
-          if (imeHeight > 0) newFabMargin += imeHeight;
-          int extraForStatusBar = willShowEditorStatusBar ? (editorStatusBarHeightPx + gapPx) : 0;
-          fabParams.bottomMargin = newFabMargin + 9 + extraForStatusBar;
-          binding.fabineditor.setLayoutParams(fabParams);
-
-          CoordinatorLayout.LayoutParams searchParams =
-              (CoordinatorLayout.LayoutParams) binding.editorSearch.getLayoutParams();
-          if (imeHeight > 0) {
-            searchParams.bottomMargin = imeHeight + gapPx;
-          } else {
-            int defaultBottomDp = 16;
-            int defaultPx =
-                (int)
-                    TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        defaultBottomDp,
-                        getResources().getDisplayMetrics());
-            searchParams.bottomMargin = defaultPx;
-          }
-          binding.editorSearch.setLayoutParams(searchParams);
-
-          CoordinatorLayout.LayoutParams symbolParams =
-              (CoordinatorLayout.LayoutParams) binding.symbolBarContainer.getLayoutParams();
-          if (imeHeight > 0) {
-            symbolParams.bottomMargin = imeHeight + gapPx;
-          } else {
-            int defaultBottomDp = 16;
-            int defaultPx =
-                (int)
-                    TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        defaultBottomDp,
-                        getResources().getDisplayMetrics());
-            symbolParams.bottomMargin = defaultPx;
-          }
-          binding.symbolBarContainer.setLayoutParams(symbolParams);
-
-          CoordinatorLayout.LayoutParams statusBarParams =
-              (CoordinatorLayout.LayoutParams) binding.editorStatusBar.getLayoutParams();
-          if (imeHeight > 0) {
-            statusBarParams.bottomMargin = navBarHeight + imeHeight + gapPx;
-          } else {
-            int statusBarDefaultDp = 16;
-            int statusBarDefaultPx =
-                (int)
-                    TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        statusBarDefaultDp,
-                        getResources().getDisplayMetrics());
-            statusBarParams.bottomMargin = navBarHeight + statusBarDefaultPx;
-          }
-          binding.editorStatusBar.setLayoutParams(statusBarParams);
-
-          return insets;
-        });
-    refreshGitStatus();
-    refreshGitStatus();
+    ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), this::applyWindowInsets);
+    gitStatus.refresh();
   }
 
   @Override
@@ -367,26 +246,81 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
       return;
     }
     try {
-      themeUtils.applyActivity(this);
-      themeUtils.applyView(binding.mainContent);
-      themeUtils.applyImageBackground(binding.backgroundicon);
-      themeUtils.applyFab(binding.fabineditor);
-      themeUtils.applyGhostIdeEditorSearch(binding.editorSearch);
-      themeUtils.applyTabLayout(binding.tab, getCurrentFilePath());
-      themeUtils.applyEditorStatusBar(binding.editorStatusBar);
-      IdeEditor editor = getEditor();
-      if (editor != null) {
-        themeUtils.applyEditor(editor);
-      }
+      applyThemeInternal(true);
     } catch (Throwable ignored) {
     }
+  }
+
+  private void applyThemeInternal(boolean applyEditor) {
+    theme.applyActivity(this);
+    theme.applyView(binding.mainContent);
+    theme.applyImageBackground(binding.backgroundicon);
+    theme.applyFab(binding.fabineditor);
+    theme.applyGhostIdeEditorSearch(binding.editorSearch);
+    theme.applyTabLayout(binding.tab, getCurrentFilePath());
+    theme.applyEditorStatusBar(binding.editorStatusBar);
+    if (applyEditor) {
+      IdeEditor editor = getEditor();
+      if (editor != null) {
+        theme.applyEditor(editor);
+      }
+    }
+  }
+
+  private WindowInsetsCompat applyWindowInsets(View v, WindowInsetsCompat insets) {
+    int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+    int navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+    int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+    if (navBarHeight == 0) {
+      navBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+    }
+
+    if (binding.mainContent != null) {
+      binding.mainContent.setPadding(0, statusBarHeight, 0, navBarHeight);
+    }
+
+    int gapPx = dp(8);
+    int editorStatusBarHeightPx = dp(36);
+    boolean willShowEditorStatusBar = imeHeight <= 0 && !binding.editorSearch.isShowing;
+
+    CoordinatorLayout.LayoutParams fabParams =
+        (CoordinatorLayout.LayoutParams) binding.fabineditor.getLayoutParams();
+    int newFabMargin = navBarHeight + dp(20) + 9;
+    if (imeHeight > 0) newFabMargin += imeHeight;
+    newFabMargin += willShowEditorStatusBar ? (editorStatusBarHeightPx + gapPx) : 0;
+    fabParams.bottomMargin = newFabMargin;
+    binding.fabineditor.setLayoutParams(fabParams);
+
+    CoordinatorLayout.LayoutParams searchParams =
+        (CoordinatorLayout.LayoutParams) binding.editorSearch.getLayoutParams();
+    searchParams.bottomMargin = imeHeight > 0 ? imeHeight + gapPx : dp(16);
+    binding.editorSearch.setLayoutParams(searchParams);
+
+    CoordinatorLayout.LayoutParams symbolParams =
+        (CoordinatorLayout.LayoutParams) binding.symbolBarContainer.getLayoutParams();
+    symbolParams.bottomMargin = imeHeight > 0 ? imeHeight + gapPx : dp(16);
+    binding.symbolBarContainer.setLayoutParams(symbolParams);
+
+    CoordinatorLayout.LayoutParams statusBarParams =
+        (CoordinatorLayout.LayoutParams) binding.editorStatusBar.getLayoutParams();
+    statusBarParams.bottomMargin =
+        imeHeight > 0 ? navBarHeight + imeHeight + gapPx : navBarHeight + dp(16);
+    binding.editorStatusBar.setLayoutParams(statusBarParams);
+
+    return insets;
+  }
+
+  private int dp(int value) {
+    return (int)
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
   }
 
   @Override
   protected void onResume() {
     super.onResume();
 
-    refreshGitStatus();
+    gitStatus.refresh();
     FileRenameNotifier.getInstance().addListener(this);
     lspStatusHandler.removeCallbacks(lspStatusPollRunnable);
     lspStatusHandler.post(lspStatusPollRunnable);
@@ -448,7 +382,9 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
           .removeOnGlobalLayoutListener(keyboardLayoutListener);
       keyboardLayoutListener = null;
     }
-    gitStatusExecutor.shutdownNow();
+    if (gitStatus != null) {
+      gitStatus.shutdown();
+    }
     if (editorHostRegistration != null) {
       editorHostRegistration.dispose();
       editorHostRegistration = null;
@@ -558,9 +494,8 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_EDIT.equals(action)) {
       Uri uri = intent.getData();
       if (uri != null) {
-        String path = getRealPathFromUri(uri);
-        File file = new File(path);
-        if (path != null && file.exists()) {
+        String path = UriFileImporter.getRealPathFromUri(this, uri);
+        if (path != null && new File(path).exists()) {
           openFile(path);
         } else {
           GhostToast.makeText(this, "خطا: فایل معتبر نیست", GhostToast.LENGTH_SHORT).show();
@@ -573,56 +508,12 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
       @SuppressWarnings("deprecation")
       Uri sharedUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
       if (sharedUri != null) {
-        String path = getRealPathFromUri(sharedUri);
+        String path = UriFileImporter.getRealPathFromUri(this, sharedUri);
         if (path != null) openFile(path);
       } else {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-        if (sharedText != null) saveAndOpenSharedText(sharedText);
+        if (sharedText != null) openFile(UriFileImporter.saveTextToCache(this, sharedText));
       }
-    }
-  }
-
-  private void saveAndOpenSharedText(String text) {
-    File dir = new File(getCacheDir(), "GhostIDE/temp");
-    if (!dir.exists()) dir.mkdirs();
-    String fileName = "shared_text_" + System.currentTimeMillis() + ".txt";
-    File file = new File(dir, fileName);
-    FileIOUtils.writeFileFromString(file.getAbsolutePath(), text);
-    openFile(file.getAbsolutePath());
-  }
-
-  private String getRealPathFromUri(Uri uri) {
-    if (uri == null) return null;
-    if ("file".equals(uri.getScheme())) {
-      return uri.getPath();
-    }
-    if ("content".equals(uri.getScheme())) {
-      return copyFileFromContentUri(uri);
-    }
-    return null;
-  }
-
-  private String copyFileFromContentUri(Uri uri) {
-    String fileName = "temp_file_" + System.currentTimeMillis();
-    try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-      if (cursor != null && cursor.moveToFirst()) {
-        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-        if (nameIndex != -1) fileName = cursor.getString(nameIndex);
-      }
-    } catch (Exception ignored) {
-    }
-    File tempDir = new File(getCacheDir(), "GhostIDE/temp");
-    if (!tempDir.exists()) tempDir.mkdirs();
-    File destFile = new File(tempDir, fileName);
-    try (InputStream is = getContentResolver().openInputStream(uri);
-        FileOutputStream os = new FileOutputStream(destFile)) {
-      byte[] buffer = new byte[8192];
-      int len;
-      while ((len = is.read(buffer)) != -1) os.write(buffer, 0, len);
-      return destFile.getAbsolutePath();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
     }
   }
 
@@ -723,7 +614,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
 
   void stepToolbar() {
     toolbarModel.clear();
-    toolbarModel.add(new ToolbarModel(R.drawable.ic_git, "git", isGit()));
+    toolbarModel.add(new ToolbarModel(R.drawable.ic_git, "git", gitStatus.isGit()));
     toolbarModel.add(new ToolbarModel(R.drawable.ic_split_column, "Item Spilt!"));
     toolbarModel.add(new ToolbarModel(R.drawable.round_account_tree, "file tree"));
     toolbarModel.add(new ToolbarModel(R.drawable.outline_search, "search"));
@@ -750,7 +641,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
                     if (getEditor().canRedo()) getEditor().redo();
                   }
                   case 6 -> setupMenuCalltoAction(view);
-                  case 7 -> showPluginPopup(view);
+                  case 7 -> pluginPopupController.show(view);
                 }
               },
               EditorActivity.this);
@@ -780,194 +671,6 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     }
   }
 
-  private void showPluginPopup(View anchor) {
-    var installedFiles = GplInstalledPlugins.listInstalled(this);
-    Log.d("EditorActivity", "showPluginPopup: installed files = " + installedFiles.size());
-
-    if (installedFiles.isEmpty()) {
-      Log.w("EditorActivity", "showPluginPopup: no .gpl files found on disk");
-      GhostToast.makeText(this, R.string.no_plugins, GhostToast.LENGTH_SHORT).show();
-      return;
-    }
-
-    var loader = GplPluginLoader.getInstance(this);
-    for (var f : installedFiles) {
-      try {
-        var manifest = GplManifestReader.read(f);
-        if (manifest == null) continue;
-        if (!loader.isLoaded(manifest.id())) {
-          loader.load(f);
-          Log.d("EditorActivity", "showPluginPopup: loaded .gpl plugin: " + manifest.id());
-        }
-      } catch (Exception e) {
-        Log.e("EditorActivity", "showPluginPopup: failed to load " + f.getName(), e);
-      }
-    }
-
-    var registeredPanels =
-        GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.EDITOR_PANEL);
-    var registeredScreens =
-        GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.PLUGIN_SCREEN);
-    Log.d(
-        "EditorActivity", "showPluginPopup: registered EditorPanels = " + registeredPanels.size());
-    Log.d(
-        "EditorActivity",
-        "showPluginPopup: registered PluginScreens = " + registeredScreens.size());
-
-    var pluginItems =
-        installedFiles.stream()
-            .map(
-                f -> {
-                  try {
-                    GplManifest manifest = GplManifestReader.read(f);
-                    if (manifest == null) {
-                      Log.w("EditorActivity", "  manifest null for: " + f.getName());
-                      return Optional.<PluginPopupAdapter.PluginItem>empty();
-                    }
-                    Log.d(
-                        "EditorActivity", "  file=" + f.getName() + " manifestId=" + manifest.id());
-
-                    var ownerPanels = PluginPopupAdapter.panelsOf(manifest.id());
-                    if (!ownerPanels.isEmpty()) {
-                      var panel = ownerPanels.get(0);
-                      Log.d(
-                          "EditorActivity", "    -> matched EditorPanel(owner): " + panel.getId());
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              panel.getId(), panel.getTitle(), f, manifest));
-                    }
-
-                    var ownerScreens = PluginPopupAdapter.screensOf(manifest.id());
-                    if (!ownerScreens.isEmpty()) {
-                      var screen = ownerScreens.get(0);
-                      Log.d(
-                          "EditorActivity",
-                          "    -> matched PluginScreen(owner): " + screen.getId());
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              screen.getId(), screen.getTitle(), f, manifest));
-                    }
-
-                    var matchingPanel =
-                        registeredPanels.stream()
-                            .filter(p -> manifest.id().equals(p.getId()))
-                            .findFirst();
-                    var matchingScreen =
-                        registeredScreens.stream()
-                            .filter(s -> manifest.id().equals(s.getId()))
-                            .findFirst();
-
-                    if (matchingPanel.isPresent()) {
-                      Log.d(
-                          "EditorActivity",
-                          "    -> matched EditorPanel: " + matchingPanel.get().getId());
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              matchingPanel.get().getId(),
-                              matchingPanel.get().getTitle(),
-                              f,
-                              manifest));
-                    } else if (matchingScreen.isPresent()) {
-                      Log.d(
-                          "EditorActivity",
-                          "    -> matched PluginScreen: " + matchingScreen.get().getId());
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              matchingScreen.get().getId(),
-                              matchingScreen.get().getTitle(),
-                              f,
-                              manifest));
-                    } else {
-                      Log.d(
-                          "EditorActivity",
-                          "    -> no extension for manifestId="
-                              + manifest.id()
-                              + ", showing by manifest name");
-                      return Optional.of(
-                          new PluginPopupAdapter.PluginItem(
-                              manifest.id(), manifest.name(), f, manifest));
-                    }
-                  } catch (Exception e) {
-                    Log.e("EditorActivity", "  error reading: " + f.getName(), e);
-                    return Optional.<PluginPopupAdapter.PluginItem>empty();
-                  }
-                })
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .toList();
-
-    Log.d("EditorActivity", "showPluginPopup: pluginItems size = " + pluginItems.size());
-
-    if (pluginItems.isEmpty()) {
-      GhostToast.makeText(this, R.string.no_plugins, GhostToast.LENGTH_SHORT).show();
-      return;
-    }
-
-    var rv = new RecyclerView(this);
-    rv.setLayoutManager(new LinearLayoutManager(this));
-    var popupRef = new PopupWindow[1];
-    rv.setAdapter(
-        new PluginPopupAdapter(
-            (view, item, pos) -> {
-              if (popupRef[0] != null) popupRef[0].dismiss();
-              String ownerId = item.manifest() != null ? item.manifest().id() : item.id();
-
-              var ownerPanels = PluginPopupAdapter.panelsOf(ownerId);
-              if (!ownerPanels.isEmpty()) {
-                pluginPanelHost.showPanel(ownerPanels.get(0));
-                return;
-              }
-
-              var ownerScreens = PluginPopupAdapter.screensOf(ownerId);
-              if (!ownerScreens.isEmpty()) {
-                startActivity(PluginScreenActivity.createIntent(this, ownerScreens.get(0).getId()));
-                return;
-              }
-
-              var allPanels =
-                  GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.EDITOR_PANEL);
-              var allScreens =
-                  GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.PLUGIN_SCREEN);
-
-              var matchingPanel =
-                  allPanels.stream()
-                      .filter(
-                          p ->
-                              item.id().equals(p.getId())
-                                  || (item.manifest() != null
-                                      && item.manifest().id().equals(p.getId())))
-                      .findFirst();
-              if (matchingPanel.isPresent()) {
-                pluginPanelHost.showPanel(matchingPanel.get());
-                return;
-              }
-
-              var matchingScreen =
-                  allScreens.stream()
-                      .filter(
-                          s ->
-                              item.id().equals(s.getId())
-                                  || (item.manifest() != null
-                                      && item.manifest().id().equals(s.getId())))
-                      .findFirst();
-              if (matchingScreen.isPresent()) {
-                startActivity(
-                    PluginScreenActivity.createIntent(this, matchingScreen.get().getId()));
-                return;
-              }
-
-              GhostToast.makeText(
-                      this,
-                      getString(R.string.plugin_manager_installed_toast, item.name()),
-                      GhostToast.LENGTH_SHORT)
-                  .show();
-            }));
-
-    ((PluginPopupAdapter) rv.getAdapter()).submit(pluginItems);
-
-    popupRef[0] = ObjectUtil.showGlassPopup(this, anchor, rv);
-  }
-
   public void stepSearch() {
     binding.editorSearch.bindEditor(this::getEditor);
     binding.editorSearch.setCallBack(
@@ -988,7 +691,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
   }
 
   private void showGitBottomSheet() {
-    String repoPath = findGitRepositoryPath();
+    String repoPath = gitStatus.findRepositoryPath();
     if (repoPath == null) {
       GhostToast.makeText(this, "هیچ مخزن گیتی در مسیر فایل جاری یافت نشد", GhostToast.LENGTH_LONG)
           .show();
@@ -998,101 +701,6 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     bottomSheet.show(getSupportFragmentManager(), "git_bottom_sheet");
   }
 
-  private String findGitRepositoryPath() {
-    String currentFilePath = getCurrentFilePath();
-    if (currentFilePath == null) return null;
-    File currentFile = new File(currentFilePath);
-    File dir = currentFile.isDirectory() ? currentFile : currentFile.getParentFile();
-    while (dir != null) {
-      File gitDir = new File(dir, ".git");
-      if (gitDir.exists() && gitDir.isDirectory()) {
-        return dir.getAbsolutePath();
-      }
-      dir = dir.getParentFile();
-    }
-    return null;
-  }
-
-  /**
-   * Refreshes the git status of the project that the currently opened tab belongs to and updates
-   * the colored "modified" indicator on every open tab accordingly. Call this after any action that
-   * may change the working tree state: opening/saving files, switching tabs, resuming the activity
-   * (e.g. returning from the Git bottom sheet after commit/push).
-   */
-  private void refreshGitStatus() {
-    long now = System.currentTimeMillis();
-    if (now - lastGitRefreshTime < GIT_REFRESH_DEBOUNCE_MS) return;
-    lastGitRefreshTime = now;
-    String repoPath = findGitRepositoryPath();
-    if (repoPath == null) {
-      gitStatusRepoPath = null;
-      gitChangedPaths.clear();
-      updateAllTabsGitStatus();
-      return;
-    }
-    gitStatusRepoPath = repoPath;
-    gitStatusExecutor.execute(
-        () -> {
-          GitManager manager = new GitManager(repoPath);
-          if (!manager.openRepository()) return;
-          List<FileChange> changes = manager.getChangedFiles();
-          runOnUiThread(
-              () -> {
-                updateGitChangedPaths(changes);
-                updateAllTabsGitStatus();
-              });
-        });
-  }
-
-  private void updateGitChangedPaths(List<FileChange> changes) {
-    gitChangedPaths.clear();
-    if (changes == null) return;
-    for (FileChange change : changes) {
-      if (change.getPath() != null) {
-        gitChangedPaths.add(change.getPath().replace(File.separatorChar, '/'));
-      }
-    }
-  }
-
-  private boolean isGit() {
-    for (int i = 0; i < tabsList.size(); i++) {
-      TabLayout.Tab layoutTab = binding.tab.getTabAt(i);
-      return isFileGitChanged(tabsList.get(i).getFilePath());
-    }
-    return false;
-  }
-
-  private void updateAllTabsGitStatus() {
-    for (int i = 0; i < tabsList.size(); i++) {
-      TabLayout.Tab layoutTab = binding.tab.getTabAt(i);
-      if (layoutTab != null && layoutTab.getCustomView() instanceof TabCustomView) {
-        boolean changed = isFileGitChanged(tabsList.get(i).getFilePath());
-        ((TabCustomView) layoutTab.getCustomView()).setGitChanged(changed);
-      }
-    }
-    if (binding.splitPaneRoot != null) {
-      binding.splitPaneRoot.notifyGitStatus(this::isFileGitChanged);
-    }
-  }
-
-  private boolean isFileGitChanged(String filePath) {
-    if (gitStatusRepoPath == null || filePath == null || gitChangedPaths.isEmpty()) return false;
-    try {
-      File repoDir = new File(gitStatusRepoPath);
-      File file = new File(filePath);
-      String relative =
-          repoDir.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '/');
-      return gitChangedPaths.contains(relative);
-    } catch (Exception e) {
-      return false;
-    }
-  }
-
-  /**
-   * توسط EditorFragment صدا زده میشه: هم موقع ContentChangeEvent (dirty=true) هم بعد از سیو موفق —
-   * چه دستی چه auto-save (dirty=false). مدل تب رو آپدیت می‌کنه و اگه همون تب الان روی TabLayout
-   * دیده میشه، ستاره رو هم فوری رفرش می‌کنه.
-   */
   public void setTabDirty(String filePath, boolean dirty) {
     if (filePath == null) return;
     for (int i = 0; i < tabsList.size(); i++) {
@@ -1269,8 +877,6 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     adapter = new EditorPagerAdapter(this, new ArrayList<>());
     binding.viewPager.setAdapter(adapter);
     binding.viewPager.setUserInputEnabled(false);
-    // محدودیت آفلاین صفحات را حذف می‌کنیم تا همه‌ی تب‌ها / ادیتورها همیشه live بمونن و هنگام
-    // جابه‌جایی بین تب‌ها محتوا درست و به‌موقع رندر بشه (باگِ نمایش/آپدیت تب)
     binding.viewPager.setOffscreenPageLimit(RecyclerView.NO_POSITION);
   }
 
@@ -1284,7 +890,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
               if (position < tabsList.size()) {
                 TabCustomView customView = new TabCustomView(this);
                 customView.bind(tabsList.get(position));
-                customView.setGitChanged(isFileGitChanged(tabsList.get(position).getFilePath()));
+                customView.setGitChanged(gitStatus.isFileGitChanged(tabsList.get(position).getFilePath()));
                 tab.setCustomView(customView);
               }
             });
@@ -1358,11 +964,6 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     prefs.edit().putString(KEY_POSITION, String.valueOf(position)).apply();
   }
 
-  /**
-   * جابه‌جایی بین تب‌ها رو روی صف اصلی ترتیب می‌ده تا ViewPager2 اول لیست جدید رو apply کنه و بعد
-   * صفحه‌ی دلخواه رو نشون بده؛ مانع از رندرِ خالی / آپدیتِ غلطِ تب موقع بازکردن یا بستن سریع تب
-   * می‌شه.
-   */
   private void switchToTab(int position) {
     if (adapter == null || adapter.getItemCount() == 0) return;
     int safe = Math.max(0, Math.min(position, adapter.getItemCount() - 1));
@@ -1407,46 +1008,17 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     if (dot != -1) ext = path.substring(dot + 1);
     PluginManager.getInstance().setCurrentEditorActivity(this, getEditor(), path, ext);
     IdeEvents.post(FileEvent.opened(path));
-    refreshGitStatus();
-  }
-
-  private String getLanguageFromPath(String path) {
-    if (path == null) return "";
-    int dot = path.lastIndexOf('.');
-    if (dot == -1 || dot == path.length() - 1) return "";
-    String ext = path.substring(dot + 1);
-    return ext.substring(0, 1).toUpperCase(Locale.ROOT) + ext.substring(1);
+    gitStatus.refresh();
   }
 
   private void updateLanguageStatus(int position) {
     if (tabsList == null || position < 0 || position >= tabsList.size()) return;
     String filePath = tabsList.get(position).getFilePath();
-    String lang = getLanguageFromPath(filePath);
+    String lang = EditorFileStats.getLanguageFromPath(filePath);
     binding.editorStatusBar.setLanguageText(lang.isEmpty() ? "Text" : lang);
-    binding.editorStatusBar.setLinesText(formatFileStats(filePath));
+    binding.editorStatusBar.setLinesText(EditorFileStats.formatFileStats(this, filePath));
     binding.editorStatusBar.setDirty(tabsList.get(position).getHasStar());
     refreshLspStatusIndicator();
-  }
-
-  /** تعداد خط و حجم فایل رو می‌خونه. برای فایل‌های خیلی بزرگ از شمردن خط صرف‌نظر می‌کنیم. */
-  private String formatFileStats(String filePath) {
-    File file = new File(filePath);
-    if (!file.isFile()) return "";
-    String size = formatFileSize(file.length());
-    if (file.length() > STATS_MAX_SCAN_BYTES) return size;
-    int lines = 0;
-    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-      while (reader.readLine() != null) lines++;
-    } catch (IOException e) {
-      return size;
-    }
-    return getString(R.string.editor_status_lines, lines, size);
-  }
-
-  private static String formatFileSize(long bytes) {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return String.format(Locale.ROOT, "%.1f KB", bytes / 1024.0);
-    return String.format(Locale.ROOT, "%.1f MB", bytes / (1024.0 * 1024.0));
   }
 
   /**
@@ -1589,6 +1161,21 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     return null;
   }
 
+  @Override
+  public List<TabModel> getTabs() {
+    return tabsList;
+  }
+
+  @Override
+  public TabLayout getTabLayout() {
+    return binding.tab;
+  }
+
+  @Override
+  public SplitPaneContainerLayout getSplitPaneRoot() {
+    return binding.splitPaneRoot;
+  }
+
   private void setupFAB() {
     binding.fabineditor.setOnClickListener(
         v -> {
@@ -1674,7 +1261,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
     GhostToast.makeText(
             this, savedCount + getString(R.string.editorac_savefile), GhostToast.LENGTH_SHORT)
         .show();
-    refreshGitStatus();
+    gitStatus.refresh();
   }
 
   public void saveCurrentTab() {
@@ -1689,7 +1276,7 @@ public class EditorActivity extends BaseCompat implements FileRenameNotifier.Lis
       ((EditorFragment) currentFragment).saveCurrentFile();
       GhostToast.makeText(this, getString(R.string.editorac_wassaved), GhostToast.LENGTH_SHORT)
           .show();
-      refreshGitStatus();
+      gitStatus.refresh();
     } else {
       GhostToast.makeText(this, getString(R.string.editorac_errorfargment), GhostToast.LENGTH_SHORT)
           .show();

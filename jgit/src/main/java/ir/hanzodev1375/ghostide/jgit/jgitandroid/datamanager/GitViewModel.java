@@ -17,6 +17,9 @@ import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.ConflictFile;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.TagInfo;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.ResetMode;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.BlameInfo;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -83,6 +86,9 @@ public class GitViewModel extends ViewModel {
 
   private final MutableLiveData<Boolean> _commitCompleted = new MutableLiveData<>();
   public final LiveData<Boolean> commitCompleted = _commitCompleted;
+
+  private final MutableLiveData<OperationResult> _gitInitResult = new MutableLiveData<>();
+  public final LiveData<OperationResult> gitInitResult = _gitInitResult;
 
   private GitManager replaceManager(GitManager next) {
     if (gitManager != null) gitManager.close();
@@ -161,6 +167,153 @@ public class GitViewModel extends ViewModel {
           }
           _progressMessage.postValue(null);
         });
+  }
+
+  /**
+   * یک مخزن گیت از نو با لینک گیت‌هاب می‌سازد. معادل دستورهای صفحه "Quick setup" گیت‌هاب:
+   * ساخت README.md (فقط اگر هیچ فایل .md دیگری در پوشه نباشد)، git init، git add README.md،
+   * git commit -m &lt;پیام کاربر&gt;, git branch -M main، git remote add origin و
+   * git push -u origin main. فقط README/فایل مارک‌داون موجود staged می‌شود و بقیه فایل‌های کاربر
+   * دست‌نخورده می‌مانند. اگر توکن وارد نشود، ساخت محلی و کامیت انجام می‌شود ولی push اسکیپ
+   * می‌شود تا کاربر بعداً از تب Remotes انجامش بدهد.
+   */
+  public void gitInitFromRemote(
+      String path,
+      String commitMessage,
+      String remoteUrl,
+      String token,
+      String userName,
+      String userEmail) {
+    if (path == null || path.trim().isEmpty() || remoteUrl == null || remoteUrl.trim().isEmpty()) {
+      _gitInitResult.postValue(new OperationResult(false, "Path and repository URL are required"));
+      return;
+    }
+    if (commitMessage == null || commitMessage.trim().isEmpty()) {
+      _gitInitResult.postValue(new OperationResult(false, "Commit message is required"));
+      return;
+    }
+    final String message = commitMessage.trim();
+    _progressMessage.postValue("Initializing repository...");
+    executor.execute(
+        () -> {
+          OperationResult result;
+          try {
+            replaceManager(new GitManager(path));
+            if (gitManager.isRepositoryInitialized()) {
+              _progressMessage.postValue(null);
+              _gitInitResult.postValue(
+                  new OperationResult(false, "This folder is already a git repository"));
+              return;
+            }
+
+            _progressMessage.postValue("Running git init...");
+            if (!gitManager.initRepository("main")
+                || !gitManager.openRepository()) {
+              _progressMessage.postValue(null);
+              _gitInitResult.postValue(new OperationResult(false, "Failed to run git init"));
+              return;
+            }
+
+            if (userName != null
+                && userEmail != null
+                && !userName.trim().isEmpty()
+                && !userEmail.trim().isEmpty()) {
+              gitManager.setUserConfig(userName.trim(), userEmail.trim());
+            }
+
+            String readmeFile = chooseReadmeFile(path, remoteUrl);
+            _progressMessage.postValue("Staging " + readmeFile + "...");
+            OperationResult stage = gitManager.stageFile(readmeFile);
+            if (!stage.isSuccess()) {
+              _progressMessage.postValue(null);
+              _gitInitResult.postValue(new OperationResult(false, stage.getMessage()));
+              return;
+            }
+
+            _progressMessage.postValue("Creating commit...");
+            OperationResult commit = gitManager.commit(message, userName, userEmail);
+            if (!commit.isSuccess()) {
+              _progressMessage.postValue(null);
+              _gitInitResult.postValue(new OperationResult(false, commit.getMessage()));
+              return;
+            }
+
+            gitManager.renameCurrentBranchTo("main");
+
+            if (!gitManager.hasRemote()) {
+              gitManager.addRemote("origin", remoteUrl.trim());
+            }
+
+            boolean pushed = false;
+            if (token != null && !token.trim().isEmpty()) {
+              _progressMessage.postValue("Pushing to GitHub...");
+              PushResult push = gitManager.push("origin", "main", "oauth2", token.trim());
+              pushed = push.isSuccess();
+              if (pushed) {
+                gitManager.setUpstream("origin", "main");
+              }
+              result =
+                  new OperationResult(
+                      pushed,
+                      pushed
+                          ? "Repository created, committed and pushed successfully"
+                          : "Repository created and committed locally, but push failed:\n"
+                              + push.getMessage());
+            } else {
+              result =
+                  new OperationResult(
+                      true,
+                      "Repository created and committed locally. Log in to GitHub and use the Remotes tab to push.");
+            }
+
+            _repositoryStatus.postValue(RepositoryStatus.OPENED);
+            _currentRepoPath.postValue(path);
+            refreshAll();
+            _progressMessage.postValue(null);
+            _gitInitResult.postValue(result);
+          } catch (Exception e) {
+            e.printStackTrace();
+            _progressMessage.postValue(null);
+            _gitInitResult.postValue(
+                new OperationResult(
+                    false,
+                    "Git init failed: "
+                        + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName())));
+          }
+        });
+  }
+
+  /**
+   * اگر README.md یا هر فایل .md دیگری در مسیر موجود باشد آن را دست‌نخورده برمی‌گرداند؛ در غیر این
+   * صورت یک README.md جدید (فقط نام مخزن) می‌سازد. هرگز فایل‌های موجود کاربر را تغییر نمی‌دهد.
+   */
+  private static String chooseReadmeFile(String path, String remoteUrl) {
+    File readme = new File(path, "README.md");
+    if (readme.exists() && readme.isFile()) return "README.md";
+
+    File[] files = new File(path).listFiles();
+    if (files != null) {
+      for (File f : files) {
+        if (f.isFile() && f.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".md")) {
+          return f.getName();
+        }
+      }
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(readme)) {
+      fos.write(("# " + repoNameFromUrl(remoteUrl) + "\n").getBytes(StandardCharsets.UTF_8));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return "README.md";
+  }
+
+  private static String repoNameFromUrl(String url) {
+    String u = url.trim().replaceAll("/+$", "");
+    if (u.endsWith(".git")) u = u.substring(0, u.length() - 4);
+    int slash = Math.max(u.lastIndexOf('/'), u.lastIndexOf('\\'));
+    String name = slash >= 0 ? u.substring(slash + 1) : u;
+    return name.isEmpty() ? "My Repo" : name;
   }
 
   public void cloneRepository(

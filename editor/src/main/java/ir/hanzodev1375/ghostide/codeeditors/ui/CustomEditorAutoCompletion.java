@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 import io.github.rosemoe.sora.lang.completion.Comparators;
 import io.github.rosemoe.sora.lsp.editor.completion.LspCompletionItem;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
+import ir.hanzodev1375.ghostide.codeeditors.snippets.UserSnippetCompletion;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -143,6 +144,7 @@ public class CustomEditorAutoCompletion extends EditorAutoCompletion {
     public void run() {
       try {
         targetLanguage.requireAutoComplete(contentRef, requestPosition, localPublisher, extraData);
+        UserSnippetCompletion.publish(editor, contentRef, requestPosition, localPublisher);
         if (localPublisher.hasData()) {
           if (mCompletionThread == Thread.currentThread()) {
             localPublisher.updateList(true);

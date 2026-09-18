@@ -56,16 +56,12 @@ public class GitManager {
         projectDir.mkdirs();
       }
 
-      git = Git.init().setDirectory(projectDir).call();
-      repository = git.getRepository();
-
-      if (!initialBranchName.equals("master")) {
-        try {
-          git.branchRename().setOldName("master").setNewName(initialBranchName).call();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+      org.eclipse.jgit.api.InitCommand init = Git.init().setDirectory(projectDir);
+      if (initialBranchName != null && !initialBranchName.trim().isEmpty()) {
+        init.setInitialBranch(initialBranchName.trim());
       }
+      git = init.call();
+      repository = git.getRepository();
 
       loadGitIgnore();
       loadGitAttributes();
@@ -434,6 +430,40 @@ public class GitManager {
   public boolean deleteBranch(String branchName) {
     try {
       git.branchDelete().setBranchNames(branchName).call();
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  /**
+   * معادل git branch -M: برنچ فعلی را به نام جدید تغییر می‌دهد. اگر شاخه هنوز کامیت نداشته باشد
+   * (HEAD روی آن اشاره دارد ولی رف برنچ ساخته نشده) فقط سیم‌رف HEAD به‌روز می‌شود.
+   */
+  public boolean renameCurrentBranchTo(String newName) {
+    try {
+      if (git == null || newName == null || newName.trim().isEmpty()) return false;
+      String current = getCurrentBranch();
+      if (newName.trim().equals(current)) return true;
+      git.branchRename().setOldName(current).setNewName(newName.trim()).call();
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  /**
+   * معادل git push -u: شعبه مشخص‌شده را به‌عنوان upstream روی ریموت ثبت می‌کند.
+   */
+  public boolean setUpstream(String remoteName, String branchName) {
+    try {
+      if (repository == null) return false;
+      org.eclipse.jgit.lib.StoredConfig config = repository.getConfig();
+      config.setString("branch", branchName, "remote", remoteName);
+      config.setString("branch", branchName, "merge", "refs/heads/" + branchName);
+      config.save();
       return true;
     } catch (Exception e) {
       e.printStackTrace();

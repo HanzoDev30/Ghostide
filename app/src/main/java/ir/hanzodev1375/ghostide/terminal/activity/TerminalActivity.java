@@ -237,8 +237,16 @@ public class TerminalActivity extends BaseCompat implements TerminalViewModel.Se
   @Override
   public void onServiceConnected() {
     animateTerminalReveal();
-    if (viewModel.getSessionList().isEmpty()) {
-      addNewDebianSession();
+    boolean runRequested = hasCommandExtra();
+    if (viewModel.getSessionList().isEmpty() || runRequested) {
+      // اگه سشنی موجود نیست، یا این اکتیویتی برای اجرای کد (EXTRA_COMMAND) اومده، همیشه یه
+      // تبِ تازه باز کن — نه این که تبِ قبلی رو دوباره لود کنی. دستورِ کد رو هم
+      // consumeCommandExtra() (بعد از onSessionAdded) روی همین تبِ تازه می‌نویسه.
+      if (DebianBootstrap.isInstalled(this)) {
+        addNewDebianSession();
+      } else {
+        addNewShellSession();
+      }
     } else {
       int idx =
           viewModel.getCurrentTabIndex().getValue() != null
@@ -309,6 +317,11 @@ public class TerminalActivity extends BaseCompat implements TerminalViewModel.Se
     getIntent().removeExtra(EXTRA_COMMAND);
     TerminalSession session = viewModel.getCurrentSession();
     if (session != null) viewModel.writeCommandWhenReady(session, command);
+  }
+
+  private boolean hasCommandExtra() {
+    String command = getIntent().getStringExtra(EXTRA_COMMAND);
+    return command != null && !command.isEmpty();
   }
 
   // ─── InputDock ───────────────────────────────────────────────────────
@@ -513,6 +526,11 @@ public class TerminalActivity extends BaseCompat implements TerminalViewModel.Se
 
   private void addNewDebianSession() {
     viewModel.addDebianSession();
+  }
+
+  private void addNewShellSession() {
+    String workingDir = getIntent().getStringExtra(EXTRA_WORKING_DIR);
+    viewModel.addSession(workingDir);
   }
 
   // ─── Theme ───────────────────────────────────────────────────────────

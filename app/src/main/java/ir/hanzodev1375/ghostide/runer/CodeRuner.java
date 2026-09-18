@@ -3,6 +3,8 @@ package ir.hanzodev1375.ghostide.runer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.AndroidClasspathResolver;
@@ -66,6 +68,16 @@ public class CodeRuner {
         if (fm == null) {
             runInActivity(command);
             return;
+        }
+        // اگه شیتِ قبلی هنوز منیجر وصل باشه (بسته/dismiss نشده)، اولش حذفش کن تا همیشه
+        // یه شیتِ تازه با تب جدید باز بشه و هربار اجرای کد، تبِ قبلی دوباره لود نشه.
+        Fragment previous = fm.findFragmentByTag(TerminalBottomSheetFragment.TAG);
+        if (previous != null) {
+            if (previous instanceof DialogFragment) {
+                ((DialogFragment) previous).dismissAllowingStateLoss();
+            } else {
+                fm.beginTransaction().remove(previous).commitAllowingStateLoss();
+            }
         }
         TerminalBottomSheetFragment.newInstance(command, null).show(fm, "terminal_sheet");
     }

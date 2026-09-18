@@ -1,19 +1,24 @@
 package ir.hanzodev1375.ghostide.adapters;
 
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.listitem.ListItemViewHolder;
 import ir.hanzodev1375.ghostide.R;
+import ir.hanzodev1375.ghostide.materialfileicon.core.langcolor.LanguageColors;
 import ir.hanzodev1375.ghostide.snippets.SnippetEntry;
 import ir.theme.M3Theme;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public final class SnippetAdapter extends RecyclerView.Adapter<SnippetAdapter.Holder> {
 
@@ -50,13 +55,16 @@ public final class SnippetAdapter extends RecyclerView.Adapter<SnippetAdapter.Ho
     SnippetEntry entry = items.get(position);
     String prefix = entry.prefix == null || entry.prefix.isEmpty() ? entry.key : entry.prefix;
     holder.prefix.setText(prefix.length() > 2 ? prefix.substring(0, 2).toUpperCase() : prefix.toUpperCase());
-    holder.prefix.setTextColor(M3Theme.primary());
+    int color = languageColor(entry.scope);
+    holder.bind(position,getItemCount());
     GradientDrawable gd = new GradientDrawable();
-    gd.setColor(M3Theme.surface());
-    gd.setStroke(1, M3Theme.outline());
-    gd.setCornerRadius(8);
+    gd.setColor(ColorUtils.setAlphaComponent(color, 128));
+    gd.setCornerRadius(
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 15, holder.prefix.getResources().getDisplayMetrics()));
     holder.prefix.setPadding(5, 5, 5, 5);
     holder.prefix.setBackground(gd);
+    holder.prefix.setTextColor(color);
     String desc = entry.description;
     if (entry.scope != null && !entry.scope.isEmpty()) {
       desc = (desc == null || desc.isEmpty() ? "" : desc + " · ") + entry.scope;
@@ -91,6 +99,39 @@ public final class SnippetAdapter extends RecyclerView.Adapter<SnippetAdapter.Ho
   @Override
   public int getItemCount() {
     return items.size();
+  }
+
+  private static int languageColor(String scope) {
+    if (scope != null) {
+      String token = scope.trim();
+      int comma = token.indexOf(',');
+      if (comma >= 0) token = token.substring(0, comma).trim();
+      if (!token.isEmpty()) {
+        String lower = token.toLowerCase();
+        String hex = LanguageColors.getColorForExtension(lower);
+        if (hex == null) {
+          for (Map.Entry<String, String> e : LanguageColors.GITHUB_LANGUAGE_COLORS.entrySet()) {
+            if (e.getKey().equalsIgnoreCase(lower)) {
+              hex = e.getValue();
+              break;
+            }
+          }
+        }
+        if (hex == null) {
+          int dot = lower.lastIndexOf('.');
+          if (dot >= 0 && dot < token.length() - 1) {
+            hex = LanguageColors.getColorForExtension(lower.substring(dot + 1));
+          }
+        }
+        if (hex != null) {
+          try {
+            return Color.parseColor(hex);
+          } catch (IllegalArgumentException ignored) {
+          }
+        }
+      }
+    }
+    return M3Theme.primary();
   }
 
   static final class Holder extends ListItemViewHolder {

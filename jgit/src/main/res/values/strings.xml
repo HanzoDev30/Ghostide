@@ -126,4 +126,14 @@
     <string name="git_empty_stash_desc">Stash your changes to keep them safe for later.</string>
     <string name="git_empty_tags_title">No tags</string>
     <string name="git_empty_tags_desc">Create a tag to mark important points in history.</string>
+
+    <!-- Git init from GitHub URL -->
+    <string name="git_init_title">ساخت مخزن گیت از لینک</string>
+    <string name="git_init_hint">آدرس مخزن (https://github.com/user/repo.git)</string>
+    <string name="git_init_commit_hint">پیام کامیت</string>
+    <string name="git_init_commit_required">لطفاً پیام کامیت را وارد کنید</string>
+    <string name="git_init_info">طبق دستورهای Quick setup گیت‌هاب خودکار انجام می‌شود: اگر فایل .md در پوشه نباشد README.md ساخته می‌شود، git init، git add README.md، کامیت با پیام خودتان، تغییر برنچ به main، افزودن origin و push. فایل‌های موجود شما تغییر نمی‌کنند.</string>
+    <string name="git_init_start">شروع</string>
+    <string name="git_init_working">در حال ساخت مخزن و آپلود… لطفاً صبر کنید</string>
+    <string name="git_init_url_required">لطفاً آدرس مخزن را وارد کنید (https://github.com/user/repo.git)</string>
 </resources>

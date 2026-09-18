@@ -4,9 +4,11 @@ import android.view.View;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.LifecycleOwner;
 import ir.hanzodev1375.components.views.GhostToast;
+import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.activity.FileManagerActivity;
 import ir.hanzodev1375.ghostide.adapters.FileManagerAdapter;
 import ir.hanzodev1375.ghostide.databinding.ActivityFilemanagerBinding;
+import ir.hanzodev1375.ghostide.jgit.dialogs.GitInitDialogFragment;
 import ir.hanzodev1375.ghostide.jgit.fragments.GitBottomSheetFragment;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitManager;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.FileChange;
@@ -67,19 +69,28 @@ public class FileGitHelper {
     bind.gitActionButton.setOnClickListener(
         v -> {
           String repoPath = findGitRepositoryPathForCurrent();
-          if (repoPath == null) {
+          if (repoPath != null) {
+            GitBottomSheetFragment.newInstance(repoPath)
+                .show(activity.getSupportFragmentManager(), "git_bottom_sheet");
+            return;
+          }
+          String dir = pathSupplier.get();
+          if (dir == null || !new File(dir).isDirectory()) {
             GhostToast.makeText(activity, "Git dir not found", GhostToast.LENGTH_LONG).show();
             return;
           }
-          GitBottomSheetFragment.newInstance(repoPath)
-              .show(activity.getSupportFragmentManager(), "git_bottom_sheet");
+          GitInitDialogFragment dialog = GitInitDialogFragment.newInstance(dir);
+          dialog.setOnGitInitListener(
+              success -> {
+                updateGitActionVisibility(pathSupplier.get());
+                refreshGitStatus();
+              });
+          dialog.show(activity.getSupportFragmentManager(), "git_init_dialog");
         });
   }
 
   public void observe(LifecycleOwner owner, LiveData<String> currentPath) {
-    currentPath.observe(
-        owner,
-        path -> bind.gitActionButton.setVisibility(isGitRepository(path) ? View.VISIBLE : View.GONE));
+    currentPath.observe(owner, this::updateGitActionVisibility);
   }
 
   public String findGitRepositoryPathForCurrent() {
@@ -90,8 +101,20 @@ public class FileGitHelper {
     bind.gitActionButton.setVisibility(visible ? View.VISIBLE : View.GONE);
   }
 
+  /**
+   * ظاهر دکمه git را بر اساس وضعیت مخزن عوض می‌کند. اگر درون یک مخزن گیت باشیم آیکون معمولی git و
+   * کلیک = شیت گیت؛ اگر مخزنی نباشد آیکون ic_git_add و کلیک = دیالوگ ساخت مخزن از لینک گیت‌هاب.
+   */
   public void updateGitActionVisibility(String path) {
-    bind.gitActionButton.setVisibility(isGitRepository(path) ? View.VISIBLE : View.GONE);
+    if (path == null || !new File(path).isDirectory()) {
+      bind.gitActionButton.setVisibility(View.GONE);
+      return;
+    }
+    boolean isRepo = findGitRepositoryPath(path) != null;
+    bind.gitActionButton.setVisibility(View.VISIBLE);
+    bind.gitActionButton.setImageResource(isRepo ? R.drawable.ic_git : R.drawable.ic_git_add);
+    bind.gitActionButton.setContentDescription(
+        isRepo ? "Git repository" : "Create git repository from URL");
   }
 
   public boolean isRepo(String path) {

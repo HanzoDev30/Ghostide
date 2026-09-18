@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import com.termux.terminal.TerminalSession;
@@ -44,6 +45,7 @@ public class TerminalSessionService extends Service {
 
   private static final String CHANNEL_ID = "terminal_sessions";
   private static final int NOTIFICATION_ID = 4821;
+  private static final String LOG_TAG = "GhostTerminalService";
 
   /** رویدادهایی که فقط وقتی یه Activity واقعاً bind کرده (visible/interactive) معنی دارن. */
   public interface SessionListener {
@@ -116,12 +118,19 @@ public class TerminalSessionService extends Service {
   }
 
   /**
-   * یه سشنِ Debian (proot) میسازه؛ باید قبلش با {@link DebianBootstrap#isInstalled} چک کرده
-   * باشی که rootfs واقعاً استخراج شده، وگرنه IllegalStateException میگیری.
+   * یه سشنِ Debian (proot) میسازه. اگه rootfs نصب/موجود نباشه، به‌جای IllegalStateException
+   * (که کل اپ رو کرش میکرد) یه شل ساده باز میکنه و warn میزنه.
    */
   public TerminalTab createDebianSession() {
     GhostTerminalSessionClient client = new GhostTerminalSessionClient(this, internalCallback);
     File rootfs = DebianBootstrap.getRootfsDir(this);
+    if (!DebianBootstrap.isInstalled(this)) {
+      Log.w(
+          LOG_TAG,
+          "Debian rootfs not installed (" + rootfs.getAbsolutePath() + "); falling back to shell");
+      TerminalSession session = TerminalSessionFactory.createSession(this, null, client);
+      return registerNewSession(session);
+    }
     TerminalSession session =
         ProotSessionFactory.createProotSession(this, rootfs, "/bin/bash", client);
     return registerNewSession(session);

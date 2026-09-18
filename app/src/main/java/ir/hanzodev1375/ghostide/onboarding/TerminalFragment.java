@@ -50,24 +50,14 @@ public class TerminalFragment extends Fragment implements GhostTerminalViewClien
     binding.btnInstall.setOnClickListener(v -> viewModel.startInstall());
     binding.btnSkip.setOnClickListener(v -> viewModel.next());
 
-    viewModel.isTerminalInstalling().observe(getViewLifecycleOwner(), this::renderInstalling);
-    viewModel.isTerminalExtracting().observe(getViewLifecycleOwner(), el -> updateProgress());
-    viewModel
-        .getTerminalProgress()
-        .observe(getViewLifecycleOwner(), p -> updateProgress());
-    viewModel
-        .getTerminalStatus()
-        .observe(getViewLifecycleOwner(), status -> binding.tvInstallStatus.setText(status));
+    viewModel.isTerminalInstalling().observe(getViewLifecycleOwner(), el -> renderState());
+    viewModel.isTerminalExtracting().observe(getViewLifecycleOwner(), el -> renderState());
+    viewModel.getTerminalProgress().observe(getViewLifecycleOwner(), el -> renderState());
+    viewModel.getTerminalStatus().observe(getViewLifecycleOwner(), el -> renderState());
     viewModel
         .getActiveSession()
         .observe(getViewLifecycleOwner(), this::attachSessionToView);
-    viewModel
-        .isTerminalDone()
-        .observe(
-            getViewLifecycleOwner(),
-            done -> {
-              if (Boolean.TRUE.equals(done)) renderDone();
-            });
+    viewModel.isTerminalDone().observe(getViewLifecycleOwner(), el -> renderState());
 
     if (viewModel.isDebianInstalled()) {
       viewModel.setTerminalDone(true);
@@ -136,19 +126,33 @@ public class TerminalFragment extends Fragment implements GhostTerminalViewClien
     }
   }
 
-  private void renderInstalling(boolean installing) {
+  private boolean doneAnimationPlayed = false;
+
+  /** همه‌ی تغییراتِ state رو یه‌جا اعمال میکنه؛ «done» همیشه برنده‌ست تا progress هیچ‌وقت سرجاش نَمونه. */
+  private void renderState() {
     if (binding == null) return;
-    if (installing) {
-      binding.btnInstall.setEnabled(false);
-      binding.btnSkip.setEnabled(false);
-      binding.btnInstall.setText(R.string.onboarding_terminal_installing);
-      binding.btnSkip.setText(R.string.onboarding_terminal_skip);
-      binding.progressInstall.setVisibility(View.VISIBLE);
-      binding.tvInstallStatus.setVisibility(View.VISIBLE);
-      updateProgress();
-    } else if (!Boolean.TRUE.equals(viewModel.isTerminalDone().getValue())) {
-      renderReady();
+    binding.tvInstallStatus.setText(viewModel.getTerminalStatus().getValue());
+    if (Boolean.TRUE.equals(viewModel.isTerminalDone().getValue())) {
+      renderDone();
+      return;
     }
+    doneAnimationPlayed = false;
+    if (Boolean.TRUE.equals(viewModel.isTerminalInstalling().getValue())) {
+      renderInstalling();
+      return;
+    }
+    renderReady();
+  }
+
+  private void renderInstalling() {
+    if (binding == null) return;
+    binding.btnInstall.setEnabled(false);
+    binding.btnInstall.setText(R.string.onboarding_terminal_installing);
+    binding.btnSkip.setEnabled(false);
+    binding.btnSkip.setText(R.string.onboarding_terminal_skip);
+    binding.progressInstall.setVisibility(View.VISIBLE);
+    binding.tvInstallStatus.setVisibility(View.VISIBLE);
+    updateProgress();
   }
 
   private void renderReady() {
@@ -169,8 +173,11 @@ public class TerminalFragment extends Fragment implements GhostTerminalViewClien
     binding.btnSkip.setText(R.string.onboarding_terminal_continue);
     binding.progressInstall.setVisibility(View.GONE);
     binding.tvInstallStatus.setVisibility(View.GONE);
-    OnboardingAnim.bounceOnce(binding.btnInstall, 0);
-    animatePulseDots();
+    if (!doneAnimationPlayed) {
+      doneAnimationPlayed = true;
+      OnboardingAnim.bounceOnce(binding.btnInstall, 0);
+      animatePulseDots();
+    }
   }
 
   private void animatePulseDots() {

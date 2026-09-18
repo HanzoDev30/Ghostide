@@ -250,6 +250,7 @@ public class OnboardingViewModel extends AndroidViewModel {
   }
 
   public void startInstall() {
+    terminalDone.setValue(false);
     terminalInstalling.setValue(true);
     terminalExtracting.setValue(false);
     terminalProgress.setValue(0);

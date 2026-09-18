@@ -12,6 +12,7 @@ import com.downloader.PRDownloader;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.adapters.UiFeedbackHostImpl;
 import ir.hanzodev1375.ghostide.activity.ErrorManagerActivity;
+import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.ProotProcessLauncherImpl;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.hanzodev1375.ghostide.ide.ui.api.FileIconContributor;
@@ -22,6 +23,7 @@ import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplInstalledPlugins;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplPluginLoader;
 import ir.hanzodev1375.ghostide.shizuku.ShizukuManager;
+import ir.hanzodev1375.ghostide.snippets.UserSnippetCompletionProvider;
 import ir.theme.M3Theme;
 import ir.theme.ThemeManager;
 import ir.theme.ThemeUtils;
@@ -79,6 +81,8 @@ public class GhostIdeAppLoader extends Application {
           return null;
         });
     GplInstalledPlugins.loadAll(this, GplPluginLoader.getInstance(this));
+
+    IdeEditor.setDefaultUserSnippetProvider(new UserSnippetCompletionProvider(this));
 
     extractCursorZip();
 

@@ -47,6 +47,7 @@ public class TerminalBottomSheetFragment extends BaseBlurBottomSheet
 
   public static final String EXTRA_WORKING_DIR = "working_dir";
   public static final String EXTRA_COMMAND = "command";
+  public static final String TAG = "terminal_sheet";
 
   private SheetTerminalBinding terminalBinding;
   private final List<TerminalTab> sessions = new ArrayList<>();
@@ -305,6 +306,10 @@ public class TerminalBottomSheetFragment extends BaseBlurBottomSheet
   }
 
   private void addNewDebianSession() {
+    if (!DebianBootstrap.isInstalled(requireContext())) {
+      addNewSession();
+      return;
+    }
     GhostTerminalSessionClient client =
         new GhostTerminalSessionClient(requireContext(), internalCallback);
     TerminalSession session =

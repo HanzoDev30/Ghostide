@@ -233,12 +233,21 @@ public class TerminalViewModel extends AndroidViewModel {
 
   public void addDebianSession() {
     if (service == null) return;
-    service.createDebianSession();
+    boolean debianReady = DebianBootstrap.isInstalled(getApplication());
+    if (debianReady) {
+      service.createDebianSession();
+    } else {
+      // rootfs رو نداریم (هنوز نصب نشده/ناقص/حذف شده). اگه force کنیم سرویس کرش میکنه؛
+      // به‌جاش شل ساده باز کن و اجازه بده کاربر از همین تب نصب رو ادامه بده.
+      service.createSession(null);
+    }
     sessions.setValue(new ArrayList<>(service.getSessions()));
     int newIndex = sessions.getValue().size() - 1;
     currentTabIndex.setValue(newIndex);
-    syncShellScriptsToFilesDir();
-    runInitScriptIfNeeded();
+    if (debianReady) {
+      syncShellScriptsToFilesDir();
+      runInitScriptIfNeeded();
+    }
     int added = newIndex;
     mainHandler.post(() -> {
       if (activityListener != null) activityListener.onSessionAdded(added);
@@ -331,6 +340,7 @@ public class TerminalViewModel extends AndroidViewModel {
 
   public void runInitScriptIfNeeded() {
     File rootfs = DebianBootstrap.getRootfsDir(getApplication());
+    if (!new File(rootfs, "bin/bash").exists()) return;
     File marker = new File(rootfs, INIT_RUN_MARKER);
     if (marker.exists()) return;
 
