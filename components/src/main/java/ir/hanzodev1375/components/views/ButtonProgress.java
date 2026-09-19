@@ -28,7 +28,6 @@ public class ButtonProgress extends FrameLayout {
   private final RectF oval = new RectF();
 
   private final float ringWidth;
-  private final float ringPadding;
 
   private float sweepAngle = 90f;
   private float rotation = 0f;
@@ -55,7 +54,6 @@ public class ButtonProgress extends FrameLayout {
 
     Resources res = getResources();
     ringWidth = 2.5f * res.getDisplayMetrics().density;
-    ringPadding = 4f * res.getDisplayMetrics().density;
 
     @ColorInt int ringColor = color(M3Theme.primary(), Color.GRAY);
 
@@ -75,9 +73,6 @@ public class ButtonProgress extends FrameLayout {
     button.setAllCaps(false);
     M3Theme.button(button);
     addView(button, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-    int pad = (int) (ringPadding + ringWidth);
-    setPadding(pad, pad, pad, pad);
   }
 
   public MaterialButton getButton() {
@@ -181,8 +176,13 @@ public class ButtonProgress extends FrameLayout {
     super.dispatchDraw(canvas);
     if (ringAlpha <= 0.001f) return;
 
+    int left = button.getLeft();
+    int top = button.getTop();
+    int right = button.getRight();
+    int bottom = button.getBottom();
+
     float inset = ringWidth / 2f;
-    oval.set(inset, inset, getWidth() - inset, getHeight() - inset);
+    oval.set(left + inset, top + inset, right - inset, bottom - inset);
 
     trackPaint.setAlpha((int) (ringAlpha * 60f));
     canvas.drawArc(oval, 0f, 360f, false, trackPaint);

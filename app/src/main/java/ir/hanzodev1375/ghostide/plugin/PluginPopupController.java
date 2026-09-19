@@ -210,13 +210,7 @@ public final class PluginPopupController {
                 return;
               }
 
-              if (!showSetupSheet(item)) {
-                GhostToast.makeText(
-                        context,
-                        context.getString(R.string.plugin_manager_installed_toast, item.name()),
-                        GhostToast.LENGTH_SHORT)
-                    .show();
-              }
+              showSetupSheet(item);
             }));
 
     ((PluginPopupAdapter) rv.getAdapter()).submit(pluginItems);
@@ -224,16 +218,16 @@ public final class PluginPopupController {
     popupRef[0] = ObjectUtil.showGlassPopup((Activity) context, anchor, rv);
   }
 
-  private boolean showSetupSheet(PluginPopupAdapter.PluginItem item) {
+  private void showSetupSheet(PluginPopupAdapter.PluginItem item) {
     if (item.gplFile() == null) {
-      return false;
+      return;
     }
     try {
       GplPluginLoader loader = GplPluginLoader.getInstance(context);
       LoadedGplPlugin loaded = loader.load(item.gplFile());
       List<PluginSetupAction> setupActions = loaded.getPlugin().getSetupActions();
-      if (setupActions == null || setupActions.isEmpty()) {
-        return false;
+      if (setupActions == null) {
+        setupActions = List.of();
       }
       List<PluginSetupActionData> data = new ArrayList<>();
       for (PluginSetupAction action : setupActions) {
@@ -256,10 +250,8 @@ public final class PluginPopupController {
                 context.startActivity(intent);
               })
           .show();
-      return true;
     } catch (Exception e) {
       Log.e(TAG, "showSetupSheet failed", e);
-      return false;
     }
   }
 }
