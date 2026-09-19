@@ -26,7 +26,11 @@ import org.json.JSONObject;
  *   "extensions": { ".ghost": "file_type_ghost" },
  *   "filenames": { "makefile": "file_type_makefile" },
  *   "folders": { "components": "folder_type_components" },
- *   "defaults": { "file": "default_file", "folder": "default_folder" }
+ *   "defaults": {
+ *     "file": "default_file",
+ *     "folder": "default_folder",
+ *     "root_folder": "default_root_folder"
+ *   }
  * }
  * }</pre>
  *
@@ -54,6 +58,7 @@ public final class JsonFileIconContributor implements FileIconContributor {
   private final JSONObject folders;
   private final String defaultFile;
   private final String defaultFolder;
+  private final String defaultRootFolder;
   private final List<String> extKeysSorted;
   private final Map<String, String> resolved = new HashMap<>();
 
@@ -68,6 +73,7 @@ public final class JsonFileIconContributor implements FileIconContributor {
     JSONObject def = root == null ? null : root.optJSONObject("defaults");
     defaultFile = def == null ? "" : def.optString("file", "");
     defaultFolder = def == null ? "" : def.optString("folder", "");
+    defaultRootFolder = def == null ? "" : def.optString("root_folder", "");
 
     extensions = root == null ? null : root.optJSONObject("extensions");
     filenames = root == null ? null : root.optJSONObject("filenames");
@@ -84,6 +90,9 @@ public final class JsonFileIconContributor implements FileIconContributor {
     markCustom(extensions, custom);
     markCustom(filenames, custom);
     markCustom(folders, custom);
+    addIfPresent(custom, defaultFile);
+    addIfPresent(custom, defaultFolder);
+    addIfPresent(custom, defaultRootFolder);
 
     File outDir = new File(new File(pluginContext.getFilesDir(), EXTRACT_DIR), safe(jsonAssetPath));
     extractArtwork(pluginContext, assetDir, bundledNames(pluginContext, assetDir, custom), outDir);
@@ -93,8 +102,10 @@ public final class JsonFileIconContributor implements FileIconContributor {
   public String getIcon(String filePath) {
     File file = new File(filePath);
     if (file.isDirectory()) {
+      String dirName = file.getName();
+      if (dirName.isEmpty()) return pick(defaultRootFolder);
       if (folders != null) {
-        String hit = resolve(folders, file.getName().toLowerCase());
+        String hit = resolve(folders, dirName.toLowerCase());
         if (hit != null) return hit;
       }
       return pick(defaultFolder);
@@ -142,8 +153,12 @@ public final class JsonFileIconContributor implements FileIconContributor {
     if (section == null) return;
     for (Iterator<String> it = section.keys(); it.hasNext(); ) {
       String name = section.optString(it.next(), "");
-      if (!name.isEmpty()) into.add(name);
+      addIfPresent(into, name);
     }
+  }
+
+  private static void addIfPresent(Set<String> into, String name) {
+    if (name != null && !name.isEmpty()) into.add(name);
   }
 
   /** Keeps only the names that actually exist as {@code <name>.svg} in the plugin assets. */

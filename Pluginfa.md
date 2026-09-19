@@ -302,7 +302,9 @@ context.registerDisposable(
   `android_asset` نمی تونه asset پلاگین رو باز کنه.
 - فقط یه اسم بر گردونید (مثل `file_type_kotlin`) تا از مجموعه داخلی `vscode_icons` استفاده بشه.
 - برای مپ کردن گروهی آیکون ها، یه فایل JSON با همون ساختار `data/file_icons.json` (`asset_dir`,
-  `extensions`, `filenames`, `folders`, `defaults`) به همراه SVG های خودتون داخل پلاگین بذارید و
+  `extensions`, `filenames`, `folders`, `defaults`) به همراه SVG های خودتون داخل پلاگین بذارید
+  (`defaults` از کلیدهای `file`, `folder` و `root_folder` پشتیبانی می کنه؛ اگه اسمشون به یه SVG
+  داخل `asset_dir` خودتون اشاره کنه اون فایل استخراج و مثل بقیه آیکون ها به صورت `file://` سرو می شه) و
   `JsonFileIconContributor` آماده رو ثبت کنید. این کلاس فقط SVG هایی که واقعا داخل پلاگین هستند
   رو استخراج و به صورت `file://` سرو می کنه، و اسم های ناشناخته رو بدون تغییر به مجموعه داخلی
   می سپاره:

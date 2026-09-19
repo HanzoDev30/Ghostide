@@ -302,7 +302,9 @@ default set) takes over.
 - Return a bare name (`file_type_kotlin`) to reuse any icon of the built-in `vscode_icons` set.
 - For bulk mappings, ship a JSON file with the same schema as `data/file_icons.json`
   (`asset_dir`, `extensions`, `filenames`, `folders`, `defaults`) plus your SVGs, then register
-  the ready-made `JsonFileIconContributor`. It extracts only the SVGs actually present in your
+  the ready-made `JsonFileIconContributor`. `defaults` supports `file`, `folder` and `root_folder`;
+  pointing any of them at artwork inside your `asset_dir` makes it extracted and served as a
+  `file://` URI, exactly like any mapped icon. It extracts only the SVGs actually present in your
   plugin, serves them as `file://` URIs, and passes unknown names through to the built-in set:
 
 ```java
