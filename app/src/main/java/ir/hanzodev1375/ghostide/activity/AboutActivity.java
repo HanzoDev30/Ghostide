@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -118,7 +119,7 @@ public class AboutActivity extends BaseCompat {
 
     android.hardware.display.DisplayManager dm =
         (android.hardware.display.DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-    android.view.Display display = dm.getDisplay(android.view.Display.DEFAULT_DISPLAY);
+    Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
 
     fillSingle(R.id.row_refresh, "Hz " + (int) display.getRefreshRate(), "Max Refresh Rate");
 

@@ -104,6 +104,13 @@
   <string name="pluginstore_install_error">Install failed: %s</string>
   <string name="pluginstore_source_saved">Source saved to %s</string>
   <string name="pluginstore_source_error">Source download failed: %s</string>
+  <string name="plugin_notify_channel">New plugins</string>
+  <string name="plugin_notify_channel_desc">Alerts when a new plugin is published in the store</string>
+  <string name="plugin_notify_title">New plugin available</string>
+  <string name="plugin_notify_text">%s was just added to the plugin store</string>
+  <string name="plugin_check_foreground_channel">Plugin checker</string>
+  <string name="plugin_check_foreground_title">Plugin checker is active</string>
+  <string name="plugin_check_foreground_text">Checks the store for new plugins every 6 hours</string>
   <string name="themes_dev_version">%1$s · v%2$d</string>
   <string name="themes_empty">No themes available</string>
   <string name="themes_error_network">Network error: %1$s</string>

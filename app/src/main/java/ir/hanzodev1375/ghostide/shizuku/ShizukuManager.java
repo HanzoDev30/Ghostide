@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import ir.hanzodev1375.ghostide.interfaces.IShellUserService;
 import rikka.shizuku.Shizuku;
@@ -99,7 +101,7 @@ public class ShizukuManager {
                 result = "error: " + e.getMessage();
               }
               final String r = result;
-              new android.os.Handler(android.os.Looper.getMainLooper())
+              new Handler(Looper.getMainLooper())
                   .post(() -> callback.onResult(r));
             })
         .start();

@@ -58,7 +58,8 @@ public class AiClientFactory {
         return new OpencodeClient(
             prefs.getOpencodeUrl(),
             prefs.getOpencodeUsername(),
-            prefs.getOpencodePassword());
+            prefs.getOpencodePassword(),
+            prefs.getOpencodeModel());
       default:
         return new ClaudeClient(prefs.getClaudeApiKey(), prefs.getClaudeModel());
     }

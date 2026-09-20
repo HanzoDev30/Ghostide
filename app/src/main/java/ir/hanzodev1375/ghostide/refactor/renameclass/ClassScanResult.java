@@ -1,24 +1,25 @@
 package ir.hanzodev1375.ghostide.refactor.renameclass;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
 public final class ClassScanResult {
 
-  private final java.io.File targetFile;
+  private final File targetFile;
   private final boolean kotlin;
   private final String packageName;
   private final String oldClassName;
   private final List<ClassFileTarget> targets;
-  private final List<java.io.File> ambiguousFiles;
+  private final List<File> ambiguousFiles;
 
   public ClassScanResult(
-      java.io.File targetFile,
+      File targetFile,
       boolean kotlin,
       String packageName,
       String oldClassName,
       List<ClassFileTarget> targets,
-      List<java.io.File> ambiguousFiles) {
+      List<File> ambiguousFiles) {
     this.targetFile = targetFile;
     this.kotlin = kotlin;
     this.packageName = packageName;
@@ -27,7 +28,7 @@ public final class ClassScanResult {
     this.ambiguousFiles = Collections.unmodifiableList(ambiguousFiles);
   }
 
-  public java.io.File getTargetFile() {
+  public File getTargetFile() {
     return targetFile;
   }
 
@@ -47,7 +48,7 @@ public final class ClassScanResult {
     return targets;
   }
 
-  public List<java.io.File> getAmbiguousFiles() {
+  public List<File> getAmbiguousFiles() {
     return ambiguousFiles;
   }
 }

@@ -14,7 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.listitem.ListItemCardView;
+import com.google.android.material.listitem.ListItemViewHolder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,11 +63,19 @@ public class PluginStoreAdapter extends RecyclerView.Adapter<PluginStoreAdapter.
   public void onBindViewHolder(@NonNull VH holder, int position) {
     PluginItem item = items.get(position);
     holder.name.setText(item.name());
-    Glide.with(holder.icon).load(item.icon()).into(holder.icon);
+    Glide.with(holder.icon)
+        .load(item.icon())
+        .override(128, 128)
+        .dontAnimate()
+        .placeholder(R.drawable.ic_outline_extension)
+        .error(R.drawable.ic_outline_extension)
+        .into(holder.icon);
 
     Integer surface = M3Theme.surfaceContainerLow();
     int bg = surface != null ? ColorUtils.setAlphaComponent(surface, 128) : Color.TRANSPARENT;
     holder.card.setCardBackgroundColor(ColorStateList.valueOf(bg));
+
+    holder.bind(position, getItemCount());
 
     if (installed.contains(item.name())) {
       holder.action.setText(R.string.pluginstore_installed_button);
@@ -89,8 +98,8 @@ public class PluginStoreAdapter extends RecyclerView.Adapter<PluginStoreAdapter.
     return items.size();
   }
 
-  static class VH extends RecyclerView.ViewHolder {
-    final MaterialCardView card;
+  static class VH extends ListItemViewHolder {
+    final ListItemCardView card;
     final ImageView icon;
     final TextView name;
     final MaterialButton action;

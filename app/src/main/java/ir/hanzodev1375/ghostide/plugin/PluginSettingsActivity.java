@@ -3,6 +3,7 @@ package ir.hanzodev1375.ghostide.plugin;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -89,7 +90,7 @@ public class PluginSettingsActivity extends BaseCompat {
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
       TextView tv = new TextView(context);
       tv.setPadding(24, 20, 24, 20);
       tv.setTextSize(18);

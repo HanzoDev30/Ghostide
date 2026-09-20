@@ -30,6 +30,8 @@ import ir.theme.GhostTheme;
 import ir.theme.M3Theme;
 import ir.theme.ThemeBus;
 import ir.theme.ThemeManager;
+import ir.theme.ThemeMediaPath;
+import ir.theme.WidgetTheme;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class AppSettingSection extends SettingSection {
   private static final int POS_SHOW_BACKGROUND = 7;
   private static final int POS_ANIMATION_THRESHOLD = 9;
   private static final int POS_GRID_COUNT = 10;
-  private static final int POS_GLASS_TINT = 15;
+  private static final int POS_GLASS_TINT = 13;
 
   private static final String THEMES_DIRECTORY = "ghostide/themes";
 
@@ -137,19 +139,6 @@ public class AppSettingSection extends SettingSection {
             R.string.terfrsubtitle,
             prefs.isTerminalFragment(),
             prefs::setTerminalFragment));
-    items.add(
-        switchItem(
-            R.string.all_blur, R.string.all_blur_subtitle, prefs.isBlurMod(), prefs::setBlurMod));
-    items.add(
-        new SettingItem(
-            getString(R.string.pref_glass_material_color),
-            getString(R.string.pref_glass_material_color_desc),
-            prefs.isGlassMaterialColor(),
-            0,
-            isChecked -> {
-              prefs.setGlassMaterialColor(isChecked);
-              activity.reapplyThemeLive();
-            }));
     items.add(
         textItem(
             R.string.pref_glass_tint,
@@ -521,6 +510,13 @@ public class AppSettingSection extends SettingSection {
       String json = new String(FileUtil.readBytesCompat(file), StandardCharsets.UTF_8);
       GhostTheme theme = new Gson().fromJson(json, GhostTheme.class);
       if (theme == null) throw new Exception("Invalid theme format");
+      WidgetTheme widget = theme.getWidget();
+      if (widget != null) {
+        String stored = widget.getImagepath();
+        if (stored != null && !stored.isEmpty()) {
+          widget.setImagepath(ThemeMediaPath.resolve(file.getAbsolutePath(), stored));
+        }
+      }
       maybeEnableBackground(theme);
       GhostTheme base = new ThemeManager(activity).getTheme();
       if (base == null) {

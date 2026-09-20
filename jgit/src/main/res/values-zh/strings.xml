@@ -107,4 +107,11 @@
   <string name="git_empty_stash_desc">隐藏您的更改以确保以后安全。</string>
   <string name="git_empty_tags_title">没有标签</string>
   <string name="git_empty_tags_desc">创建一个标签来标记历史上的重要时刻。</string>
+  <string name="git_init_hint">下载 (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">克什米尔</string>
+  <string name="git_init_commit_required">???????????????????????????????????????????????????????????????</string>
+  <string name="git_init_info">快速设置 快速安装 : .md README.md git初始化，git add . ( ) 巴巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 )</string>
+  <string name="git_init_start">唷唷</string>
+  <string name="git_init_working">详细信息...</string>
+  <string name="git_init_url_required">???? (https://github.com/user/repo.git)</string>
 </resources>

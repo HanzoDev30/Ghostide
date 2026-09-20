@@ -460,6 +460,7 @@
   <string name="plugin_manager_installed_toast">تم تثبيت %1$s</string>
   <string name="plugin_manager_not_gpl_file">الرجاء اختيار ملف البرنامج المساعد .gpl</string>
   <string name="plugin_manager_run_setup">تشغيل في المحطة</string>
+  <string name="plugin_manager_no_setup">لا يحتوي هذا البرنامج المساعد على إجراءات الإعداد لتشغيلها</string>
   <string name="pluginstore_empty">لا توجد مكونات إضافية متاحة حتى الآن</string>
   <string name="pluginstore_install">ثَبَّتَ</string>
   <string name="pluginstore_busy">عمل…</string>
@@ -497,10 +498,6 @@
   <string name="terminal_status_downloading">التنزيل: %1$d%%</string>
   <string name="terminal_status_extracting">جارٍ الاستخراج... (%1$d ملف)</string>
   <string name="terminal_debian_installed_success">تم تثبيت دبيان ✓</string>
-  <string name="all_blur">طمس الوضع</string>
-  <string name="all_blur_subtitle">طمس جميع المكونات.</string>
-  <string name="pref_glass_material_color">لون زجاج المادة</string>
-  <string name="pref_glass_material_color_desc">تطبيق لون المادة على الأسطح الزجاجية</string>
   <string name="pref_glass_tint">شدة تلوين الزجاج</string>
   <string name="pref_glass_tint_desc">اضبط قوة اللون المطبق على الأسطح الزجاجية</string>
   <string name="webcolor">إظهار Color PickerWeb</string>

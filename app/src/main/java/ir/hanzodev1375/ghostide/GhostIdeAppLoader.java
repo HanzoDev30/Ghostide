@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Process;
 import android.util.Log;
 import com.downloader.PRDownloader;
+import ir.hanzodev1375.components.store.notification.PluginCheckLifecycle;
+import ir.hanzodev1375.components.store.notification.PluginNotifier;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.adapters.UiFeedbackHostImpl;
 import ir.hanzodev1375.ghostide.activity.ErrorManagerActivity;
@@ -81,6 +83,10 @@ public class GhostIdeAppLoader extends Application {
           return null;
         });
     GplInstalledPlugins.loadAll(this, GplPluginLoader.getInstance(this));
+
+    PluginNotifier.schedule(this);
+    PluginNotifier.checkNow(this);
+    PluginCheckLifecycle.init(this);
 
     IdeEditor.setDefaultUserSnippetProvider(new UserSnippetCompletionProvider(this));
 

@@ -203,6 +203,17 @@ public class AiPreferencesUtils {
         .apply();
   }
 
+  public String getOpencodeModel() {
+    return getPrefs().getString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_MODEL, "");
+  }
+
+  public void setOpencodeModel(String model) {
+    getPrefs()
+        .edit()
+        .putString(AiConstants.SharedPreferenceKeys.KEY_AI_OPENCODE_MODEL, model)
+        .apply();
+  }
+
   // ========== Selected Provider ==========
   public String getSelectedProvider() {
     return getPrefs()

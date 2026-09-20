@@ -1,7 +1,10 @@
 package ir.hanzodev1375.ghostide.activity;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -9,11 +12,17 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import ir.hanzodev1375.components.views.GhostToast;
 import androidx.activity.OnBackPressedCallback;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.DialogCompat;
@@ -75,7 +84,7 @@ public class WebViewActivity extends BaseCompat {
     b.webView.setWebViewClient(
         new WebViewClient() {
           @Override
-          public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+          public void onPageStarted(WebView view, String url, Bitmap favicon) {
             b.pageProgress.setVisibility(View.VISIBLE);
             b.pageProgress.setProgress(10);
             b.urlBar.setText(url);
@@ -109,7 +118,7 @@ public class WebViewActivity extends BaseCompat {
           }
 
           @Override
-          public boolean onConsoleMessage(android.webkit.ConsoleMessage msg) {
+          public boolean onConsoleMessage(ConsoleMessage msg) {
             appendConsole(
                 msg.messageLevel().name(), msg.message(), msg.sourceId(), msg.lineNumber());
             return true;
@@ -127,7 +136,7 @@ public class WebViewActivity extends BaseCompat {
   private void setupUrlBar() {
     b.urlBar.setOnEditorActionListener(
         (v, actionId, event) -> {
-          boolean isGo = actionId == android.view.inputmethod.EditorInfo.IME_ACTION_GO;
+          boolean isGo = actionId == EditorInfo.IME_ACTION_GO;
           boolean isEnter =
               event != null
                   && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
@@ -150,7 +159,7 @@ public class WebViewActivity extends BaseCompat {
 
     b.consoleInput.setOnEditorActionListener(
         (v, actionId, event) -> {
-          boolean isSend = actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND;
+          boolean isSend = actionId == EditorInfo.IME_ACTION_SEND;
           boolean isEnter =
               event != null
                   && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
@@ -466,49 +475,49 @@ public class WebViewActivity extends BaseCompat {
   }
 
   private void showElementEditor(String outerHtml, String computedCss, String tag) {
-    android.widget.LinearLayout root = new android.widget.LinearLayout(this);
-    root.setOrientation(android.widget.LinearLayout.VERTICAL);
+    LinearLayout root = new LinearLayout(this);
+    root.setOrientation(LinearLayout.VERTICAL);
     root.setPadding(dp(16), dp(8), dp(16), dp(8));
 
-    android.widget.TextView tvTag = new android.widget.TextView(this);
+    TextView tvTag = new TextView(this);
     tvTag.setText("<" + tag + ">");
-    tvTag.setTypeface(android.graphics.Typeface.MONOSPACE);
+    tvTag.setTypeface(Typeface.MONOSPACE);
     tvTag.setTextColor(0xFF4CAF50);
     tvTag.setPadding(0, 0, 0, dp(8));
     root.addView(tvTag);
 
-    android.widget.TextView lHtml = new android.widget.TextView(this);
+    TextView lHtml = new TextView(this);
     lHtml.setText("HTML");
     lHtml.setTextSize(11);
     root.addView(lHtml);
 
-    android.widget.EditText etHtml = new android.widget.EditText(this);
+    EditText etHtml = new EditText(this);
     etHtml.setText(outerHtml);
     etHtml.setMinLines(4);
     etHtml.setMaxLines(10);
-    etHtml.setTypeface(android.graphics.Typeface.MONOSPACE);
+    etHtml.setTypeface(Typeface.MONOSPACE);
     etHtml.setTextSize(12);
     etHtml.setInputType(
-        android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
     root.addView(etHtml);
 
-    android.widget.TextView lCss = new android.widget.TextView(this);
+    TextView lCss = new TextView(this);
     lCss.setText("Computed CSS");
     lCss.setTextSize(11);
     lCss.setPadding(0, dp(12), 0, 0);
     root.addView(lCss);
 
-    android.widget.EditText etCss = new android.widget.EditText(this);
+    EditText etCss = new EditText(this);
     etCss.setText(computedCss);
     etCss.setMinLines(4);
     etCss.setMaxLines(8);
-    etCss.setTypeface(android.graphics.Typeface.MONOSPACE);
+    etCss.setTypeface(Typeface.MONOSPACE);
     etCss.setTextSize(11);
     etCss.setInputType(
-        android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
     root.addView(etCss);
 
-    android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+    ScrollView scroll = new ScrollView(this);
     scroll.addView(root);
 
     new DialogCompat(this)

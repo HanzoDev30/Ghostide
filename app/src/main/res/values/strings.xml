@@ -462,6 +462,7 @@
     <string name="plugin_manager_installed_toast">Installed %1$s</string>
     <string name="plugin_manager_not_gpl_file">Please choose a .gpl plugin file</string>
     <string name="plugin_manager_run_setup">Run in terminal</string>
+    <string name="plugin_manager_no_setup">This plugin has no setup actions to run</string>
     <string name="pluginstore_empty">No plugins available yet</string>
     <string name="pluginstore_install">Install</string>
     <string name="pluginstore_busy">Working…</string>
@@ -499,10 +500,6 @@
     <string name="terminal_status_downloading">Downloading: %1$d%%</string>
     <string name="terminal_status_extracting">Extracting... (%1$d files)</string>
     <string name="terminal_debian_installed_success">Debian installed ✓</string>
-    <string name="all_blur">Blur mod</string>
-    <string name="all_blur_subtitle">Blur all components.</string>
-    <string name="pref_glass_material_color">Glass Material Color</string>
-    <string name="pref_glass_material_color_desc">Apply Material color to glass surfaces</string>
     <string name="pref_glass_tint">Glass tint intensity</string>
     <string name="pref_glass_tint_desc">Adjust the strength of the color applied to glass surfaces</string>
     <string name="webcolor"> Show Color PickerWeb</string>

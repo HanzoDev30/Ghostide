@@ -6,7 +6,7 @@
     android:layout_marginHorizontal="4dp"
     android:layout_marginVertical="4dp">
 
-    <com.google.android.material.card.MaterialCardView
+    <com.google.android.material.listitem.ListItemCardView
         android:id="@+id/pluginCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -47,5 +47,5 @@
                 android:text="@string/pluginstore_install"
                 android:textSize="13sp" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </com.google.android.material.listitem.ListItemCardView>
 </com.google.android.material.listitem.ListItemLayout>

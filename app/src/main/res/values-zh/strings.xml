@@ -460,6 +460,7 @@
   <string name="plugin_manager_installed_toast">已安装 %1$s</string>
   <string name="plugin_manager_not_gpl_file">请选择 .gpl 插件文件</string>
   <string name="plugin_manager_run_setup">在终端中运行</string>
+  <string name="plugin_manager_no_setup">该插件没有要运行的设置操作</string>
   <string name="pluginstore_empty">还没有可用的插件</string>
   <string name="pluginstore_install">安装</string>
   <string name="pluginstore_busy">在职的…</string>
@@ -497,10 +498,6 @@
   <string name="terminal_status_downloading">正在下载：%1$d%%</string>
   <string name="terminal_status_extracting">正在提取...（%1$d 个文件）</string>
   <string name="terminal_debian_installed_success">已安装 Debian ✓</string>
-  <string name="all_blur">模糊模式</string>
-  <string name="all_blur_subtitle">模糊所有组件。</string>
-  <string name="pref_glass_material_color">玻璃材质颜色</string>
-  <string name="pref_glass_material_color_desc">将材质颜色应用于玻璃表面</string>
   <string name="pref_glass_tint">玻璃色调强度</string>
   <string name="pref_glass_tint_desc">调整应用于玻璃表面的颜色强度</string>
   <string name="webcolor">显示颜色选择器Web</string>

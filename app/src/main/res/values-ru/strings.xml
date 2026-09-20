@@ -460,6 +460,7 @@
   <string name="plugin_manager_installed_toast">Установлен %1$s</string>
   <string name="plugin_manager_not_gpl_file">Пожалуйста, выберите файл плагина .gpl</string>
   <string name="plugin_manager_run_setup">Запустить в терминале</string>
+  <string name="plugin_manager_no_setup">Этот плагин не требует действий по настройке для запуска</string>
   <string name="pluginstore_empty">Плагинов пока нет</string>
   <string name="pluginstore_install">Установить</string>
   <string name="pluginstore_busy">Работающий…</string>
@@ -497,10 +498,6 @@
   <string name="terminal_status_downloading">Загрузка: %1$d%%</string>
   <string name="terminal_status_extracting">Извлечение... (%1$d файлов)</string>
   <string name="terminal_debian_installed_success">Debian установлен ✓</string>
-  <string name="all_blur">Мод размытия</string>
-  <string name="all_blur_subtitle">Размытие всех компонентов.</string>
-  <string name="pref_glass_material_color">Цвет стекла Material</string>
-  <string name="pref_glass_material_color_desc">Применять цвет материала к стеклянным поверхностям</string>
   <string name="pref_glass_tint">Интенсивность тонировки стекла</string>
   <string name="pref_glass_tint_desc">Настройка силы цвета, применяемого к стеклянным поверхностям</string>
   <string name="webcolor">Показать палитру цветовWeb</string>

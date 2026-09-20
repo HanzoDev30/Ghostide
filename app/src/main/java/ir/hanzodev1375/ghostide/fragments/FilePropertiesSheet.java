@@ -1,6 +1,7 @@
 package ir.hanzodev1375.ghostide.fragments;
 
 import android.os.Bundle;
+import android.os.Process;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -357,7 +358,7 @@ public class FilePropertiesSheet extends BaseBlurBottomSheet {
       if (view != null) return view.getOwner().getName();
     } catch (Exception ignored) {
     }
-    return "u0_a" + (android.os.Process.myUid() - 10000);
+    return "u0_a" + (Process.myUid() - 10000);
   }
 
   private static int fallback(Integer value, int def) {

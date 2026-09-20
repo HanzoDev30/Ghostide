@@ -103,6 +103,13 @@
   <string name="pluginstore_install_error">安装失败：%s</string>
   <string name="pluginstore_source_saved">源已保存到 %s</string>
   <string name="pluginstore_source_error">源下载失败：%s</string>
+  <string name="plugin_notify_channel">新插件</string>
+  <string name="plugin_notify_channel_desc">当商店中发布新插件时发出警报</string>
+  <string name="plugin_notify_title">新插件可用</string>
+  <string name="plugin_notify_text">%s 刚刚添加到插件商店</string>
+  <string name="plugin_check_foreground_channel">插件检查器</string>
+  <string name="plugin_check_foreground_title">插件检查器已激活</string>
+  <string name="plugin_check_foreground_text">每 6 小时检查一次商店是否有新插件</string>
   <string name="themes_dev_version">%1$s·v%2$d</string>
   <string name="themes_empty">没有可用的主题</string>
   <string name="themes_error_network">网络错误：%1$s</string>

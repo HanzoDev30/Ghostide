@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import com.bumptech.glide.Glide;
 import java.util.List;
 import java.util.Set;
 
@@ -112,10 +113,19 @@ public class PluginStoreFragment extends Fragment {
   }
 
   private void onPlugins(List<PluginItem> plugins) {
+    preloadIcons(plugins);
     adapter.updateItems(plugins);
     boolean empty = plugins == null || plugins.isEmpty();
     emptyText.setVisibility(empty ? View.VISIBLE : View.GONE);
     list.setVisibility(empty ? View.GONE : View.VISIBLE);
+  }
+
+  private void preloadIcons(List<PluginItem> plugins) {
+    if (plugins == null || plugins.isEmpty() || getContext() == null) return;
+    for (PluginItem item : plugins) {
+      if (item.icon() == null || item.icon().trim().isEmpty()) continue;
+      Glide.with(getContext()).load(item.icon()).override(128, 128).preload();
+    }
   }
 
   private void onLoading(Boolean loading) {

@@ -103,6 +103,13 @@
   <string name="pluginstore_install_error">نصب ناموفق بود: %s</string>
   <string name="pluginstore_source_saved">سورس در %s ذخیره شد</string>
   <string name="pluginstore_source_error">دانلود سورس ناموفق بود: %s</string>
+  <string name="plugin_notify_channel">افزونه‌های جدید</string>
+  <string name="plugin_notify_channel_desc">اعلان وقتی افزونه جدیدی در فروشگاه منتشر می‌شود</string>
+  <string name="plugin_notify_title">افزونه جدید موجود است</string>
+  <string name="plugin_notify_text">%s به فروشگاه افزونه‌ها اضافه شد</string>
+  <string name="plugin_check_foreground_channel">چک‌کننده افزونه</string>
+  <string name="plugin_check_foreground_title">چک‌کننده افزونه فعال است</string>
+  <string name="plugin_check_foreground_text">هر ۶ ساعت فروشگاه را برای افزونه جدید بررسی می‌کند</string>
   <string name="themes_dev_version">%1$s · نسخه %2$d</string>
   <string name="themes_empty">تمی در دسترس نیست</string>
   <string name="themes_error_network">خطای شبکه: %1$s</string>

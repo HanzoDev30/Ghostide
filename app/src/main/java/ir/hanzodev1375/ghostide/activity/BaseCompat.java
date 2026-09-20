@@ -255,7 +255,10 @@ public class BaseCompat extends AppCompatActivity
             && !theme.getWidget().getImagepath().isEmpty();
 
     if (!showBg) {
-      if (backgroundView != null) backgroundView.clear();
+      if (backgroundView != null) {
+        backgroundView.clear();
+        backgroundView.setVisibility(View.GONE);
+      }
       return;
     }
 
@@ -271,6 +274,7 @@ public class BaseCompat extends AppCompatActivity
         getWindow().setNavigationBarColor(M3Theme.surface());
         getWindow().setStatusBarColor(M3Theme.surface());
         backgroundView.clear();
+        backgroundView.setVisibility(View.GONE);
       }
     }
 

@@ -93,9 +93,13 @@ public final class InstalledPluginAdapter
     byte[] iconBytes = GplManifestReader.readIconBytes(plugin.file(), plugin.manifest());
     if (iconBytes != null) {
       Bitmap bitmap = BitmapFactory.decodeByteArray(iconBytes, 0, iconBytes.length);
-      Glide.with(holder.icon.getContext()).asBitmap().load(bitmap).centerInside().into(holder.icon);
+      if (bitmap != null) {
+        Glide.with(holder.icon.getContext()).asBitmap().load(bitmap).centerInside().into(holder.icon);
+      } else {
+        holder.icon.setImageResource(R.drawable.ic_outline_extension);
+      }
     } else {
-      holder.icon.setImageResource(R.mipmap.ic_lego_foreground);
+      holder.icon.setImageResource(R.drawable.ic_outline_extension);
     }
     M3Theme.listCard(holder.itemView);
   }

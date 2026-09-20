@@ -1,5 +1,6 @@
 package ir.hanzodev1375.ghostide.postman.adapter;
 
+import android.graphics.Color;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -100,8 +101,8 @@ public class KeyValueAdapter extends RecyclerView.Adapter<KeyValueAdapter.ViewHo
 
       var setting = GhostIdeAppLoader.getInstance().getSetting();
       if (setting.isShowBackground()) {
-        binding.keyInput.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        binding.valueInput.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        binding.keyInput.setBackgroundColor(Color.TRANSPARENT);
+        binding.valueInput.setBackgroundColor(Color.TRANSPARENT);
       } else {
         binding.keyInput.setBackgroundResource(R.drawable.bg_input_row);
         binding.valueInput.setBackgroundResource(R.drawable.bg_input_row);

@@ -103,6 +103,13 @@
   <string name="pluginstore_install_error">Не удалось установить: %s</string>
   <string name="pluginstore_source_saved">Источник сохранен в %s.</string>
   <string name="pluginstore_source_error">Не удалось загрузить исходный код: %s</string>
+  <string name="plugin_notify_channel">Новые плагины</string>
+  <string name="plugin_notify_channel_desc">Оповещения о публикации нового плагина в магазине</string>
+  <string name="plugin_notify_title">Доступен новый плагин</string>
+  <string name="plugin_notify_text">%s был только что добавлен в магазин плагинов</string>
+  <string name="plugin_check_foreground_channel">Плагин проверки</string>
+  <string name="plugin_check_foreground_title">Проверка плагина активна</string>
+  <string name="plugin_check_foreground_text">Проверяет магазин на наличие новых плагинов каждые 6 часов.</string>
   <string name="themes_dev_version">%1$s · v%2$d</string>
   <string name="themes_empty">Нет доступных тем</string>
   <string name="themes_error_network">Ошибка сети: %1$s</string>

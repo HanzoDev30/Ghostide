@@ -85,7 +85,7 @@ public class NewModuleDialog {
           public void onTextChanged(CharSequence s, int st, int b, int c) {}
 
           @Override
-          public void afterTextChanged(android.text.Editable s) {
+          public void afterTextChanged(Editable s) {
             if (pkgEditedByUser[0]) return;
             String slug =
                 s.toString()

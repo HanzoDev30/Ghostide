@@ -103,6 +103,13 @@
   <string name="pluginstore_install_error">ההתקנה נכשלה: %s</string>
   <string name="pluginstore_source_saved">המקור נשמר ב-%s</string>
   <string name="pluginstore_source_error">הורדת המקור נכשלה: %s</string>
+  <string name="plugin_notify_channel">תוספים חדשים</string>
+  <string name="plugin_notify_channel_desc">מתריע כאשר מתפרסם תוסף חדש בחנות</string>
+  <string name="plugin_notify_title">תוסף חדש זמין</string>
+  <string name="plugin_notify_text">%s התווסף זה עתה לחנות התוספים</string>
+  <string name="plugin_check_foreground_channel">בודק תוספים</string>
+  <string name="plugin_check_foreground_title">בודק הפלאגין פעיל</string>
+  <string name="plugin_check_foreground_text">בודקת בחנות תוספים חדשים כל 6 שעות</string>
   <string name="themes_dev_version">%1$s · v%2$d</string>
   <string name="themes_empty">אין ערכות נושא זמינות</string>
   <string name="themes_error_network">שגיאת רשת: %1$s</string>

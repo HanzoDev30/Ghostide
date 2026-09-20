@@ -460,6 +460,7 @@
   <string name="plugin_manager_installed_toast">%1$s نصب شد</string>
   <string name="plugin_manager_not_gpl_file">لطفاً یک فایل پلاگین با پسوند .gpl انتخاب کنید</string>
   <string name="plugin_manager_run_setup">اجرا در ترمینال</string>
+  <string name="plugin_manager_no_setup">این پلاگین اکشن setup برای اجرا ندارد</string>
   <string name="pluginstore_empty">هنوز پلاگینی موجود نیست</string>
   <string name="pluginstore_install">نصب</string>
   <string name="pluginstore_busy">در حال انجام…</string>
@@ -497,10 +498,6 @@
   <string name="terminal_status_downloading">در حال بارگیری: %1$d%%</string>
   <string name="terminal_status_extracting">در حال استخراج... (%1$d فایل)</string>
   <string name="terminal_debian_installed_success">دبیان نصب شد ✓</string>
-  <string name="all_blur">حالت تاری</string>
-  <string name="all_blur_subtitle">همه اجزا را تار کنید.</string>
-  <string name="pref_glass_material_color">رنگ شیشه مادی</string>
-  <string name="pref_glass_material_color_desc">اعمال رنگ متریال روی سطوح شیشه‌ای</string>
   <string name="pref_glass_tint">شدت رنگ شیشه</string>
   <string name="pref_glass_tint_desc">میزان شدت رنگی که روی سطوح شیشه‌ای اعمال می‌شود</string>
   <string name="webcolor">نمایش Color PickerWeb</string>

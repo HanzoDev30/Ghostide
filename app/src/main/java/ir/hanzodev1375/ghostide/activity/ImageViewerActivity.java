@@ -36,6 +36,7 @@ import com.bumptech.glide.request.transition.Transition;
 import ir.hanzodev1375.ghostide.adapters.ImagePagerAdapter;
 import ir.hanzodev1375.ghostide.databinding.ActivityImageViewerBinding;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -282,25 +283,44 @@ public class ImageViewerActivity extends BaseCompat {
               try {
                 Bitmap bitmap = Glide.with(this).asBitmap().load(imageUri).submit().get();
                 if (bitmap == null) return;
-                ContentValues values = new ContentValues();
-                values.put(
-                    MediaStore.Images.Media.DISPLAY_NAME,
-                    "img_" + System.currentTimeMillis() + ".jpg");
-                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-                values.put(
-                    MediaStore.Images.Media.RELATIVE_PATH,
-                    Environment.DIRECTORY_PICTURES + "/ImageViewer");
-                Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                Uri saveUri = getContentResolver().insert(collection, values);
-                if (saveUri != null) {
-                  try (OutputStream oss = getContentResolver().openOutputStream(saveUri)) {
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, oss);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                  ContentValues values = new ContentValues();
+                  values.put(
+                      MediaStore.Images.Media.DISPLAY_NAME,
+                      "img_" + System.currentTimeMillis() + ".jpg");
+                  values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                  values.put(
+                      MediaStore.Images.Media.RELATIVE_PATH,
+                      Environment.DIRECTORY_PICTURES + "/ImageViewer");
+                  Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                  Uri saveUri = getContentResolver().insert(collection, values);
+                  if (saveUri != null) {
+                    try (OutputStream oss = getContentResolver().openOutputStream(saveUri)) {
+                      bitmap.compress(Bitmap.CompressFormat.JPEG, 90, oss);
+                    }
+                    runOnUiThread(
+                        () -> GhostToast.makeText(this, "Saved to Gallery", GhostToast.LENGTH_SHORT).show());
+                  } else {
+                    runOnUiThread(
+                        () -> GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT).show());
+                  }
+                } else {
+                  File dir =
+                      new File(
+                          Environment.getExternalStoragePublicDirectory(
+                                  Environment.DIRECTORY_PICTURES),
+                          "ImageViewer");
+                  if (!dir.exists() && !dir.mkdirs()) {
+                    runOnUiThread(
+                        () -> GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT).show());
+                    return;
+                  }
+                  File outFile = new File(dir, "img_" + System.currentTimeMillis() + ".jpg");
+                  try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
                   }
                   runOnUiThread(
                       () -> GhostToast.makeText(this, "Saved to Gallery", GhostToast.LENGTH_SHORT).show());
-                } else {
-                  runOnUiThread(
-                      () -> GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT).show());
                 }
               } catch (Exception e) {
                 e.printStackTrace();

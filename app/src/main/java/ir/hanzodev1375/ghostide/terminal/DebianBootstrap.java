@@ -6,13 +6,16 @@ import android.os.Looper;
 import android.util.Log;
 import ir.hanzodev1375.ghostide.R;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * هماهنگ‌کننده‌ی نصب Debian. خودِ دانلود tar.xz مسئولیت شما با PRDownloader هست؛ این کلاس فقط
- * دو کار میکنه: چک اینکه از قبل نصب شده یا نه، و استخراجِ فایلِ دانلودشده رو یه ترد پس‌زمینه.
+ * هماهنگ‌کننده‌ی نصب Debian. خودِ دانلود tar.xz مسئولیت شما با PRDownloader هست؛ این کلاس فقط دو
+ * کار میکنه: چک اینکه از قبل نصب شده یا نه، و استخراجِ فایلِ دانلودشده رو یه ترد پس‌زمینه.
  */
 public final class DebianBootstrap {
 
@@ -117,8 +120,7 @@ public final class DebianBootstrap {
   private static void runFirstBootSetup(Context context, File rootfsDir) throws IOException {
     File etc = new File(rootfsDir, "etc");
     if (!etc.exists() && !etc.mkdirs()) {
-      throw new IOException(
-          context.getString(R.string.terminal_error_cannot_create_etc_dir, etc));
+      throw new IOException(context.getString(R.string.terminal_error_cannot_create_etc_dir, etc));
     }
 
     writeFile(new File(etc, "resolv.conf"), "nameserver 8.8.8.8\nnameserver 8.8.4.4\n");
@@ -142,19 +144,15 @@ public final class DebianBootstrap {
   }
 
   private static void writeFile(File file, String content) throws IOException {
-    try (java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
-      out.write(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    try (FileOutputStream out = new FileOutputStream(file)) {
+      out.write(content.getBytes(StandardCharsets.UTF_8));
     }
   }
 
-  private static void appendGroupLinesIfMissing(File groupFile, String[] lines)
-      throws IOException {
+  private static void appendGroupLinesIfMissing(File groupFile, String[] lines) throws IOException {
     String existing = "";
     if (groupFile.exists()) {
-      existing =
-          new String(
-              java.nio.file.Files.readAllBytes(groupFile.toPath()),
-              java.nio.charset.StandardCharsets.UTF_8);
+      existing = new String(Files.readAllBytes(groupFile.toPath()), StandardCharsets.UTF_8);
     }
     StringBuilder toAppend = new StringBuilder();
     for (String line : lines) {
@@ -165,7 +163,7 @@ public final class DebianBootstrap {
       }
     }
     if (toAppend.length() > 0) {
-      try (java.io.FileOutputStream out = new java.io.FileOutputStream(groupFile, true)) {
+      try (FileOutputStream out = new FileOutputStream(groupFile, true)) {
         out.write(toAppend.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
       }
     }

@@ -107,4 +107,11 @@
   <string name="git_empty_stash_desc">Armazene suas alterações para mantê-las seguras para uso posterior.</string>
   <string name="git_empty_tags_title">Sem tags</string>
   <string name="git_empty_tags_desc">Crie uma tag para marcar pontos importantes da história.</string>
+  <string name="git_init_hint">Clique aqui (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">پیام کامیت</string>
+  <string name="git_init_commit_required">لطفاً پیام کامیت را وارد کنید</string>
+  <string name="git_init_info">طبق دستورهای Configuração rápida گیت‌هاب خودکار انجام می‌شود: اگر فایل .md در پوشه نباشد README.md ساخته می‌شود, git init, git add . (تمام فایل‌های پروژه با احترام به .gitignore), کامیت با پیام خودتان, تغییر برنچ به main, افزودن origin e push.</string>
+  <string name="git_init_start">شروع</string>
+  <string name="git_init_working">Qualquer coisa que você possa fazer e fazer…</string>
+  <string name="git_init_url_required">Para obter mais informações sobre o seu negócio (https://github.com/user/repo.git)</string>
 </resources>

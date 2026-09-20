@@ -3,6 +3,8 @@ package ir.hanzodev1375.ghostide.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
+import android.provider.OpenableColumns;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import ir.hanzodev1375.components.views.GhostToast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -39,12 +40,14 @@ import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.ai.chat.AttachedFilesAdapter;
 import ir.hanzodev1375.ghostide.ai.chat.ChatAdapter;
 import ir.hanzodev1375.ghostide.ai.chat.HistoryBottomSheetFragment;
+import ir.hanzodev1375.ghostide.ai.chat.OpencodeModelPickerFragment;
+import ir.hanzodev1375.ghostide.ai.chat.OpenRouterModelPickerFragment;
 import ir.hanzodev1375.ghostide.ai.database.ChatRepository;
 import ir.hanzodev1375.ghostide.ai.model.AttachedFile;
 import ir.hanzodev1375.ghostide.ai.model.ChatMessage;
+import ir.hanzodev1375.ghostide.ai.utils.AiConstants;
 import ir.hanzodev1375.ghostide.ai.network.AiClient;
 import ir.hanzodev1375.ghostide.ai.network.AiClientFactory;
-import ir.hanzodev1375.ghostide.ai.utils.AiConstants;
 import ir.hanzodev1375.ghostide.ai.utils.AiPreferencesUtils;
 import ir.hanzodev1375.ghostide.ai.utils.FileReadUtils;
 import ir.theme.M3Theme;
@@ -229,7 +232,11 @@ public class AiChatActivity extends BaseCompat {
         (parent, view, position, id) -> {
           String selected = PROVIDERS[position];
           prefs.setSelectedProvider(selected);
-          if (!prefs.hasApiKeyForProvider(selected)) {
+          if (AiConstants.AiProvider.OPENROUTER.equals(selected)) {
+            openOpenRouterModelPicker();
+          } else if (AiConstants.AiProvider.OPENCODE.equals(selected)) {
+            openOpencodeModelPicker();
+          } else if (!prefs.hasApiKeyForProvider(selected)) {
             GhostToast.makeText(
                     this, "API key not set. Go to Settings → AI Settings.", GhostToast.LENGTH_LONG)
                 .show();
@@ -238,8 +245,31 @@ public class AiChatActivity extends BaseCompat {
         });
   }
 
+  private void openOpenRouterModelPicker() {
+    OpenRouterModelPickerFragment picker = new OpenRouterModelPickerFragment();
+    picker.setOnModelSelectedListener(
+        (qualifiedId, name) ->
+            GhostToast.makeText(this, "Model set: " + name, GhostToast.LENGTH_SHORT).show());
+    picker.show(getSupportFragmentManager(), "openrouter_models");
+  }
+
+  private void openOpencodeModelPicker() {
+    OpencodeModelPickerFragment picker = new OpencodeModelPickerFragment();
+    picker.setOnModelSelectedListener(
+        (qualifiedId, name) ->
+            GhostToast.makeText(this, "Model set: " + name, GhostToast.LENGTH_SHORT).show());
+    picker.show(getSupportFragmentManager(), "opencode_models");
+  }
+
   private void setupChatRecyclerView() {
-    adapter = new ChatAdapter(messages);
+    adapter =
+        new ChatAdapter(
+            messages,
+            message -> {
+              if (currentChatId != -1) {
+                chatRepository.updateMessageContent(currentChatId, message);
+              }
+            });
     recyclerView.setItemAnimator(null);
     LinearLayoutManager lm = new LinearLayoutManager(this);
     lm.setStackFromEnd(true);
@@ -396,11 +426,11 @@ public class AiChatActivity extends BaseCompat {
   }
 
   private long queryFileSize(Uri uri) {
-    try (android.database.Cursor cursor =
+    try (Cursor cursor =
         getContentResolver()
-            .query(uri, new String[] {android.provider.OpenableColumns.SIZE}, null, null, null)) {
+            .query(uri, new String[] {OpenableColumns.SIZE}, null, null, null)) {
       if (cursor != null && cursor.moveToFirst()) {
-        int idx = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+        int idx = cursor.getColumnIndex(OpenableColumns.SIZE);
         if (idx >= 0 && !cursor.isNull(idx)) return cursor.getLong(idx);
       }
     } catch (Exception ignored) {
@@ -409,11 +439,11 @@ public class AiChatActivity extends BaseCompat {
   }
 
   private String resolveFileName(Uri uri) {
-    try (android.database.Cursor cursor =
+    try (Cursor cursor =
         getContentResolver()
             .query(
                 uri,
-                new String[] {android.provider.OpenableColumns.DISPLAY_NAME},
+                new String[] {OpenableColumns.DISPLAY_NAME},
                 null,
                 null,
                 null)) {

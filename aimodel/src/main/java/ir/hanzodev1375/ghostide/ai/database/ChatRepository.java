@@ -53,6 +53,27 @@ public class ChatRepository {
     db.close();
   }
 
+  public void updateMessageContent(long chatId, ChatMessage message) {
+    SQLiteDatabase db = dbHelper.getWritableDatabase();
+    ContentValues values = new ContentValues();
+    values.put(ChatContract.MessageEntry.COLUMN_CONTENT, message.getContent());
+    db.update(
+        ChatContract.MessageEntry.TABLE_NAME,
+        values,
+        ChatContract.MessageEntry.COLUMN_CHAT_ID
+            + " = ? AND "
+            + ChatContract.MessageEntry.COLUMN_TIMESTAMP
+            + " = ? AND "
+            + ChatContract.MessageEntry.COLUMN_TYPE
+            + " = ?",
+        new String[] {
+          String.valueOf(chatId),
+          String.valueOf(message.getTimestamp()),
+          String.valueOf(message.getType())
+        });
+    db.close();
+  }
+
   public List<ChatMessage> getMessagesByChatId(long chatId) {
     List<ChatMessage> messages = new ArrayList<>();
     SQLiteDatabase db = dbHelper.getReadableDatabase();

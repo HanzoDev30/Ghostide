@@ -27,15 +27,15 @@
   <string name="branch_rebase">Rebase</string>
   <string name="branch_delete">حذف کنید</string>
   <string name="branch_delete_confirm_title">حذف شعبه</string>
-  <string name="branch_delete_confirm_msg">شاخه \'%s\' حذف شود؟</string>
+  <string name="branch_delete_confirm_msg">شاخه \&apos;%s\&apos; حذف شود؟</string>
   <string name="branch_merge_confirm_title">ادغام شعبه</string>
-  <string name="branch_merge_confirm_msg">\'%1$s\' در \'%2$s\' ادغام شود؟</string>
+  <string name="branch_merge_confirm_msg">\&apos;%1$s\&apos; در \&apos;%2$s\&apos; ادغام شود؟</string>
   <string name="branch_rebase_confirm_title">Rebase</string>
-  <string name="branch_rebase_confirm_msg">\'%1$s\' را روی \'%2$s\' تغییر دهید؟\n\nاین تاریخچه commit را بازنویسی می‌کند.</string>
+  <string name="branch_rebase_confirm_msg">\&apos;%1$s\&apos; را روی \&apos;%2$s\&apos; تغییر دهید؟\n\nاین تاریخچه commit را بازنویسی می‌کند.</string>
   <string name="remote_add">از راه دور اضافه کنید</string>
   <string name="remote_remove">حذف کنید</string>
   <string name="remote_remove_confirm_title">Remote را بردارید</string>
-  <string name="remote_remove_confirm_msg">\'%s\' حذف شود؟</string>
+  <string name="remote_remove_confirm_msg">\&apos;%s\&apos; حذف شود؟</string>
   <string name="remote_push">فشار دهید</string>
   <string name="remote_pull">بکشید</string>
   <string name="remote_fetch">واکشی</string>
@@ -84,7 +84,7 @@
   <string name="tag_create">برچسب ایجاد کنید</string>
   <string name="tag_delete">حذف کنید</string>
   <string name="tag_delete_confirm_title">حذف برچسب</string>
-  <string name="tag_delete_confirm_msg">برچسب \'%s\' حذف شود؟</string>
+  <string name="tag_delete_confirm_msg">برچسب \&apos;%s\&apos; حذف شود؟</string>
   <string name="tag_no_tags">هنوز هیچ برچسبی وجود ندارد</string>
   <string name="gitignore_title">ویرایشگر .gitignore</string>
   <string name="gitignore_hint">الگوها را وارد کنید، یکی در هر خط…</string>
@@ -95,7 +95,6 @@
   <string name="gitignore_failed">gitignore ذخیره نشد</string>
   <string name="gitignore_templates">قالب ها</string>
   <string name="tab_blame">سرزنش کردن</string>
-
   <string name="git_empty_changes_title">تغییری وجود ندارد</string>
   <string name="git_empty_changes_desc">درخت کاری شما تمیز است. فایل‌های جدید یا ویرایش‌شده اینجا نمایش داده می‌شوند.</string>
   <string name="git_empty_history_title">هنوز کامیتی وجود ندارد</string>
@@ -108,4 +107,11 @@
   <string name="git_empty_stash_desc">تغییراتتان را استش کنید تا برای بعد امن بمانند.</string>
   <string name="git_empty_tags_title">تگی وجود ندارد</string>
   <string name="git_empty_tags_desc">یک تگ بسازید تا نقاط مهم تاریخچه را علامت‌گذاری کنید.</string>
+  <string name="git_init_hint">آدرس مخزن (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">پیام کامیت</string>
+  <string name="git_init_commit_required">لطفا پیام کامیت را وارد کنید</string>
+  <string name="git_init_info">طبق دستورات Quick setup گیت‌هااب خودکار انجام می‌شود: اگر فایل .md در پوشه نباشد README.m ساخته می‌شود، git init، git add. (تمام فایل‌های پروژه با احترام به .gitignore)، کامیت با پیام خود، تغییر برنچ به اصلی، افزودن مبدا و فشار.</string>
+  <string name="git_init_start">شروع کردن</string>
+  <string name="git_init_working">در حال ساخت مخزن و آپلود… لطفاً صبر کنید</string>
+  <string name="git_init_url_required">لطفاً آدرس مخزن را وارد کنید (https://github.com/user/repo.git)</string>
 </resources>

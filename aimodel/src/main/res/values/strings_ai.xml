@@ -22,4 +22,10 @@
     <string name="hint_chatgpt_key">OpenAI API Key</string>
     <string name="hint_deepseek_key">DeepSeek API Key</string>
     <string name="hint_gemini_key">Google AI API Key</string>
+
+    <!-- Message actions -->
+    <string name="chat_select_all">Select all</string>
+    <string name="chat_copy">Copy</string>
+    <string name="chat_cut">Cut</string>
+    <string name="chat_copied">Copied</string>
 </resources>

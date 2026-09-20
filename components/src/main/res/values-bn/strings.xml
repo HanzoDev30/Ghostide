@@ -97,11 +97,19 @@
   <string name="pluginstore_installed_button">ইনস্টল করা হয়েছে</string>
   <string name="pluginstore_install_and_source">ইন্সটল + সোর্স</string>
   <string name="pluginstore_install_only">শুধুমাত্র ইনস্টল করুন</string>
+  <string name="pluginstore_run_setup">টার্মিনালে চালান</string>
   <string name="pluginstore_no_description">কোন বিবরণ উপলব্ধ</string>
   <string name="pluginstore_installed">প্লাগইন %s ইনস্টল করা হয়েছে</string>
   <string name="pluginstore_install_error">ইনস্টল ব্যর্থ হয়েছে: %s</string>
   <string name="pluginstore_source_saved">উৎস %s এ সংরক্ষণ করা হয়েছে</string>
   <string name="pluginstore_source_error">উৎস ডাউনলোড ব্যর্থ হয়েছে: %s</string>
+  <string name="plugin_notify_channel">নতুন প্লাগইন</string>
+  <string name="plugin_notify_channel_desc">দোকানে একটি নতুন প্লাগইন প্রকাশিত হলে সতর্কতা</string>
+  <string name="plugin_notify_title">নতুন প্লাগইন উপলব্ধ</string>
+  <string name="plugin_notify_text">প্লাগইন স্টোরে %s যোগ করা হয়েছে</string>
+  <string name="plugin_check_foreground_channel">প্লাগইন চেকার</string>
+  <string name="plugin_check_foreground_title">প্লাগইন চেকার সক্রিয় আছে</string>
+  <string name="plugin_check_foreground_text">প্রতি 6 ঘন্টা নতুন প্লাগইন জন্য দোকান চেক</string>
   <string name="themes_dev_version">%1$s · v%2$d</string>
   <string name="themes_empty">কোন থিম উপলব্ধ</string>
   <string name="themes_error_network">নেটওয়ার্ক ত্রুটি: %1$s৷</string>
@@ -113,4 +121,7 @@
   <string name="themes_background_failed">পটভূমি ডাউনলোড ব্যর্থ হয়েছে</string>
   <string name="themes_description">বর্ণনা</string>
   <string name="themes_description_failed">কোন বিবরণ উপলব্ধ</string>
+  <string name="webstore_download_done">প্রজেক্ট গোস্টাইড/প্রজেক্টে ডাউনলোড করা হয়েছে</string>
+  <string name="webstore_download_failed">ডাউনলোড ব্যর্থ হয়েছে৷</string>
+  <string name="webstore_images">%1$dটি ছবি</string>
 </resources>

@@ -275,6 +275,71 @@ public final class M3Theme {
     return color(m3() != null ? m3().getOnTertiaryFixedVariant() : null);
   }
 
+  /**
+   * Editor bracket-match color for the given nesting level (1..6). Reads the persisted editor
+   * theme (or the live preview during a theme transition) and falls back to the default rainbow
+   * bracket palette when the theme does not define one.
+   */
+  public static Integer bracket(int level) {
+    EditorTheme editor = editorTheme();
+    if (editor != null) {
+      String hex = null;
+      switch (level) {
+        case 1:
+          hex = editor.getBracketlevelmatch1();
+          break;
+        case 2:
+          hex = editor.getBracketlevelmatch2();
+          break;
+        case 3:
+          hex = editor.getBracketlevelmatch3();
+          break;
+        case 4:
+          hex = editor.getBracketlevelmatch4();
+          break;
+        case 5:
+          hex = editor.getBracketlevelmatch5();
+          break;
+        case 6:
+          hex = editor.getBracketlevelmatch6();
+          break;
+        default:
+          return null;
+      }
+      Integer c = color(hex);
+      if (c != null) {
+        return c;
+      }
+    }
+    switch (level) {
+      case 1:
+        return Color.parseColor("#FFDD00");
+      case 2:
+        return Color.parseColor("#00D9FF");
+      case 3:
+        return Color.parseColor("#00FF55");
+      case 4:
+        return Color.parseColor("#FF6200");
+      case 5:
+        return Color.parseColor("#FF64F5");
+      case 6:
+        return Color.parseColor("#64FFD0");
+      default:
+        return null;
+    }
+  }
+
+  /** All six bracket-match colors (level 1..6), never null entries. */
+  public static int[] bracketPalette() {
+    int c1 = bracket(1);
+    int c2 = bracket(2);
+    int c3 = bracket(3);
+    int c4 = bracket(4);
+    int c5 = bracket(5);
+    int c6 = bracket(6);
+    return new int[] {c1, c2, c3, c4, c5, c6};
+  }
+
   public static Integer inverseSurface() {
     return color(m3() != null ? m3().getInverseSurface() : null);
   }
@@ -1198,6 +1263,18 @@ public final class M3Theme {
       return null;
     }
     return g.getMaterial3();
+  }
+
+  private static EditorTheme editorTheme() {
+    EditorTheme preview = preViewEditor;
+    if (preview != null) {
+      return preview;
+    }
+    GhostTheme g = theme();
+    if (g == null) {
+      return null;
+    }
+    return g.getEditor();
   }
 
   public static WidgetTheme widget() {

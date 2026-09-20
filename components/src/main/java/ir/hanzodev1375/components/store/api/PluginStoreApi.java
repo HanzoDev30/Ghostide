@@ -29,6 +29,8 @@ public class PluginStoreApi {
       new OkHttpClient.Builder()
           .connectTimeout(15, TimeUnit.SECONDS)
           .readTimeout(30, TimeUnit.SECONDS)
+          .writeTimeout(30, TimeUnit.SECONDS)
+          .callTimeout(20, TimeUnit.SECONDS)
           .build();
 
   private static final Gson GSON = new Gson();

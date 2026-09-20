@@ -103,6 +103,13 @@
   <string name="pluginstore_install_error">Falha na instalação: %s</string>
   <string name="pluginstore_source_saved">Fonte salva em %s</string>
   <string name="pluginstore_source_error">Falha no download da fonte: %s</string>
+  <string name="plugin_notify_channel">Novos plug-ins</string>
+  <string name="plugin_notify_channel_desc">Alertas quando um novo plugin é publicado na loja</string>
+  <string name="plugin_notify_title">Novo plugin disponível</string>
+  <string name="plugin_notify_text">%s acabou de ser adicionado à loja de plugins</string>
+  <string name="plugin_check_foreground_channel">Verificador de plug-ins</string>
+  <string name="plugin_check_foreground_title">O verificador de plug-ins está ativo</string>
+  <string name="plugin_check_foreground_text">Verifica a loja em busca de novos plugins a cada 6 horas</string>
   <string name="themes_dev_version">%1$s ·v%2$d</string>
   <string name="themes_empty">Nenhum tema disponível</string>
   <string name="themes_error_network">Erro de rede: %1$s</string>

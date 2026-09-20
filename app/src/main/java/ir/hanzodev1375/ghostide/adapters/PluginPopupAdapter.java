@@ -31,14 +31,9 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
 
   private final List<PluginItem> items = new ArrayList<>();
   private final OnItemClickListener<PluginItem> listener;
-  private int fallbackIconRes = R.mipmap.ic_lego_foreground;
 
   public PluginPopupAdapter(OnItemClickListener<PluginItem> listener) {
     this.listener = listener;
-  }
-
-  public void setFallbackIcon(int res) {
-    this.fallbackIconRes = res;
   }
 
   public void submit(List<PluginItem> newItems) {
@@ -62,11 +57,12 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
     holder.typeIcon.setImageResource(typeIconRes(item.id()));
 
     byte[] iconBytes = GplManifestReader.readIconBytes(item.gplFile(), item.manifest());
-    if (iconBytes != null) {
-      Bitmap bitmap = BitmapFactory.decodeByteArray(iconBytes, 0, iconBytes.length);
+    Bitmap bitmap =
+        iconBytes != null ? BitmapFactory.decodeByteArray(iconBytes, 0, iconBytes.length) : null;
+    if (bitmap != null) {
       Glide.with(holder.icon.getContext()).asBitmap().load(bitmap).centerInside().into(holder.icon);
     } else {
-      holder.icon.setImageResource(fallbackIconRes);
+      holder.icon.setImageResource(fallbackIconFor(item.id()));
     }
 
     holder.itemView.setOnClickListener(
@@ -99,6 +95,33 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
         .filter(r -> pluginId.equals(r.ownerPluginId()))
         .map(r -> (PluginScreen) r.extension())
         .toList();
+  }
+
+  public static boolean isLsp(String pluginId) {
+    return owns(pluginId, EditorExtensionPoints.LSP_SERVER_PROVIDER);
+  }
+
+  public static boolean isEditor(String pluginId) {
+    return owns(pluginId, PluginUiExtensionPoints.EDITOR_PANEL)
+        || owns(pluginId, PluginUiExtensionPoints.EDITOR_ACTION_HANDLER);
+  }
+
+  public static boolean isScreen(String pluginId) {
+    return owns(pluginId, PluginUiExtensionPoints.PLUGIN_SCREEN);
+  }
+
+  /** Icon shown when the plugin ships no usable icon in its .gpl package. */
+  public static int fallbackIconFor(String pluginId) {
+    if (isLsp(pluginId)) {
+      return R.drawable.ic_plugin_lsp;
+    }
+    if (isEditor(pluginId)) {
+      return R.drawable.ic_plugin_editor;
+    }
+    if (isScreen(pluginId)) {
+      return R.drawable.ic_plugin_misc;
+    }
+    return R.drawable.ic_outline_extension;
   }
 
   private static boolean owns(String pluginId, ExtensionPoint<?> point) {

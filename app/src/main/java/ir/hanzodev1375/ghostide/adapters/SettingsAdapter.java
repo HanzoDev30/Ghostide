@@ -3,6 +3,7 @@ package ir.hanzodev1375.ghostide.adapters;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
@@ -126,7 +127,7 @@ public class SettingsAdapter extends RecyclerView.Adapter<SettingsAdapter.ViewHo
     holder.switchGroup.setValue(item.isChecked());
     holder.switchGroup.getSwitch().setOnCheckedChangeListener(null);
     if (item.getListener() != null) {
-      holder.switchGroup.getSwitch().setVisibility(android.view.View.VISIBLE);
+      holder.switchGroup.getSwitch().setVisibility(View.VISIBLE);
       holder.switchGroup.setSwitchChangedListener(
           (button, isChecked) -> {
             item.setChecked(isChecked);
@@ -134,7 +135,7 @@ public class SettingsAdapter extends RecyclerView.Adapter<SettingsAdapter.ViewHo
           });
       holder.switchGroup.setOnClickListener(holder.switchGroup);
     } else {
-      holder.switchGroup.getSwitch().setVisibility(android.view.View.GONE);
+      holder.switchGroup.getSwitch().setVisibility(View.GONE);
       holder.switchGroup.setOnClickListener(
           v -> {
             if (listener != null) {

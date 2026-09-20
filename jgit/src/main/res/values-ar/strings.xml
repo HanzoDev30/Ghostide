@@ -107,4 +107,11 @@
   <string name="git_empty_stash_desc">قم بتخزين تغييراتك لإبقائها آمنة لوقت لاحق.</string>
   <string name="git_empty_tags_title">لا توجد علامات</string>
   <string name="git_empty_tags_desc">قم بإنشاء علامة لتحديد النقاط المهمة في التاريخ.</string>
+  <string name="git_init_hint">عنوان مخزن (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">غرفة كاملة</string>
+  <string name="git_init_commit_required">من فضلك قم بإعادة الأموال</string>
+  <string name="git_init_info">تعليمات تعليمات الإعداد السريع: إذا لم يكن الملف .md في الدفع، فاختر README.md، git init، git add . (جميع الملفات التي تم تطويرها مع الاعتراف بـ .gitignore)، والتعاقد مع بيام جودتان، وتغيير برنش إلى الأصل الرئيسي والدفع.</string>
+  <string name="git_init_start">الشروع</string>
+  <string name="git_init_working">في الوقت الحالي اختيرت مخزنًا ومتجرًا… من فضلك كن صبورًا</string>
+  <string name="git_init_url_required">يرجى الحصول على عنوان المتجر (https://github.com/user/repo.git)</string>
 </resources>

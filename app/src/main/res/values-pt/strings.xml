@@ -460,6 +460,7 @@
   <string name="plugin_manager_installed_toast">%1$s instalado</string>
   <string name="plugin_manager_not_gpl_file">Escolha um arquivo de plug-in .gpl</string>
   <string name="plugin_manager_run_setup">Execute no terminal</string>
+  <string name="plugin_manager_no_setup">Este plugin não possui ações de configuração para executar</string>
   <string name="pluginstore_empty">Nenhum plug-in disponível ainda</string>
   <string name="pluginstore_install">Instalar</string>
   <string name="pluginstore_busy">Trabalhando…</string>
@@ -497,10 +498,6 @@
   <string name="terminal_status_downloading">Baixando: %1$d%%</string>
   <string name="terminal_status_extracting">Extraindo... (%1$d arquivos)</string>
   <string name="terminal_debian_installed_success">Debian instalado ✓</string>
-  <string name="all_blur">Mod de desfoque</string>
-  <string name="all_blur_subtitle">Desfoque todos os componentes.</string>
-  <string name="pref_glass_material_color">Cor do vidro material</string>
-  <string name="pref_glass_material_color_desc">Aplicar cor de material às superfícies de vidro</string>
   <string name="pref_glass_tint">Intensidade da cor do vidro</string>
   <string name="pref_glass_tint_desc">Ajuste a intensidade da cor aplicada às superfícies de vidro</string>
   <string name="webcolor">Mostrar seletor de coresWeb</string>

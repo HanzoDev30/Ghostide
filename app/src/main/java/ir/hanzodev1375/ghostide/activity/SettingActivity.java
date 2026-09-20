@@ -1,6 +1,8 @@
 package ir.hanzodev1375.ghostide.activity;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,7 @@ import ir.hanzodev1375.ghostide.settings.EditorSettingSection;
 import ir.hanzodev1375.ghostide.settings.LspSettingSection;
 import ir.hanzodev1375.ghostide.settings.SettingSection;
 import ir.theme.M3Theme;
+import ir.theme.ThemeUtils;
 
 /**
  * Thin coordinator for the settings screen. Every section (Editor/App/AI/LSP) lives in
@@ -51,7 +54,11 @@ public class SettingActivity extends BaseCompat {
     setContentView(R.layout.activity_setting);
     aiPrefs = new AiPreferencesUtils(this);
     prefs = new PreferencesUtils(this);
-    setupBackgroundBlur();
+    new Handler(Looper.getMainLooper())
+        .post(
+            () -> {
+              if (!isFinishing()) setupBackgroundBlur();
+            });
     MaterialToolbar toolbar = findViewById(R.id.toolbar);
     ser = findViewById(R.id.searchitem);
 
@@ -193,6 +200,15 @@ public class SettingActivity extends BaseCompat {
     toolbar.setBackgroundColor(0);
     if (settingsContainer == null || backgroundIcon == null) return;
     setupBackgroundBlur(backgroundIcon, settingRoot, appbar, scrollView);
+  }
+
+  /**
+   * Every theme change (dialog preview, store preview, applied theme) re-runs the background blur so
+   * a backgrounded theme shows its image at once and a backgroundless theme hides the ViewChilder.
+   */
+  @Override
+  protected void applyOwnTheme(ThemeUtils themeUtils) {
+    setupBackgroundBlur();
   }
 
   @Override

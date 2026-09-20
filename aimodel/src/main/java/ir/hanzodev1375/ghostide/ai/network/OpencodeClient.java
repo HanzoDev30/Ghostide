@@ -14,12 +14,15 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import ir.hanzodev1375.ghostide.ai.model.AttachedFile;
 import ir.hanzodev1375.ghostide.ai.model.ChatMessage;
+import ir.hanzodev1375.ghostide.ai.model.OpencodeModelInfo;
 import ir.hanzodev1375.ghostide.ai.utils.AiConstants;
 
 public class OpencodeClient implements AiClient {
@@ -29,12 +32,17 @@ public class OpencodeClient implements AiClient {
   private final String baseUrl;
   private final String username;
   private final String password;
+  private final String model;
   private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
   private volatile String sessionId;
 
   public OpencodeClient(String baseUrl, String username, String password) {
+    this(baseUrl, username, password, null);
+  }
+
+  public OpencodeClient(String baseUrl, String username, String password, String model) {
     String url = baseUrl == null ? "" : baseUrl.trim();
     while (url.endsWith("/")) {
       url = url.substring(0, url.length() - 1);
@@ -42,6 +50,7 @@ public class OpencodeClient implements AiClient {
     this.baseUrl = url.isEmpty() ? AiConstants.ApiEndpoints.OPENCODE_BASE_URL : url;
     this.username = username;
     this.password = password;
+    this.model = model;
   }
 
   @Override
@@ -85,6 +94,9 @@ public class OpencodeClient implements AiClient {
 
             body.put("parts", parts);
             body.put("noReply", false);
+            if (model != null && !model.trim().isEmpty()) {
+              body.put("model", model.trim());
+            }
 
             JSONObject resp = postJson(baseUrl + "/session/" + sessionId + "/message", body);
             String text = extractText(resp);
@@ -184,5 +196,103 @@ public class OpencodeClient implements AiClient {
   @Override
   public String getProviderName() {
     return AiConstants.AiProvider.OPENCODE;
+  }
+
+  /** Fetches the providers and their models from the opencode server (blocking). */
+  public List<OpencodeModelInfo> getModels() throws Exception {
+    JSONObject resp = getJson(baseUrl + "/provider");
+    JSONArray all = resp.optJSONArray("all");
+    if (all == null) {
+      return Collections.emptyList();
+    }
+    JSONArray connected = resp.optJSONArray("connected");
+    List<String> connectedIds = new ArrayList<>();
+    if (connected != null) {
+      for (int i = 0; i < connected.length(); i++) {
+        String id = connected.optString(i);
+        if (id != null && !id.isEmpty()) {
+          connectedIds.add(id);
+        }
+      }
+    }
+
+    List<OpencodeModelInfo> models = new ArrayList<>();
+    for (int i = 0; i < all.length(); i++) {
+      JSONObject provider = all.optJSONObject(i);
+      if (provider == null) {
+        continue;
+      }
+      String providerId = provider.optString("id");
+      String providerName = provider.optString("name", providerId);
+      boolean connectedState = connectedIds.contains(providerId);
+      JSONArray providerModels = provider.optJSONArray("models");
+      if (providerModels == null) {
+        continue;
+      }
+      for (int j = 0; j < providerModels.length(); j++) {
+        JSONObject m = providerModels.optJSONObject(j);
+        if (m == null) {
+          continue;
+        }
+        String modelId = m.optString("modelID");
+        if (modelId == null || modelId.isEmpty()) {
+          modelId = m.optString("id");
+        }
+        if (modelId == null || modelId.isEmpty()) {
+          continue;
+        }
+        String name = m.optString("name", modelId);
+        boolean free = isFree(m);
+        models.add(new OpencodeModelInfo(providerId, providerName, modelId, name, free, connectedState));
+      }
+    }
+    return models;
+  }
+
+  private boolean isFree(JSONObject model) {
+    JSONObject price = model.optJSONObject("price");
+    if (price == null) {
+      return true;
+    }
+    double input = price.optDouble("input", 0d);
+    double output = price.optDouble("output", 0d);
+    return !price.has("input") && !price.has("output") || (input <= 0 && output <= 0);
+  }
+
+  private JSONObject getJson(String urlStr) throws Exception {
+    URL url = new URL(urlStr);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("GET");
+    conn.setRequestProperty("Accept", "application/json");
+    applyAuth(conn);
+    conn.setConnectTimeout(30_000);
+    conn.setReadTimeout(30_000);
+
+    int code = conn.getResponseCode();
+    BufferedReader reader =
+        new BufferedReader(
+            new InputStreamReader(
+                code == 200 ? conn.getInputStream() : conn.getErrorStream(),
+                StandardCharsets.UTF_8));
+    StringBuilder sb = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) sb.append(line);
+    reader.close();
+    conn.disconnect();
+
+    if (code != 200) {
+      throw new Exception("OpenCode server error " + code + ": " + sb);
+    }
+    return new JSONObject(sb.toString());
+  }
+
+  private void applyAuth(HttpURLConnection conn) {
+    if (password != null && !password.isEmpty()) {
+      String user = (username == null || username.isEmpty()) ? "opencode" : username;
+      String cred =
+          Base64.encodeToString(
+              (user + ":" + password).getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+      conn.setRequestProperty("Authorization", "Basic " + cred);
+    }
   }
 }

@@ -38,6 +38,7 @@ public class PluginRepository {
           .connectTimeout(15, TimeUnit.SECONDS)
           .readTimeout(60, TimeUnit.SECONDS)
           .writeTimeout(60, TimeUnit.SECONDS)
+          .callTimeout(60, TimeUnit.SECONDS)
           .build();
 
   public interface Callback<T> {

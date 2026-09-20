@@ -107,4 +107,11 @@
   <string name="git_empty_stash_desc">Сохраните изменения, чтобы сохранить их на будущее.</string>
   <string name="git_empty_tags_title">Нет тегов</string>
   <string name="git_empty_tags_desc">Создайте тег, чтобы отметить важные моменты в истории.</string>
+  <string name="git_init_hint">Дополнительная информация (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">پیام کامیت</string>
+  <string name="git_init_commit_required">لطفاً پیام کامیت را وارد کنید</string>
+  <string name="git_init_info">Перейти к началу страницы Быстрая установка Доступ к файлу: Файл .md или файл .md. README.md содержит файлы git init, git add . (Если вы хотите использовать .gitignore) Выберите main, افزودن origin и push.</string>
+  <string name="git_init_start">شروع</string>
+  <string name="git_init_working">در حال ساخت مخزن و آپلود… لطفاً صبر کنید</string>
+  <string name="git_init_url_required">Получите дополнительную информацию об этом (https://github.com/user/repo.git)</string>
 </resources>

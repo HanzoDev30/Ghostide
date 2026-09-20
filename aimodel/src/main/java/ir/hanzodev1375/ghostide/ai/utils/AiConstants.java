@@ -31,6 +31,7 @@ public class AiConstants {
         public static final String KEY_AI_DEEPSEEK_MODEL = "pref_ai_deepseek_model";
         public static final String KEY_AI_GEMINI_MODEL = "pref_ai_gemini_model";
         public static final String KEY_AI_OPENROUTER_MODEL = "pref_ai_openrouter_model";
+        public static final String KEY_AI_OPENCODE_MODEL = "pref_ai_opencode_model";
 
         private SharedPreferenceKeys() {
             throw new UnsupportedOperationException("Utility class");

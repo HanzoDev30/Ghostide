@@ -1,12 +1,21 @@
 package ir.hanzodev1375.ghostide.ai.chat;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.text.Selection;
+import android.text.Spannable;
 import android.text.TextUtils;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,7 +31,17 @@ import ir.theme.M3Theme;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+  private static final int ID_SELECT_ALL = 0x6001;
+  private static final int ID_COPY = 0x6002;
+  private static final int ID_CUT = 0x6003;
+
+  /** Lets the Activity persist edits triggered by the bubble's Cut action. */
+  public interface ChatMessageActionCallback {
+    void onMessageEdited(ChatMessage message);
+  }
+
   private final List<ChatMessage> messages;
+  private final ChatMessageActionCallback actionCallback;
   private boolean animateNextBind;
   private RecyclerView attachedTo;
 
@@ -40,7 +59,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
       };
 
   public ChatAdapter(List<ChatMessage> messages) {
+    this(messages, null);
+  }
+
+  public ChatAdapter(List<ChatMessage> messages, ChatMessageActionCallback actionCallback) {
     this.messages = messages;
+    this.actionCallback = actionCallback;
   }
 
   @Override
@@ -106,7 +130,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     } else if (holder instanceof AiViewHolder) {
       AiViewHolder aiHolder = (AiViewHolder) holder;
-      aiHolder.tvMessage.setText(msg.getContent());
+      String content = msg.getContent() == null ? "" : msg.getContent();
+      if (content.trim().isEmpty()) {
+        aiHolder.tvMessage.setText("");
+        aiHolder.tvMessage.setVisibility(View.GONE);
+      } else {
+        ChatMarkwon.setMarkdown(aiHolder.tvMessage, content);
+        aiHolder.tvMessage.setVisibility(View.VISIBLE);
+        aiHolder.tvMessage.setTextIsSelectable(true);
+        aiHolder.setupSelectionActions(
+            msg,
+            actionCallback,
+            () -> {
+              int p = aiHolder.getBindingAdapterPosition();
+              if (p != RecyclerView.NO_POSITION) {
+                notifyItemChanged(p);
+              }
+            });
+      }
       aiHolder.tvProvider.setText(msg.getProvider().toUpperCase());
     } else if (holder instanceof ErrorViewHolder) {
       ((ErrorViewHolder) holder).tvError.setText(msg.getContent());
@@ -148,6 +189,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
       ivImage = itemView.findViewById(R.id.iv_user_image);
       chatFadeView = itemView.findViewById(R.id.chat_fade_view);
       chatFadeView.setFadeHeightsDp(44, 36);
+      chatFadeView.setTailSide(ChatFadeView.TAIL_RIGHT);
     }
   }
 
@@ -162,6 +204,73 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
       tvProvider = itemView.findViewById(R.id.tv_provider_label);
       chatFadeView = itemView.findViewById(R.id.chat_fade_view_ai);
       chatFadeView.setFadeHeightsDp(44, 36);
+      chatFadeView.setTailSide(ChatFadeView.TAIL_LEFT);
+    }
+
+    void setupSelectionActions(
+        ChatMessage message, ChatMessageActionCallback callback, Runnable rerender) {
+      tvMessage.setCustomSelectionActionModeCallback(
+          new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+              return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+              menu.clear();
+              menu.add(Menu.NONE, ID_SELECT_ALL, 0, R.string.chat_select_all);
+              menu.add(Menu.NONE, ID_COPY, 1, R.string.chat_copy);
+              menu.add(Menu.NONE, ID_CUT, 2, R.string.chat_cut);
+              return true;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+              CharSequence full = tvMessage.getText();
+              String text = full != null ? full.toString() : "";
+              if (item.getItemId() == ID_SELECT_ALL) {
+                CharSequence all = tvMessage.getText();
+                if (all instanceof Spannable) {
+                  Selection.setSelection((Spannable) all, 0, all.length());
+                }
+                return true;
+              }
+              int start = Math.max(0, tvMessage.getSelectionStart());
+              int end = Math.max(start, tvMessage.getSelectionEnd());
+              String selected =
+                  start < text.length() && start < end ? text.substring(start, end) : text;
+              copyToClipboard(tvMessage.getContext(), selected);
+              if (item.getItemId() == ID_CUT
+                  && start < end
+                  && start < text.length()
+                  && end <= text.length()) {
+                message.setContent(text.substring(0, start) + text.substring(end));
+                if (callback != null) {
+                  callback.onMessageEdited(message);
+                }
+                if (rerender != null) {
+                  rerender.run();
+                }
+              }
+              mode.finish();
+              return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {}
+          });
+    }
+
+    private void copyToClipboard(Context context, String text) {
+      try {
+        ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm != null) {
+          cm.setPrimaryClip(ClipData.newPlainText("chat", text));
+          Toast.makeText(context, R.string.chat_copied, Toast.LENGTH_SHORT).show();
+        }
+      } catch (RuntimeException ignored) {
+      }
     }
   }
 

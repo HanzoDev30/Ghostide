@@ -103,6 +103,13 @@
   <string name="pluginstore_install_error">इंस्टॉल विफल: %s</string>
   <string name="pluginstore_source_saved">स्रोत %s में सहेजा गया</string>
   <string name="pluginstore_source_error">स्रोत डाउनलोड विफल: %s</string>
+  <string name="plugin_notify_channel">नए प्लगइन्स</string>
+  <string name="plugin_notify_channel_desc">स्टोर में कोई नया प्लगइन प्रकाशित होने पर अलर्ट</string>
+  <string name="plugin_notify_title">नया प्लगइन उपलब्ध है</string>
+  <string name="plugin_notify_text">%s को अभी प्लगइन स्टोर में जोड़ा गया था</string>
+  <string name="plugin_check_foreground_channel">प्लगइन चेकर</string>
+  <string name="plugin_check_foreground_title">प्लगइन चेकर सक्रिय है</string>
+  <string name="plugin_check_foreground_text">हर 6 घंटे में नए प्लगइन्स के लिए स्टोर की जाँच करता है</string>
   <string name="themes_dev_version">%1$s · v%2$d</string>
   <string name="themes_empty">कोई थीम उपलब्ध नहीं है</string>
   <string name="themes_error_network">नेटवर्क त्रुटि: %1$s</string>

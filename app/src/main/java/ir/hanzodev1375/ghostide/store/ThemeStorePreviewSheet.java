@@ -7,11 +7,21 @@ import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import com.blankj.utilcode.util.FileIOUtils;
 import com.blankj.utilcode.util.FileUtils;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.slider.Slider;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import ir.hanzodev1375.components.sheet.BaseBlurBottomSheet;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -143,17 +153,17 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
     binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Editor"));
     binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Widgets"));
     binding.tabLayout.addOnTabSelectedListener(
-        new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
+        new TabLayout.OnTabSelectedListener() {
           @Override
-          public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab tab) {
+          public void onTabSelected(TabLayout.Tab tab) {
             updateTabVisibility(tab.getPosition() == 0);
           }
 
           @Override
-          public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+          public void onTabUnselected(TabLayout.Tab tab) {}
 
           @Override
-          public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+          public void onTabReselected(TabLayout.Tab tab) {}
         });
     updateTabVisibility(true);
   }
@@ -438,24 +448,23 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
 
   private void applyWidgetRecursively(
       View v, int surface, int accent, int text, int hint, int imageTint, int onSurface) {
-    if (v instanceof com.google.android.material.materialswitch.MaterialSwitch) {
-      ((com.google.android.material.materialswitch.MaterialSwitch) v)
+    if (v instanceof MaterialSwitch) {
+      ((MaterialSwitch) v)
           .setButtonTintList(ColorStateList.valueOf(accent));
-      ((com.google.android.material.materialswitch.MaterialSwitch) v).setThumbTintList(null);
-    } else if (v instanceof com.google.android.material.checkbox.MaterialCheckBox) {
-      ((com.google.android.material.checkbox.MaterialCheckBox) v)
+      ((MaterialSwitch) v).setThumbTintList(null);
+    } else if (v instanceof MaterialCheckBox) {
+      ((MaterialCheckBox) v)
           .setButtonTintList(ColorStateList.valueOf(accent));
-    } else if (v instanceof com.google.android.material.slider.Slider) {
-      ((com.google.android.material.slider.Slider) v)
+    } else if (v instanceof Slider) {
+      ((Slider) v)
           .setThumbTintList(ColorStateList.valueOf(accent));
-      ((com.google.android.material.slider.Slider) v)
+      ((Slider) v)
           .setTickTintList(ColorStateList.valueOf(accent));
-    } else if (v instanceof com.google.android.material.appbar.MaterialToolbar) {
-      ((com.google.android.material.appbar.MaterialToolbar) v).setBackgroundColor(surface);
-      ((com.google.android.material.appbar.MaterialToolbar) v).setTitleTextColor(text);
-    } else if (v instanceof com.google.android.material.floatingactionbutton.FloatingActionButton) {
-      com.google.android.material.floatingactionbutton.FloatingActionButton fab =
-          (com.google.android.material.floatingactionbutton.FloatingActionButton) v;
+    } else if (v instanceof MaterialToolbar) {
+      ((MaterialToolbar) v).setBackgroundColor(surface);
+      ((MaterialToolbar) v).setTitleTextColor(text);
+    } else if (v instanceof FloatingActionButton) {
+      FloatingActionButton fab = (FloatingActionButton) v;
       WidgetTheme w = appliedTheme != null ? appliedTheme.getWidget() : null;
       if (w != null) {
         if (w.getFabBackground() != null) {
@@ -467,20 +476,20 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
           fab.setColorFilter(imageTint);
         }
       }
-    } else if (v instanceof com.google.android.material.tabs.TabLayout) {
-      ((com.google.android.material.tabs.TabLayout) v).setBackgroundColor(surface);
-      ((com.google.android.material.tabs.TabLayout) v).setSelectedTabIndicatorColor(accent);
-    } else if (v instanceof com.google.android.material.bottomnavigation.BottomNavigationView) {
-      ((com.google.android.material.bottomnavigation.BottomNavigationView) v)
+    } else if (v instanceof TabLayout) {
+      ((TabLayout) v).setBackgroundColor(surface);
+      ((TabLayout) v).setSelectedTabIndicatorColor(accent);
+    } else if (v instanceof BottomNavigationView) {
+      ((BottomNavigationView) v)
           .setBackgroundColor(surface);
-    } else if (v instanceof com.google.android.material.textfield.TextInputLayout) {
-      ((com.google.android.material.textfield.TextInputLayout) v).setBoxStrokeColor(accent);
-    } else if (v instanceof com.google.android.material.button.MaterialButton) {
-      ((com.google.android.material.button.MaterialButton) v)
+    } else if (v instanceof TextInputLayout) {
+      ((TextInputLayout) v).setBoxStrokeColor(accent);
+    } else if (v instanceof MaterialButton) {
+      ((MaterialButton) v)
           .setBackgroundTintList(ColorStateList.valueOf(accent));
-      ((com.google.android.material.button.MaterialButton) v).setTextColor(onSurface);
-    } else if (v instanceof android.widget.TextView) {
-      ((android.widget.TextView) v).setTextColor(text);
+      ((MaterialButton) v).setTextColor(onSurface);
+    } else if (v instanceof TextView) {
+      ((TextView) v).setTextColor(text);
     }
 
     if (v instanceof ViewGroup) {
