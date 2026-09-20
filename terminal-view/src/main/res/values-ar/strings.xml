@@ -1,0 +1,7 @@
+<resources>
+  <string name="paste_text">الصق</string>
+  <string name="copy_text">نسخ</string>
+  <string name="text_selection_more">المزيد…</string>
+  <string name="terminal_completion_item_icon">نوع الإكمال</string>
+  <string name="terminal_completion_loading">جارٍ التحميل…</string>
+</resources>

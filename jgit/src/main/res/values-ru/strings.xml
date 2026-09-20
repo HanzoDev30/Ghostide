@@ -1,117 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <!-- General -->
   <string name="app_name">GhostIDE Git</string>
   <string name="cancel">Отмена</string>
-  <string name="confirm">Подтверждать</string>
-  <string name="ok">ХОРОШО</string>
+  <string name="confirm">Подтвердить</string>
+  <string name="ok">ОК</string>
   <string name="delete">Удалить</string>
-  <string name="save">Сохранять</string>
-  <string name="close">Закрывать</string>
+  <string name="save">Сохранить</string>
+  <string name="close">Закрыть</string>
   <string name="error">Ошибка</string>
-  <string name="success">Успех</string>
+  <string name="success">Успешно</string>
   <string name="loading">Загрузка…</string>
+
+  <!-- Tabs -->
   <string name="tab_changes">Изменения</string>
   <string name="tab_history">История</string>
-  <string name="tab_branches">Филиалы</string>
-  <string name="tab_remotes">Пульты</string>
-  <string name="tab_stash">Тайник</string>
+  <string name="tab_branches">Ветки</string>
+  <string name="tab_remotes">Удалённые</string>
+  <string name="tab_stash">Stash</string>
   <string name="tab_conflicts">Конфликты</string>
-  <string name="tab_diff">Разница</string>
-  <string name="tab_reset">Перезагрузить</string>
+  <string name="tab_diff">Различия</string>
+  <string name="tab_reset">Сброс</string>
   <string name="tab_tags">Теги</string>
-  <string name="tab_gitignore">Житигнор</string>
-  <string name="branch_new_hint">Новое название филиала</string>
-  <string name="branch_create">Создавать</string>
-  <string name="branch_checkout">Проверить</string>
-  <string name="branch_merge">Объединить</string>
-  <string name="branch_rebase">Перебазировать</string>
+  <string name="tab_gitignore">Gitignore</string>
+
+  <!-- Branches -->
+  <string name="branch_new_hint">Название новой ветки</string>
+  <string name="branch_create">Создать</string>
+  <string name="branch_checkout">Переключить</string>
+  <string name="branch_merge">Слияние</string>
+  <string name="branch_rebase">Rebase</string>
   <string name="branch_delete">Удалить</string>
   <string name="branch_delete_confirm_title">Удалить ветку</string>
-  <string name="branch_delete_confirm_msg">Удалить ветку \&apos;%s\&apos;?</string>
-  <string name="branch_merge_confirm_title">Объединить ветку</string>
-  <string name="branch_merge_confirm_msg">Объединить \&apos;%1$s\&apos; с \&apos;%2$s\&apos;?</string>
-  <string name="branch_rebase_confirm_title">Перебазировать</string>
-  <string name="branch_rebase_confirm_msg">Перебазировать \&apos;%1$s\&apos; на \&apos;%2$s\&apos;?\n\nПри этом история коммитов перезаписывается.</string>
-  <string name="remote_add">Добавить удаленный</string>
-  <string name="remote_remove">Удалять</string>
-  <string name="remote_remove_confirm_title">Удалить удаленный</string>
-  <string name="remote_remove_confirm_msg">Удалить \&apos;%s\&apos;?</string>
-  <string name="remote_push">Толкать</string>
-  <string name="remote_pull">Тянуть</string>
-  <string name="remote_fetch">Принести</string>
-  <string name="remote_no_token">Токен GitHub не найден. Пожалуйста, сначала войдите в систему.</string>
-  <string name="remote_uncommitted_title">Незафиксированные изменения</string>
-  <string name="remote_uncommitted_push_msg">У вас есть незафиксированные изменения. Пожалуйста, зафиксируйте их перед отправкой.</string>
-  <string name="remote_uncommitted_pull_msg">У вас есть незафиксированные изменения. Притяжение может вызвать конфликты. Все равно продолжить?</string>
+  <string name="branch_delete_confirm_msg">Удалить ветку \'%s\'?</string>
+  <string name="branch_merge_confirm_title">Слияние веток</string>
+  <string name="branch_merge_confirm_msg">Объединить \'%1$s\' с \'%2$s\'?</string>
+  <string name="branch_rebase_confirm_title">Rebase</string>
+  <string name="branch_rebase_confirm_msg">Перебазировать \'%1$s\' на \'%2$s\'?\n\nЭто перепишет историю коммитов.</string>
+
+  <!-- Remotes -->
+  <string name="remote_add">Добавить удалённый репозиторий</string>
+  <string name="remote_remove">Удалить</string>
+  <string name="remote_remove_confirm_title">Удалить remote</string>
+  <string name="remote_remove_confirm_msg">Удалить \'%s\'?</string>
+  <string name="remote_push">Push</string>
+  <string name="remote_pull">Pull</string>
+  <string name="remote_fetch">Fetch</string>
+  <string name="remote_no_token">Токен GitHub не найден. Сначала войдите в систему.</string>
+  <string name="remote_uncommitted_title">Незакоммиченные изменения</string>
+  <string name="remote_uncommitted_push_msg">У вас есть незакоммиченные изменения. Перед push выполните коммит.</string>
+  <string name="remote_uncommitted_pull_msg">У вас есть незакоммиченные изменения. Pull может вызвать конфликты. Продолжить?</string>
   <string name="remote_fetching">Загрузка из %s…</string>
-  <string name="stash_message_hint">Тайное сообщение (необязательно)</string>
-  <string name="stash_save">Тайник</string>
-  <string name="stash_pop">Поп</string>
-  <string name="stash_apply">Применять</string>
-  <string name="stash_drop">Уронить</string>
-  <string name="stash_pop_confirm_title">Поп Тайник</string>
+
+  <!-- Stash -->
+  <string name="stash_message_hint">Сообщение stash (необязательно)</string>
+  <string name="stash_save">Stash</string>
+  <string name="stash_pop">Pop</string>
+  <string name="stash_apply">Применить</string>
+  <string name="stash_drop">Удалить</string>
+  <string name="stash_pop_confirm_title">Pop stash</string>
   <string name="stash_pop_confirm_msg">Применить stash@{%d} и удалить его?</string>
-  <string name="stash_drop_confirm_title">Выбросить тайник</string>
-  <string name="stash_drop_confirm_msg">Удалить stash@{%d}? Это невозможно отменить.</string>
-  <string name="stash_saved_title">Сохраненные тайники</string>
+  <string name="stash_drop_confirm_title">Удалить stash</string>
+  <string name="stash_drop_confirm_msg">Удалить stash@{%d}? Это действие нельзя отменить.</string>
+  <string name="stash_saved_title">Сохранённые stash</string>
+
+  <!-- Conflicts -->
   <string name="conflict_title">Конфликтующие файлы</string>
-  <string name="conflict_no_conflicts">✅ Никаких конфликтов</string>
-  <string name="conflict_use_ours">Используйте наши</string>
-  <string name="conflict_use_theirs">Используйте их</string>
+  <string name="conflict_no_conflicts">✅ Конфликтов нет</string>
+  <string name="conflict_use_ours">Использовать нашу версию</string>
+  <string name="conflict_use_theirs">Использовать их версию</string>
   <string name="conflict_edit">Редактировать</string>
-  <string name="conflict_use_ours_title">Используйте наши</string>
-  <string name="conflict_use_ours_msg">Сохранить локальную версию:\n%s?</string>
-  <string name="conflict_use_theirs_title">Используйте их</string>
+  <string name="conflict_use_ours_title">Использовать нашу версию</string>
+  <string name="conflict_use_ours_msg">Сохранить вашу локальную версию:\n%s?</string>
+  <string name="conflict_use_theirs_title">Использовать их версию</string>
   <string name="conflict_use_theirs_msg">Использовать входящую версию:\n%s?</string>
   <string name="conflict_manual_title">Ручное разрешение: %s</string>
-  <string name="conflict_dialog_title">⚠️ Объединение конфликтов</string>
-  <string name="conflict_dialog_msg">Обнаружены конфликты.\n\nКонфликтующие файлы отмечены на вкладке «Изменения».\nРазрешите каждый конфликт вручную, затем создайте стадию и зафиксируйте.\n\nПодробнее: %s</string>
+  <string name="conflict_dialog_title">⚠️ Конфликт слияния</string>
+  <string name="conflict_dialog_msg">Обнаружены конфликты.\n\nКонфликтующие файлы отмечены во вкладке «Изменения».\nРазрешите каждый конфликт вручную, затем выполните stage и коммит.\n\nПодробности: %s</string>
   <string name="conflict_go_to_changes">Перейти к изменениям</string>
-  <string name="conflict_dismiss">Увольнять</string>
-  <string name="reset_title">Перезагрузить</string>
-  <string name="reset_soft">Мягкий</string>
-  <string name="reset_mixed">Смешанный</string>
-  <string name="reset_hard">Жесткий</string>
-  <string name="reset_soft_desc">Держите изменения наготове</string>
-  <string name="reset_mixed_desc">Сохраняйте изменения неиндексированными</string>
-  <string name="reset_hard_desc">Отменить все изменения</string>
-  <string name="reset_confirm_title">Подтвердить сброс</string>
-  <string name="reset_confirm_msg">Сбросить предыдущую фиксацию?\n\nРежим: %s\n\nОтменить это действие невозможно.</string>
-  <string name="reset_steps_label">Шаги назад</string>
+  <string name="conflict_dismiss">Отклонить</string>
+
+  <!-- Reset -->
+  <string name="reset_title">Сброс</string>
+  <string name="reset_soft">Soft (мягкий)</string>
+  <string name="reset_mixed">Mixed (смешанный)</string>
+  <string name="reset_hard">Hard (жёсткий)</string>
+  <string name="reset_soft_desc">Сохранить изменения в индексе (staged)</string>
+  <string name="reset_mixed_desc">Сохранить изменения вне индекса (unstaged)</string>
+  <string name="reset_hard_desc">Отбросить все изменения</string>
+  <string name="reset_confirm_title">Подтверждение сброса</string>
+  <string name="reset_confirm_msg">Сбросить до предыдущего коммита?\n\nРежим: %s\n\nЭто действие нельзя отменить.</string>
+  <string name="reset_steps_label">Шагов назад</string>
+
+  <!-- Tags -->
   <string name="tag_title">Теги</string>
-  <string name="tag_name_hint">Имя тега (например, v1.0.0)</string>
-  <string name="tag_message_hint">Тег сообщения (необязательно)</string>
+  <string name="tag_name_hint">Название тега (например, v1.0.0)</string>
+  <string name="tag_message_hint">Сообщение тега (необязательно)</string>
   <string name="tag_create">Создать тег</string>
   <string name="tag_delete">Удалить</string>
   <string name="tag_delete_confirm_title">Удалить тег</string>
-  <string name="tag_delete_confirm_msg">Удалить тег \&apos;%s\&apos;?</string>
+  <string name="tag_delete_confirm_msg">Удалить тег \'%s\'?</string>
   <string name="tag_no_tags">Тегов пока нет</string>
+
+  <!-- Gitignore -->
   <string name="gitignore_title">Редактор .gitignore</string>
   <string name="gitignore_hint">Введите шаблоны, по одному в строке…</string>
-  <string name="gitignore_save">Сохранять</string>
-  <string name="gitignore_add_pattern">Добавить узор</string>
-  <string name="gitignore_pattern_hint">например *.log, build/, .DS_Store</string>
-  <string name="gitignore_saved">Gitignore сохранен</string>
+  <string name="gitignore_save">Сохранить</string>
+  <string name="gitignore_add_pattern">Добавить шаблон</string>
+  <string name="gitignore_pattern_hint">например, *.log, build/, .DS_Store</string>
+  <string name="gitignore_saved">Gitignore сохранён</string>
   <string name="gitignore_failed">Не удалось сохранить gitignore</string>
   <string name="gitignore_templates">Шаблоны</string>
-  <string name="tab_blame">Обвинять</string>
-  <string name="git_empty_changes_title">Никаких изменений</string>
-  <string name="git_empty_changes_desc">Ваше рабочее дерево чистое. Здесь будут отображаться отредактированные или новые файлы.</string>
-  <string name="git_empty_history_title">Коммитов пока нет</string>
-  <string name="git_empty_history_desc">Сделайте свой первый коммит, и здесь появится его история.</string>
-  <string name="git_empty_branches_title">Нет филиалов</string>
+
+  <string name="tab_blame">Blame</string>
+
+  <string name="git_empty_changes_title">Нет изменений</string>
+  <string name="git_empty_changes_desc">Ваше рабочее дерево чисто. Отредактированные или новые файлы появятся здесь.</string>
+  <string name="git_empty_history_title">Пока нет коммитов</string>
+  <string name="git_empty_history_desc">Сделайте первый коммит, и его история появится здесь.</string>
+  <string name="git_empty_branches_title">Нет веток</string>
   <string name="git_empty_branches_desc">Создайте ветку, чтобы начать работу.</string>
-  <string name="git_empty_remotes_title">Нет пультов</string>
-  <string name="git_empty_remotes_desc">Добавьте удаленный сервер (например, источник), чтобы отправлять ваши коммиты.</string>
-  <string name="git_empty_stash_title">Ничего не спрятано</string>
-  <string name="git_empty_stash_desc">Сохраните изменения, чтобы сохранить их на будущее.</string>
+  <string name="git_empty_remotes_title">Нет удалённых репозиториев</string>
+  <string name="git_empty_remotes_desc">Добавьте remote (например, origin), чтобы отправлять коммиты.</string>
+  <string name="git_empty_stash_title">Ничего не сохранено в stash</string>
+  <string name="git_empty_stash_desc">Сохраните изменения в stash, чтобы они были в безопасности.</string>
   <string name="git_empty_tags_title">Нет тегов</string>
-  <string name="git_empty_tags_desc">Создайте тег, чтобы отметить важные моменты в истории.</string>
-  <string name="git_init_hint">Дополнительная информация (https://github.com/user/repo.git)</string>
-  <string name="git_init_commit_hint">پیام کامیت</string>
-  <string name="git_init_commit_required">لطفاً پیام کامیت را وارد کنید</string>
-  <string name="git_init_info">Перейти к началу страницы Быстрая установка Доступ к файлу: Файл .md или файл .md. README.md содержит файлы git init, git add . (Если вы хотите использовать .gitignore) Выберите main, افزودن origin и push.</string>
-  <string name="git_init_start">شروع</string>
-  <string name="git_init_working">در حال ساخت مخزن و آپلود… لطفاً صبر کنید</string>
-  <string name="git_init_url_required">Получите дополнительную информацию об этом (https://github.com/user/repo.git)</string>
+  <string name="git_empty_tags_desc">Создайте тег, чтобы отметить важные точки истории.</string>
+
+  <!-- Git init from GitHub URL -->
+  <string name="git_init_hint">Адрес репозитория (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">Сообщение коммита</string>
+  <string name="git_init_commit_required">Введите сообщение коммита</string>
+  <string name="git_init_info">Согласно инструкциям по быстрой настройке GitHub это делается автоматически: если в папке нет файла .md, будет создан README.md, выполняется git init, git add . (все файлы проекта с учётом .gitignore), коммит с вашим сообщением, переключение ветки на main, добавление origin и push.</string>
+  <string name="git_init_start">Начать</string>
+  <string name="git_init_working">Создание репозитория и загрузка… подождите</string>
+  <string name="git_init_url_required">Введите адрес репозитория (https://github.com/user/repo.git)</string>
 </resources>

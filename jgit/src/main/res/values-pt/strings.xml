@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">FantasmaIDE Git</string>
+  <!-- General -->
+  <string name="app_name">GhostIDE Git</string>
   <string name="cancel">Cancelar</string>
   <string name="confirm">Confirmar</string>
   <string name="ok">OK</string>
@@ -10,108 +11,128 @@
   <string name="error">Erro</string>
   <string name="success">Sucesso</string>
   <string name="loading">Carregando…</string>
-  <string name="tab_changes">Mudanças</string>
-  <string name="tab_history">História</string>
-  <string name="tab_branches">Galhos</string>
-  <string name="tab_remotes">Controles remotos</string>
-  <string name="tab_stash">Esconderijo</string>
+
+  <!-- Tabs -->
+  <string name="tab_changes">Alterações</string>
+  <string name="tab_history">Histórico</string>
+  <string name="tab_branches">Branches</string>
+  <string name="tab_remotes">Remotos</string>
+  <string name="tab_stash">Stash</string>
   <string name="tab_conflicts">Conflitos</string>
-  <string name="tab_diff">Diferença</string>
-  <string name="tab_reset">Reiniciar</string>
-  <string name="tab_tags">Etiquetas</string>
+  <string name="tab_diff">Diferenças</string>
+  <string name="tab_reset">Redefinir</string>
+  <string name="tab_tags">Tags</string>
   <string name="tab_gitignore">Gitignore</string>
-  <string name="branch_new_hint">Novo nome da filial</string>
+
+  <!-- Branches -->
+  <string name="branch_new_hint">Nome da nova branch</string>
   <string name="branch_create">Criar</string>
-  <string name="branch_checkout">Confira</string>
+  <string name="branch_checkout">Checkout</string>
   <string name="branch_merge">Mesclar</string>
   <string name="branch_rebase">Rebase</string>
   <string name="branch_delete">Excluir</string>
-  <string name="branch_delete_confirm_title">Excluir filial</string>
-  <string name="branch_delete_confirm_msg">Excluir filial \&apos;%s\&apos;?</string>
-  <string name="branch_merge_confirm_title">Mesclar Filial</string>
-  <string name="branch_merge_confirm_msg">Mesclar \&apos;%1$s\&apos; em \&apos;%2$s\&apos;?</string>
+  <string name="branch_delete_confirm_title">Excluir Branch</string>
+  <string name="branch_delete_confirm_msg">Excluir a branch \'%s\'?</string>
+  <string name="branch_merge_confirm_title">Mesclar Branch</string>
+  <string name="branch_merge_confirm_msg">Mesclar \'%1$s\' em \'%2$s\'?</string>
   <string name="branch_rebase_confirm_title">Rebase</string>
-  <string name="branch_rebase_confirm_msg">Rebase \&apos;%1$s\&apos; em \&apos;%2$s\&apos;?\n\nIsso reescreve o histórico de commits.</string>
-  <string name="remote_add">Adicionar remoto</string>
+  <string name="branch_rebase_confirm_msg">Fazer rebase de \'%1$s\' em \'%2$s\'?\n\nIsso reescreve o histórico de commits.</string>
+
+  <!-- Remotes -->
+  <string name="remote_add">Adicionar Remoto</string>
   <string name="remote_remove">Remover</string>
-  <string name="remote_remove_confirm_title">Remover remoto</string>
-  <string name="remote_remove_confirm_msg">Remover \&apos;%s\&apos;?</string>
-  <string name="remote_push">Empurrar</string>
-  <string name="remote_pull">Puxar</string>
+  <string name="remote_remove_confirm_title">Remover Remoto</string>
+  <string name="remote_remove_confirm_msg">Remover \'%s\'?</string>
+  <string name="remote_push">Push</string>
+  <string name="remote_pull">Pull</string>
   <string name="remote_fetch">Buscar</string>
-  <string name="remote_no_token">Token GitHub não encontrado. Faça login primeiro.</string>
-  <string name="remote_uncommitted_title">Alterações não confirmadas</string>
-  <string name="remote_uncommitted_push_msg">Você tem alterações não confirmadas. Por favor, comprometa-os antes de empurrar.</string>
-  <string name="remote_uncommitted_pull_msg">Você tem alterações não confirmadas. Puxar pode causar conflitos. Continuar mesmo assim?</string>
+  <string name="remote_no_token">Token do GitHub não encontrado. Faça login primeiro.</string>
+  <string name="remote_uncommitted_title">Alterações não commitadas</string>
+  <string name="remote_uncommitted_push_msg">Você tem alterações não commitadas. Por favor, faça o commit antes de enviar.</string>
+  <string name="remote_uncommitted_pull_msg">Você tem alterações não commitadas. O pull pode causar conflitos. Continuar mesmo assim?</string>
   <string name="remote_fetching">Buscando de %s…</string>
-  <string name="stash_message_hint">Mensagem oculta (opcional)</string>
-  <string name="stash_save">Esconderijo</string>
+
+  <!-- Stash -->
+  <string name="stash_message_hint">Mensagem do stash (opcional)</string>
+  <string name="stash_save">Stash</string>
   <string name="stash_pop">Pop</string>
   <string name="stash_apply">Aplicar</string>
-  <string name="stash_drop">Derrubar</string>
-  <string name="stash_pop_confirm_title">Estoque pop</string>
+  <string name="stash_drop">Descartar</string>
+  <string name="stash_pop_confirm_title">Pop do Stash</string>
   <string name="stash_pop_confirm_msg">Aplicar stash@{%d} e removê-lo?</string>
-  <string name="stash_drop_confirm_title">Soltar estoque</string>
-  <string name="stash_drop_confirm_msg">Excluir stash@{%d}? Isto não pode ser desfeito.</string>
-  <string name="stash_saved_title">Esconderijos salvos</string>
-  <string name="conflict_title">Arquivos conflitantes</string>
+  <string name="stash_drop_confirm_title">Descartar Stash</string>
+  <string name="stash_drop_confirm_msg">Excluir stash@{%d}? Esta ação não pode ser desfeita.</string>
+  <string name="stash_saved_title">Stashes Salvos</string>
+
+  <!-- Conflicts -->
+  <string name="conflict_title">Arquivos em Conflito</string>
   <string name="conflict_no_conflicts">✅ Sem conflitos</string>
-  <string name="conflict_use_ours">Use o nosso</string>
-  <string name="conflict_use_theirs">Use o deles</string>
+  <string name="conflict_use_ours">Usar Nossa Versão</string>
+  <string name="conflict_use_theirs">Usar a Versão Deles</string>
   <string name="conflict_edit">Editar</string>
-  <string name="conflict_use_ours_title">Use o nosso</string>
-  <string name="conflict_use_ours_msg">Mantenha sua versão local de:\n%s?</string>
-  <string name="conflict_use_theirs_title">Use o deles</string>
-  <string name="conflict_use_theirs_msg">Usar versão recebida de:\n%s?</string>
-  <string name="conflict_manual_title">Resolução manual: %s</string>
-  <string name="conflict_dialog_title">⚠️ Mesclar conflito</string>
-  <string name="conflict_dialog_msg">Conflitos foram detectados.\n\nOs arquivos conflitantes estão marcados na guia Alterações.\nResolva cada conflito manualmente, depois prepare e confirme.\n\nDetalhes: %s</string>
-  <string name="conflict_go_to_changes">Vá para Mudanças</string>
-  <string name="conflict_dismiss">Liberar</string>
-  <string name="reset_title">Reiniciar</string>
-  <string name="reset_soft">Macio</string>
-  <string name="reset_mixed">Misturado</string>
-  <string name="reset_hard">Duro</string>
-  <string name="reset_soft_desc">Mantenha as mudanças preparadas</string>
-  <string name="reset_mixed_desc">Mantenha as alterações sem etapas</string>
+  <string name="conflict_use_ours_title">Usar Nossa Versão</string>
+  <string name="conflict_use_ours_msg">Manter sua versão local de:\n%s?</string>
+  <string name="conflict_use_theirs_title">Usar a Versão Deles</string>
+  <string name="conflict_use_theirs_msg">Usar a versão recebida de:\n%s?</string>
+  <string name="conflict_manual_title">Solução Manual: %s</string>
+  <string name="conflict_dialog_title">⚠️ Conflito de Merge</string>
+  <string name="conflict_dialog_msg">Foram detectados conflitos.\n\nOs arquivos em conflito estão marcados na aba Alterações.\nResolva cada conflito manualmente e depois faça o stage e o commit.\n\nDetalhes: %s</string>
+  <string name="conflict_go_to_changes">Ir para Alterações</string>
+  <string name="conflict_dismiss">Ignorar</string>
+
+  <!-- Reset -->
+  <string name="reset_title">Redefinir</string>
+  <string name="reset_soft">Soft</string>
+  <string name="reset_mixed">Mixed</string>
+  <string name="reset_hard">Hard</string>
+  <string name="reset_soft_desc">Manter alterações no stage</string>
+  <string name="reset_mixed_desc">Manter alterações fora do stage</string>
   <string name="reset_hard_desc">Descartar todas as alterações</string>
-  <string name="reset_confirm_title">Confirmar redefinição</string>
-  <string name="reset_confirm_msg">Redefinir para commit anterior?\n\nModo: %s\n\nIsto não pode ser desfeito.</string>
+  <string name="reset_confirm_title">Confirmar Redefinição</string>
+  <string name="reset_confirm_msg">Redefinir para o commit anterior?\n\nModo: %s\n\nEsta ação não pode ser desfeita.</string>
   <string name="reset_steps_label">Passos para trás</string>
-  <string name="tag_title">Etiquetas</string>
-  <string name="tag_name_hint">Nome da tag (por exemplo, v1.0.0)</string>
-  <string name="tag_message_hint">Mensagem de etiqueta (opcional)</string>
-  <string name="tag_create">Criar etiqueta</string>
+
+  <!-- Tags -->
+  <string name="tag_title">Tags</string>
+  <string name="tag_name_hint">Nome da tag (ex.: v1.0.0)</string>
+  <string name="tag_message_hint">Mensagem da tag (opcional)</string>
+  <string name="tag_create">Criar Tag</string>
   <string name="tag_delete">Excluir</string>
-  <string name="tag_delete_confirm_title">Excluir etiqueta</string>
-  <string name="tag_delete_confirm_msg">Excluir etiqueta \&apos;%s\&apos;?</string>
-  <string name="tag_no_tags">Ainda não há tags</string>
-  <string name="gitignore_title">Editor .gitignore</string>
-  <string name="gitignore_hint">Insira padrões, um por linha…</string>
+  <string name="tag_delete_confirm_title">Excluir Tag</string>
+  <string name="tag_delete_confirm_msg">Excluir a tag \'%s\'?</string>
+  <string name="tag_no_tags">Nenhuma tag ainda</string>
+
+  <!-- Gitignore -->
+  <string name="gitignore_title">Editor de .gitignore</string>
+  <string name="gitignore_hint">Digite os padrões, um por linha…</string>
   <string name="gitignore_save">Salvar</string>
   <string name="gitignore_add_pattern">Adicionar padrão</string>
-  <string name="gitignore_pattern_hint">por exemplo *.log, compilação/, .DS_Store</string>
+  <string name="gitignore_pattern_hint">ex.: *.log, build/, .DS_Store</string>
   <string name="gitignore_saved">Gitignore salvo</string>
   <string name="gitignore_failed">Falha ao salvar o gitignore</string>
   <string name="gitignore_templates">Modelos</string>
-  <string name="tab_blame">Culpa</string>
+
+  <string name="tab_blame">Blame</string>
+
   <string name="git_empty_changes_title">Sem alterações</string>
   <string name="git_empty_changes_desc">Sua árvore de trabalho está limpa. Arquivos editados ou novos aparecerão aqui.</string>
-  <string name="git_empty_history_title">Ainda não há commits</string>
-  <string name="git_empty_history_desc">Faça seu primeiro commit e seu histórico aparecerá aqui.</string>
-  <string name="git_empty_branches_title">Sem filiais</string>
-  <string name="git_empty_branches_desc">Crie um branch para começar a trabalhar.</string>
-  <string name="git_empty_remotes_title">Sem controles remotos</string>
-  <string name="git_empty_remotes_desc">Adicione um controle remoto (por exemplo, origem) para enviar seus commits.</string>
-  <string name="git_empty_stash_title">Nada escondido</string>
-  <string name="git_empty_stash_desc">Armazene suas alterações para mantê-las seguras para uso posterior.</string>
-  <string name="git_empty_tags_title">Sem tags</string>
-  <string name="git_empty_tags_desc">Crie uma tag para marcar pontos importantes da história.</string>
-  <string name="git_init_hint">Clique aqui (https://github.com/user/repo.git)</string>
-  <string name="git_init_commit_hint">پیام کامیت</string>
-  <string name="git_init_commit_required">لطفاً پیام کامیت را وارد کنید</string>
-  <string name="git_init_info">طبق دستورهای Configuração rápida گیت‌هاب خودکار انجام می‌شود: اگر فایل .md در پوشه نباشد README.md ساخته می‌شود, git init, git add . (تمام فایل‌های پروژه با احترام به .gitignore), کامیت با پیام خودتان, تغییر برنچ به main, افزودن origin e push.</string>
-  <string name="git_init_start">شروع</string>
-  <string name="git_init_working">Qualquer coisa que você possa fazer e fazer…</string>
-  <string name="git_init_url_required">Para obter mais informações sobre o seu negócio (https://github.com/user/repo.git)</string>
+  <string name="git_empty_history_title">Nenhum commit ainda</string>
+  <string name="git_empty_history_desc">Faça seu primeiro commit e o histórico aparecerá aqui.</string>
+  <string name="git_empty_branches_title">Nenhuma branch</string>
+  <string name="git_empty_branches_desc">Crie uma branch para começar a trabalhar.</string>
+  <string name="git_empty_remotes_title">Nenhum remoto</string>
+  <string name="git_empty_remotes_desc">Adicione um remoto (ex.: origin) para enviar seus commits.</string>
+  <string name="git_empty_stash_title">Nada no stash</string>
+  <string name="git_empty_stash_desc">Guarde suas alterações no stash para mantê-las seguras.</string>
+  <string name="git_empty_tags_title">Nenhuma tag</string>
+  <string name="git_empty_tags_desc">Crie uma tag para marcar pontos importantes do histórico.</string>
+
+  <!-- Git init from GitHub URL -->
+  <string name="git_init_hint">Endereço do repositório (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">Mensagem do commit</string>
+  <string name="git_init_commit_required">Digite a mensagem do commit</string>
+  <string name="git_init_info">Conforme as instruções de configuração rápida do GitHub, isso é feito automaticamente: se não houver arquivo .md na pasta, um README.md será criado, git init, git add . (todos os arquivos do projeto respeitando o .gitignore), commit com sua própria mensagem, alteração da branch para main, adição do origin e push.</string>
+  <string name="git_init_start">Iniciar</string>
+  <string name="git_init_working">Criando o repositório e enviando… por favor, aguarde</string>
+  <string name="git_init_url_required">Digite o endereço do repositório (https://github.com/user/repo.git)</string>
 </resources>

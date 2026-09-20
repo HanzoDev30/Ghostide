@@ -1,0 +1,7 @@
+<resources>
+  <string name="paste_text">पेस्ट करें</string>
+  <string name="copy_text">कॉपी करें</string>
+  <string name="text_selection_more">अधिक…</string>
+  <string name="terminal_completion_item_icon">पूर्णता प्रकार</string>
+  <string name="terminal_completion_loading">लोड हो रहा है…</string>
+</resources>

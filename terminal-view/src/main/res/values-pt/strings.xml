@@ -1,0 +1,7 @@
+<resources>
+  <string name="paste_text">Colar</string>
+  <string name="copy_text">Copiar</string>
+  <string name="text_selection_more">Mais…</string>
+  <string name="terminal_completion_item_icon">Tipo de conclusão</string>
+  <string name="terminal_completion_loading">Carregando…</string>
+</resources>

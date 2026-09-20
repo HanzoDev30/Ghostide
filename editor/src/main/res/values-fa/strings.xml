@@ -72,7 +72,7 @@
   <string name="dependency_update_catalog_failed">libs.versions.toml قابل آپدیت نبود</string>
   <string name="editor_more">بیشتر</string>
   <string name="editor_indent">تورفتگی</string>
-  <string name="editor_unindent">پس‌گرد</string>
+  <string name="editor_unindent">پس گرد</string>
   <string name="editor_duplicate_line">تکراری کردن خط</string>
   <string name="editor_select_current_word">انتخاب کلمه فعلی</string>
   <string name="editor_toggle_comment">کامنت/آن\u200Cکامنت</string>

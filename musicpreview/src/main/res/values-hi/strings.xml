@@ -1,0 +1,17 @@
+<resources>
+  <string name="app_names" translatable="false">Music</string>
+  <string name="music_preview_no_artist">कलाकार का नाम उपलब्ध नहीं है</string>
+  <string name="music_preview_no_album">एल्बम का नाम उपलब्ध नहीं है</string>
+  <string name="music_preview_load_error">लोडिंग में त्रुटि</string>
+  <string name="music_preview_cover">संगीत कवर</string>
+  <string name="music_preview_previous">पिछला गाना</string>
+  <string name="music_preview_play">चलाएं या रोकें</string>
+  <string name="music_preview_next">अगला गाना</string>
+  <string name="music_player_sheet_collapse">छोटा करें</string>
+  <string name="music_player_position">प्लेबैक स्थिति</string>
+  <string name="music_player_seekbar">प्रगति पट्टी</string>
+  <string name="music_play_icon_upper_path_data">M 44 32 L 44 64 L 100 64 L 100 64 Z</string>
+  <string name="music_play_icon_bottom_path_data">M 44 96 L 44 63 L 100 63 L 100 63 Z</string>
+  <string name="music_pause_icon_upper_path_data">M 32 40 L 32 56  L 96 56 L 96 40 Z</string>
+  <string name="music_pause_icon_bottom_path_data">M 32 88 L 32 72 L 96 72 L 96 88 Z</string>
+</resources>

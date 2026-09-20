@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="ai_chat_title">Ghost AI</string>
+  <string name="ai_settings_title">AI सेटिंग्स</string>
+  <string name="ai_input_hint">संदेश…</string>
+  <string name="ai_send">भेजें</string>
+  <string name="ai_clear_chat">चैट साफ़ करें</string>
+  <string name="ai_settings_menu">AI सेटिंग्स</string>
+  <string name="ai_no_api_key">कृपया सेटिंग्स → AI सेटिंग्स में API कुंजी सेट करें।</string>
+  <string name="ai_thinking">सोच रहा है…</string>
+  <string name="ai_key_saved">API कुंजी सहेजी गई।</string>
+  <string name="ai_save">सहेजें</string>
+
+  <!-- Provider names -->
+  <string name="provider_claude">Claude (Anthropic)</string>
+  <string name="provider_chatgpt">ChatGPT (OpenAI)</string>
+  <string name="provider_deepseek">DeepSeek</string>
+  <string name="provider_gemini">Gemini (Google)</string>
+
+  <!-- API Key hints -->
+  <string name="hint_claude_key">Claude API कुंजी</string>
+  <string name="hint_chatgpt_key">OpenAI API कुंजी</string>
+  <string name="hint_deepseek_key">DeepSeek API कुंजी</string>
+  <string name="hint_gemini_key">Google AI API कुंजी</string>
+
+  <!-- Message actions -->
+  <string name="chat_select_all">सभी चुनें</string>
+  <string name="chat_copy">कॉपी करें</string>
+  <string name="chat_cut">काटें</string>
+  <string name="chat_copied">कॉपी हो गया</string>
+</resources>

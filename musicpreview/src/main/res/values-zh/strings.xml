@@ -1,0 +1,17 @@
+<resources>
+  <string name="app_names" translatable="false">Music</string>
+  <string name="music_preview_no_artist">没有艺术家姓名</string>
+  <string name="music_preview_no_album">没有专辑名称</string>
+  <string name="music_preview_load_error">加载错误</string>
+  <string name="music_preview_cover">音乐封面</string>
+  <string name="music_preview_previous">上一首</string>
+  <string name="music_preview_play">播放或暂停</string>
+  <string name="music_preview_next">下一首</string>
+  <string name="music_player_sheet_collapse">收起</string>
+  <string name="music_player_position">播放位置</string>
+  <string name="music_player_seekbar">进度条</string>
+  <string name="music_play_icon_upper_path_data">M 44 32 L 44 64 L 100 64 L 100 64 Z</string>
+  <string name="music_play_icon_bottom_path_data">M 44 96 L 44 63 L 100 63 L 100 63 Z</string>
+  <string name="music_pause_icon_upper_path_data">M 32 40 L 32 56  L 96 56 L 96 40 Z</string>
+  <string name="music_pause_icon_bottom_path_data">M 32 88 L 32 72 L 96 72 L 96 88 Z</string>
+</resources>

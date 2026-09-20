@@ -1,117 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <!-- General -->
   <string name="app_name">GhostIDE Git</string>
-  <string name="cancel">لغو کنید</string>
-  <string name="confirm">تایید کنید</string>
-  <string name="ok">باشه</string>
-  <string name="delete">حذف کنید</string>
-  <string name="save">ذخیره کنید</string>
+  <string name="cancel">لغو</string>
+  <string name="confirm">تأیید</string>
+  <string name="ok">تأیید</string>
+  <string name="delete">حذف</string>
+  <string name="save">ذخیره</string>
   <string name="close">بستن</string>
   <string name="error">خطا</string>
   <string name="success">موفقیت</string>
-  <string name="loading">در حال بارگیری…</string>
+  <string name="loading">در حال بارگذاری…</string>
+
+  <!-- Tabs -->
   <string name="tab_changes">تغییرات</string>
   <string name="tab_history">تاریخچه</string>
-  <string name="tab_branches">شاخه ها</string>
-  <string name="tab_remotes">ریموت ها</string>
-  <string name="tab_stash">مخفی کردن</string>
-  <string name="tab_conflicts">درگیری ها</string>
-  <string name="tab_diff">تفاوت</string>
-  <string name="tab_reset">بازنشانی کنید</string>
-  <string name="tab_tags">برچسب ها</string>
-  <string name="tab_gitignore">گیتینور</string>
-  <string name="branch_new_hint">نام شعبه جدید</string>
-  <string name="branch_create">ایجاد کنید</string>
-  <string name="branch_checkout">تسویه حساب</string>
+  <string name="tab_branches">شاخه‌ها</string>
+  <string name="tab_remotes">مخازن راه دور</string>
+  <string name="tab_stash">استاش</string>
+  <string name="tab_conflicts">تداخل‌ها</string>
+  <string name="tab_diff">تفاوت‌ها</string>
+  <string name="tab_reset">بازنشانی</string>
+  <string name="tab_tags">برچسب‌ها</string>
+  <string name="tab_gitignore">Gitignore</string>
+
+  <!-- Branches -->
+  <string name="branch_new_hint">نام شاخه جدید</string>
+  <string name="branch_create">ایجاد</string>
+  <string name="branch_checkout">تغییر شاخه</string>
   <string name="branch_merge">ادغام</string>
-  <string name="branch_rebase">Rebase</string>
-  <string name="branch_delete">حذف کنید</string>
-  <string name="branch_delete_confirm_title">حذف شعبه</string>
-  <string name="branch_delete_confirm_msg">شاخه \&apos;%s\&apos; حذف شود؟</string>
-  <string name="branch_merge_confirm_title">ادغام شعبه</string>
-  <string name="branch_merge_confirm_msg">\&apos;%1$s\&apos; در \&apos;%2$s\&apos; ادغام شود؟</string>
-  <string name="branch_rebase_confirm_title">Rebase</string>
-  <string name="branch_rebase_confirm_msg">\&apos;%1$s\&apos; را روی \&apos;%2$s\&apos; تغییر دهید؟\n\nاین تاریخچه commit را بازنویسی می‌کند.</string>
-  <string name="remote_add">از راه دور اضافه کنید</string>
-  <string name="remote_remove">حذف کنید</string>
-  <string name="remote_remove_confirm_title">Remote را بردارید</string>
-  <string name="remote_remove_confirm_msg">\&apos;%s\&apos; حذف شود؟</string>
-  <string name="remote_push">فشار دهید</string>
-  <string name="remote_pull">بکشید</string>
-  <string name="remote_fetch">واکشی</string>
-  <string name="remote_no_token">توکن GitHub پیدا نشد. لطفا ابتدا وارد شوید</string>
-  <string name="remote_uncommitted_title">تغییرات غیرمتعهد</string>
-  <string name="remote_uncommitted_push_msg">شما تغییرات غیرمتعهد دارید. لطفاً قبل از فشار دادن آنها را متعهد کنید.</string>
-  <string name="remote_uncommitted_pull_msg">شما تغییرات غیرمتعهد دارید. کشیدن ممکن است باعث درگیری شود. به هر حال ادامه دهید؟</string>
-  <string name="remote_fetching">در حال واکشی از %s…</string>
-  <string name="stash_message_hint">پیام پنهان (اختیاری)</string>
-  <string name="stash_save">مخفی کردن</string>
-  <string name="stash_pop">پاپ</string>
-  <string name="stash_apply">درخواست کنید</string>
-  <string name="stash_drop">رها کردن</string>
-  <string name="stash_pop_confirm_title">پاپ استاش</string>
-  <string name="stash_pop_confirm_msg">stash@{%d} اعمال شود و حذف شود؟</string>
-  <string name="stash_drop_confirm_title">Stash را رها کنید</string>
-  <string name="stash_drop_confirm_msg">stash@{%d} حذف شود؟ این قابل واگرد نیست.</string>
-  <string name="stash_saved_title">ذخیره شده ذخیره شده</string>
-  <string name="conflict_title">فایل های متناقض</string>
-  <string name="conflict_no_conflicts">✅بدون درگیری</string>
-  <string name="conflict_use_ours">از ما استفاده کن</string>
-  <string name="conflict_use_theirs">از آنها استفاده کنید</string>
-  <string name="conflict_edit">ویرایش کنید</string>
-  <string name="conflict_use_ours_title">از ما استفاده کن</string>
-  <string name="conflict_use_ours_msg">نسخه محلی خود را از:\n%s حفظ کنید؟</string>
-  <string name="conflict_use_theirs_title">از آنها استفاده کنید</string>
+  <string name="branch_rebase">ریبیس</string>
+  <string name="branch_delete">حذف</string>
+  <string name="branch_delete_confirm_title">حذف شاخه</string>
+  <string name="branch_delete_confirm_msg">شاخه \'%s\' حذف شود؟</string>
+  <string name="branch_merge_confirm_title">ادغام شاخه</string>
+  <string name="branch_merge_confirm_msg">\'%1$s\' با \'%2$s\' ادغام شود؟</string>
+  <string name="branch_rebase_confirm_title">ریبیس</string>
+  <string name="branch_rebase_confirm_msg">\'%1$s\' روی \'%2$s\' ریبیس شود؟\n\nاین کار تاریخچه کامیت‌ها را بازنویسی می‌کند.</string>
+
+  <!-- Remotes -->
+  <string name="remote_add">افزودن مخزن راه دور</string>
+  <string name="remote_remove">حذف</string>
+  <string name="remote_remove_confirm_title">حذف مخزن راه دور</string>
+  <string name="remote_remove_confirm_msg">\'%s\' حذف شود؟</string>
+  <string name="remote_push">پوش (Push)</string>
+  <string name="remote_pull">پول (Pull)</string>
+  <string name="remote_fetch">دریافت (Fetch)</string>
+  <string name="remote_no_token">نشان GitHub یافت نشد. لطفاً ابتدا وارد شوید.</string>
+  <string name="remote_uncommitted_title">تغییرات بدون کامیت</string>
+  <string name="remote_uncommitted_push_msg">تغییرات بدون کامیت دارید. لطفاً قبل از push آن‌ها را کامیت کنید.</string>
+  <string name="remote_uncommitted_pull_msg">تغییرات بدون کامیت دارید. Pull ممکن است تداخل ایجاد کند. با این حال ادامه می‌دهید؟</string>
+  <string name="remote_fetching">در حال دریافت از %s…</string>
+
+  <!-- Stash -->
+  <string name="stash_message_hint">پیام استاش (اختیاری)</string>
+  <string name="stash_save">استاش</string>
+  <string name="stash_pop">بازیابی و حذف</string>
+  <string name="stash_apply">بازیابی</string>
+  <string name="stash_drop">حذف</string>
+  <string name="stash_pop_confirm_title">بازیابی استاش</string>
+  <string name="stash_pop_confirm_msg">استاش@{%d} بازیابی و حذف شود؟</string>
+  <string name="stash_drop_confirm_title">حذف استاش</string>
+  <string name="stash_drop_confirm_msg">استاش@{%d} حذف شود؟ این عمل قابل بازگشت نیست.</string>
+  <string name="stash_saved_title">استاش‌های ذخیره‌شده</string>
+
+  <!-- Conflicts -->
+  <string name="conflict_title">فایل‌های متعارض</string>
+  <string name="conflict_no_conflicts">✅ بدون تداخل</string>
+  <string name="conflict_use_ours">نگه داشتن نسخه خودمان</string>
+  <string name="conflict_use_theirs">استفاده از نسخه آن‌ها</string>
+  <string name="conflict_edit">ویرایش</string>
+  <string name="conflict_use_ours_title">نگه داشتن نسخه خودمان</string>
+  <string name="conflict_use_ours_msg">نسخه محلی شما از:\n%s نگه داشته شود؟</string>
+  <string name="conflict_use_theirs_title">استفاده از نسخه آن‌ها</string>
   <string name="conflict_use_theirs_msg">از نسخه دریافتی:\n%s استفاده شود؟</string>
   <string name="conflict_manual_title">حل دستی: %s</string>
-  <string name="conflict_dialog_title">⚠️ ادغام تضاد</string>
-  <string name="conflict_dialog_msg">تضادها شناسایی شدند.\n\nفایل‌های متناقض در برگه تغییرات علامت‌گذاری شده‌اند.\nلطفاً هر تضاد را به‌طور دستی حل کنید، سپس مرحله‌بندی و انجام دهید.\n\nجزئیات: %s</string>
-  <string name="conflict_go_to_changes">به Changes بروید</string>
+  <string name="conflict_dialog_title">⚠️ تداخل در ادغام</string>
+  <string name="conflict_dialog_msg">تداخل‌هایی شناسایی شد.\n\nفایل‌های متعارض در برگه «تغییرات» علامت‌گذاری شده‌اند.\nلطفاً هر تداخل را به‌صورت دستی حل کنید، سپس stage و کامیت کنید.\n\nجزئیات: %s</string>
+  <string name="conflict_go_to_changes">رفتن به تغییرات</string>
   <string name="conflict_dismiss">رد کردن</string>
-  <string name="reset_title">بازنشانی کنید</string>
-  <string name="reset_soft">نرم</string>
-  <string name="reset_mixed">مختلط</string>
-  <string name="reset_hard">سخت</string>
-  <string name="reset_soft_desc">تغییرات را مرتب نگه دارید</string>
-  <string name="reset_mixed_desc">تغییرات را بدون مرحله نگه دارید</string>
-  <string name="reset_hard_desc">تمام تغییرات را کنار بگذارید</string>
-  <string name="reset_confirm_title">ریست را تایید کنید</string>
-  <string name="reset_confirm_msg">به تعهد قبلی بازنشانی شود؟\n\nحالت: %s\n\nاین قابل واگرد نیست.</string>
-  <string name="reset_steps_label">قدم به عقب</string>
-  <string name="tag_title">برچسب ها</string>
-  <string name="tag_name_hint">نام برچسب (به عنوان مثال نسخه 1.0.0)</string>
-  <string name="tag_message_hint">برچسب پیام (اختیاری)</string>
-  <string name="tag_create">برچسب ایجاد کنید</string>
-  <string name="tag_delete">حذف کنید</string>
+
+  <!-- Reset -->
+  <string name="reset_title">بازنشانی</string>
+  <string name="reset_soft">نرم (Soft)</string>
+  <string name="reset_mixed">Mixed</string>
+  <string name="reset_hard">سخت (Hard)</string>
+  <string name="reset_soft_desc">نگه داشتن تغییرات در حالت staged</string>
+  <string name="reset_mixed_desc">نگه داشتن تغییرات در حالت unstaged</string>
+  <string name="reset_hard_desc">دور انداختن همه تغییرات</string>
+  <string name="reset_confirm_title">تأیید بازنشانی</string>
+  <string name="reset_confirm_msg">به کامیت قبلی بازنشانی شود؟\n\nحالت: %s\n\nاین عمل قابل بازگشت نیست.</string>
+  <string name="reset_steps_label">تعداد قدم‌ها به عقب</string>
+
+  <!-- Tags -->
+  <string name="tag_title">برچسب‌ها</string>
+  <string name="tag_name_hint">نام برچسب (مثلاً v1.0.0)</string>
+  <string name="tag_message_hint">پیام برچسب (اختیاری)</string>
+  <string name="tag_create">ایجاد برچسب</string>
+  <string name="tag_delete">حذف</string>
   <string name="tag_delete_confirm_title">حذف برچسب</string>
-  <string name="tag_delete_confirm_msg">برچسب \&apos;%s\&apos; حذف شود؟</string>
-  <string name="tag_no_tags">هنوز هیچ برچسبی وجود ندارد</string>
+  <string name="tag_delete_confirm_msg">برچسب \'%s\' حذف شود؟</string>
+  <string name="tag_no_tags">هنوز برچسبی وجود ندارد</string>
+
+  <!-- Gitignore -->
   <string name="gitignore_title">ویرایشگر .gitignore</string>
-  <string name="gitignore_hint">الگوها را وارد کنید، یکی در هر خط…</string>
-  <string name="gitignore_save">ذخیره کنید</string>
-  <string name="gitignore_add_pattern">اضافه کردن الگو</string>
-  <string name="gitignore_pattern_hint">به عنوان مثال *.log، build/، .DS_Store</string>
+  <string name="gitignore_hint">الگوها را وارد کنید، در هر سطر یک الگو…</string>
+  <string name="gitignore_save">ذخیره</string>
+  <string name="gitignore_add_pattern">افزودن الگو</string>
+  <string name="gitignore_pattern_hint">مثلاً *.log, build/, .DS_Store</string>
   <string name="gitignore_saved">Gitignore ذخیره شد</string>
-  <string name="gitignore_failed">gitignore ذخیره نشد</string>
-  <string name="gitignore_templates">قالب ها</string>
-  <string name="tab_blame">سرزنش کردن</string>
+  <string name="gitignore_failed">ذخیره Gitignore ناموفق بود</string>
+  <string name="gitignore_templates">قالب‌ها</string>
+
+  <string name="tab_blame">Blame (پیگیری تغییرات)</string>
+
   <string name="git_empty_changes_title">تغییری وجود ندارد</string>
-  <string name="git_empty_changes_desc">درخت کاری شما تمیز است. فایل‌های جدید یا ویرایش‌شده اینجا نمایش داده می‌شوند.</string>
+  <string name="git_empty_changes_desc">فضای کاری شما تمیز است. فایل‌های ویرایش‌شده یا جدید اینجا نمایش داده می‌شوند.</string>
   <string name="git_empty_history_title">هنوز کامیتی وجود ندارد</string>
-  <string name="git_empty_history_desc">اولین کامیت خود را بسازید تا تاریخچه‌اش اینجا بیاید.</string>
-  <string name="git_empty_branches_title">برنچی وجود ندارد</string>
-  <string name="git_empty_branches_desc">برای شروع کار یک برنچ بسازید.</string>
-  <string name="git_empty_remotes_title">رموتی وجود ندارد</string>
-  <string name="git_empty_remotes_desc">برای پوش کردن کامیت‌ها یک ریموت (مثلاً origin) اضافه کنید.</string>
-  <string name="git_empty_stash_title">استشی ذخیره نشده</string>
-  <string name="git_empty_stash_desc">تغییراتتان را استش کنید تا برای بعد امن بمانند.</string>
-  <string name="git_empty_tags_title">تگی وجود ندارد</string>
-  <string name="git_empty_tags_desc">یک تگ بسازید تا نقاط مهم تاریخچه را علامت‌گذاری کنید.</string>
+  <string name="git_empty_history_desc">اولین کامیت خود را انجام دهید تا تاریخچه آن اینجا ظاهر شود.</string>
+  <string name="git_empty_branches_title">شاخه‌ای وجود ندارد</string>
+  <string name="git_empty_branches_desc">برای شروع کار یک شاخه ایجاد کنید.</string>
+  <string name="git_empty_remotes_title">مخزن راه دوری وجود ندارد</string>
+  <string name="git_empty_remotes_desc">برای push کامیت‌های خود یک remote (مثلاً origin) اضافه کنید.</string>
+  <string name="git_empty_stash_title">چیزی استاش نشده</string>
+  <string name="git_empty_stash_desc">تغییرات خود را استاش کنید تا برای بعد امن بمانند.</string>
+  <string name="git_empty_tags_title">برچسبی وجود ندارد</string>
+  <string name="git_empty_tags_desc">برای مشخص کردن نقاط مهم تاریخچه یک برچسب ایجاد کنید.</string>
+
+  <!-- Git init from GitHub URL -->
   <string name="git_init_hint">آدرس مخزن (https://github.com/user/repo.git)</string>
   <string name="git_init_commit_hint">پیام کامیت</string>
-  <string name="git_init_commit_required">لطفا پیام کامیت را وارد کنید</string>
-  <string name="git_init_info">طبق دستورات Quick setup گیت‌هااب خودکار انجام می‌شود: اگر فایل .md در پوشه نباشد README.m ساخته می‌شود، git init، git add. (تمام فایل‌های پروژه با احترام به .gitignore)، کامیت با پیام خود، تغییر برنچ به اصلی، افزودن مبدا و فشار.</string>
-  <string name="git_init_start">شروع کردن</string>
+  <string name="git_init_commit_required">لطفاً پیام کامیت را وارد کنید</string>
+  <string name="git_init_info">طبق دستورهای Quick setup گیت‌هاب خودکار انجام می‌شود: اگر فایل .md در پوشه نباشد README.md ساخته می‌شود، git init، git add . (تمام فایل‌های پروژه با احترام به .gitignore)، کامیت با پیام خودتان، تغییر برنچ به main، افزودن origin و push.</string>
+  <string name="git_init_start">شروع</string>
   <string name="git_init_working">در حال ساخت مخزن و آپلود… لطفاً صبر کنید</string>
   <string name="git_init_url_required">لطفاً آدرس مخزن را وارد کنید (https://github.com/user/repo.git)</string>
 </resources>

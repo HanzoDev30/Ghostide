@@ -1,0 +1,17 @@
+<resources>
+  <string name="app_names" translatable="false">Music</string>
+  <string name="music_preview_no_artist">Nome do artista indisponível</string>
+  <string name="music_preview_no_album">Nome do álbum indisponível</string>
+  <string name="music_preview_load_error">Erro ao carregar</string>
+  <string name="music_preview_cover">Capa da música</string>
+  <string name="music_preview_previous">Música anterior</string>
+  <string name="music_preview_play">Reproduzir ou pausar</string>
+  <string name="music_preview_next">Próxima música</string>
+  <string name="music_player_sheet_collapse">Recolher</string>
+  <string name="music_player_position">Posição de reprodução</string>
+  <string name="music_player_seekbar">Barra de progresso</string>
+  <string name="music_play_icon_upper_path_data">M 44 32 L 44 64 L 100 64 L 100 64 Z</string>
+  <string name="music_play_icon_bottom_path_data">M 44 96 L 44 63 L 100 63 L 100 63 Z</string>
+  <string name="music_pause_icon_upper_path_data">M 32 40 L 32 56  L 96 56 L 96 40 Z</string>
+  <string name="music_pause_icon_bottom_path_data">M 32 88 L 32 72 L 96 72 L 96 88 Z</string>
+</resources>

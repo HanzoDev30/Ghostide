@@ -1,0 +1,7 @@
+<resources>
+  <string name="paste_text">Вставить</string>
+  <string name="copy_text">Копировать</string>
+  <string name="text_selection_more">Ещё…</string>
+  <string name="terminal_completion_item_icon">Тип автодополнения</string>
+  <string name="terminal_completion_loading">Загрузка…</string>
+</resources>

@@ -1,117 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <!-- General -->
   <string name="app_name">GhostIDE Git</string>
   <string name="cancel">取消</string>
   <string name="confirm">确认</string>
-  <string name="ok">好的</string>
+  <string name="ok">确定</string>
   <string name="delete">删除</string>
-  <string name="save">节省</string>
+  <string name="save">保存</string>
   <string name="close">关闭</string>
   <string name="error">错误</string>
   <string name="success">成功</string>
   <string name="loading">加载中…</string>
-  <string name="tab_changes">变化</string>
-  <string name="tab_history">历史</string>
-  <string name="tab_branches">分支机构</string>
-  <string name="tab_remotes">遥控器</string>
-  <string name="tab_stash">藏</string>
+
+  <!-- Tabs -->
+  <string name="tab_changes">更改</string>
+  <string name="tab_history">历史记录</string>
+  <string name="tab_branches">分支</string>
+  <string name="tab_remotes">远程仓库</string>
+  <string name="tab_stash">暂存</string>
   <string name="tab_conflicts">冲突</string>
   <string name="tab_diff">差异</string>
   <string name="tab_reset">重置</string>
   <string name="tab_tags">标签</string>
-  <string name="tab_gitignore">吉蒂诺尔</string>
-  <string name="branch_new_hint">新分行名称</string>
-  <string name="branch_create">创造</string>
-  <string name="branch_checkout">查看</string>
+  <string name="tab_gitignore">Gitignore</string>
+
+  <!-- Branches -->
+  <string name="branch_new_hint">新分支名称</string>
+  <string name="branch_create">创建</string>
+  <string name="branch_checkout">检出</string>
   <string name="branch_merge">合并</string>
   <string name="branch_rebase">变基</string>
   <string name="branch_delete">删除</string>
   <string name="branch_delete_confirm_title">删除分支</string>
-  <string name="branch_delete_confirm_msg">删除分支\&apos;%s\&apos;吗？</string>
+  <string name="branch_delete_confirm_msg">删除分支 \'%s\'？</string>
   <string name="branch_merge_confirm_title">合并分支</string>
-  <string name="branch_merge_confirm_msg">将“%1$s”合并到“%2$s”中吗？</string>
+  <string name="branch_merge_confirm_msg">将 \'%1$s\' 合并到 \'%2$s\'？</string>
   <string name="branch_rebase_confirm_title">变基</string>
-  <string name="branch_rebase_confirm_msg">将“%1$s”重定为“%2$s”？\n\n这会重写提交历史记录。</string>
-  <string name="remote_add">添加遥控器</string>
-  <string name="remote_remove">消除</string>
-  <string name="remote_remove_confirm_title">删除遥控器</string>
-  <string name="remote_remove_confirm_msg">删除\&apos;%s\&apos;？</string>
-  <string name="remote_push">推</string>
-  <string name="remote_pull">拉</string>
-  <string name="remote_fetch">拿来</string>
+  <string name="branch_rebase_confirm_msg">将 \'%1$s\' 变基到 \'%2$s\'？\n\n这会重写提交历史。</string>
+
+  <!-- Remotes -->
+  <string name="remote_add">添加远程仓库</string>
+  <string name="remote_remove">移除</string>
+  <string name="remote_remove_confirm_title">移除远程仓库</string>
+  <string name="remote_remove_confirm_msg">移除 \'%s\'？</string>
+  <string name="remote_push">推送</string>
+  <string name="remote_pull">拉取</string>
+  <string name="remote_fetch">获取</string>
   <string name="remote_no_token">未找到 GitHub 令牌。请先登录。</string>
   <string name="remote_uncommitted_title">未提交的更改</string>
-  <string name="remote_uncommitted_push_msg">您有未提交的更改。请在推送之前提交它们。</string>
-  <string name="remote_uncommitted_pull_msg">您有未提交的更改。拉动可能会引起冲突。还是继续吗？</string>
-  <string name="remote_fetching">正在从 %s 获取...</string>
-  <string name="stash_message_hint">隐藏消息（可选）</string>
-  <string name="stash_save">藏</string>
-  <string name="stash_pop">流行音乐</string>
-  <string name="stash_apply">申请</string>
-  <string name="stash_drop">降低</string>
-  <string name="stash_pop_confirm_title">流行藏品</string>
-  <string name="stash_pop_confirm_msg">应用 stash@{%d} 并删除它？</string>
-  <string name="stash_drop_confirm_title">掉落藏匿处</string>
-  <string name="stash_drop_confirm_msg">删除存储@{%d}？此操作无法撤消。</string>
-  <string name="stash_saved_title">保存的藏品</string>
+  <string name="remote_uncommitted_push_msg">您有未提交的更改。请先提交再推送。</string>
+  <string name="remote_uncommitted_pull_msg">您有未提交的更改。拉取可能会导致冲突。仍要继续吗？</string>
+  <string name="remote_fetching">正在从 %s 获取…</string>
+
+  <!-- Stash -->
+  <string name="stash_message_hint">暂存消息（可选）</string>
+  <string name="stash_save">暂存</string>
+  <string name="stash_pop">弹出</string>
+  <string name="stash_apply">应用</string>
+  <string name="stash_drop">丢弃</string>
+  <string name="stash_pop_confirm_title">弹出暂存</string>
+  <string name="stash_pop_confirm_msg">应用 stash@{%d} 并将其移除？</string>
+  <string name="stash_drop_confirm_title">丢弃暂存</string>
+  <string name="stash_drop_confirm_msg">删除 stash@{%d}？此操作无法撤销。</string>
+  <string name="stash_saved_title">已保存的暂存</string>
+
+  <!-- Conflicts -->
   <string name="conflict_title">冲突文件</string>
   <string name="conflict_no_conflicts">✅ 无冲突</string>
-  <string name="conflict_use_ours">使用我们的</string>
-  <string name="conflict_use_theirs">使用他们的</string>
+  <string name="conflict_use_ours">使用我们的版本</string>
+  <string name="conflict_use_theirs">使用他们的版本</string>
   <string name="conflict_edit">编辑</string>
-  <string name="conflict_use_ours_title">使用我们的</string>
+  <string name="conflict_use_ours_title">使用我们的版本</string>
   <string name="conflict_use_ours_msg">保留您的本地版本：\n%s？</string>
-  <string name="conflict_use_theirs_title">使用他们的</string>
-  <string name="conflict_use_theirs_msg">使用传入版本：\n%s？</string>
+  <string name="conflict_use_theirs_title">使用他们的版本</string>
+  <string name="conflict_use_theirs_msg">使用传入的版本：\n%s？</string>
   <string name="conflict_manual_title">手动解决：%s</string>
   <string name="conflict_dialog_title">⚠️ 合并冲突</string>
-  <string name="conflict_dialog_msg">检测到冲突。\n\n冲突文件已在“更改”选项卡中标记。\n请手动解决每个冲突，然后暂存并提交。\n\n详细信息: %s</string>
+  <string name="conflict_dialog_msg">检测到冲突。\n\n冲突文件已在“更改”选项卡中标记。\n请手动解决每个冲突，然后进行暂存和提交。\n\n详情：%s</string>
   <string name="conflict_go_to_changes">转到更改</string>
-  <string name="conflict_dismiss">解雇</string>
+  <string name="conflict_dismiss">关闭</string>
+
+  <!-- Reset -->
   <string name="reset_title">重置</string>
-  <string name="reset_soft">柔软的</string>
-  <string name="reset_mixed">混合</string>
-  <string name="reset_hard">难的</string>
-  <string name="reset_soft_desc">保持变更暂存</string>
-  <string name="reset_mixed_desc">保持更改不暂存</string>
+  <string name="reset_soft">软重置</string>
+  <string name="reset_mixed">混合重置</string>
+  <string name="reset_hard">硬重置</string>
+  <string name="reset_soft_desc">保持已暂存的更改</string>
+  <string name="reset_mixed_desc">保持未暂存的更改</string>
   <string name="reset_hard_desc">放弃所有更改</string>
   <string name="reset_confirm_title">确认重置</string>
-  <string name="reset_confirm_msg">重置为先前提交？\n\n模式：%s\n\n此操作无法撤消。</string>
-  <string name="reset_steps_label">后退一步</string>
+  <string name="reset_confirm_msg">重置到上一个提交？\n\n模式：%s\n\n此操作无法撤销。</string>
+  <string name="reset_steps_label">后退的步数</string>
+
+  <!-- Tags -->
   <string name="tag_title">标签</string>
   <string name="tag_name_hint">标签名称（例如 v1.0.0）</string>
   <string name="tag_message_hint">标签消息（可选）</string>
   <string name="tag_create">创建标签</string>
   <string name="tag_delete">删除</string>
   <string name="tag_delete_confirm_title">删除标签</string>
-  <string name="tag_delete_confirm_msg">删除标签\&apos;%s\&apos;吗？</string>
-  <string name="tag_no_tags">还没有标签</string>
+  <string name="tag_delete_confirm_msg">删除标签 \'%s\'？</string>
+  <string name="tag_no_tags">暂无标签</string>
+
+  <!-- Gitignore -->
   <string name="gitignore_title">.gitignore 编辑器</string>
-  <string name="gitignore_hint">输入模式，每行一个……</string>
-  <string name="gitignore_save">节省</string>
-  <string name="gitignore_add_pattern">添加图案</string>
-  <string name="gitignore_pattern_hint">例如*.log、构建/、.DS_Store</string>
+  <string name="gitignore_hint">输入模式，每行一个…</string>
+  <string name="gitignore_save">保存</string>
+  <string name="gitignore_add_pattern">添加模式</string>
+  <string name="gitignore_pattern_hint">例如 *.log, build/, .DS_Store</string>
   <string name="gitignore_saved">Gitignore 已保存</string>
   <string name="gitignore_failed">保存 gitignore 失败</string>
   <string name="gitignore_templates">模板</string>
-  <string name="tab_blame">责备</string>
-  <string name="git_empty_changes_title">没有变化</string>
-  <string name="git_empty_changes_desc">你的工作树是干净的。编辑过的文件或新文件将显示在此处。</string>
-  <string name="git_empty_history_title">还没有提交</string>
-  <string name="git_empty_history_desc">进行您的第一次提交，其历史记录将显示在此处。</string>
-  <string name="git_empty_branches_title">没有分支机构</string>
-  <string name="git_empty_branches_desc">创建一个分支开始工作。</string>
-  <string name="git_empty_remotes_title">没有遥控器</string>
-  <string name="git_empty_remotes_desc">添加远程（例如 origin）来推送您的提交。</string>
-  <string name="git_empty_stash_title">没有藏匿任何东西</string>
-  <string name="git_empty_stash_desc">隐藏您的更改以确保以后安全。</string>
-  <string name="git_empty_tags_title">没有标签</string>
-  <string name="git_empty_tags_desc">创建一个标签来标记历史上的重要时刻。</string>
-  <string name="git_init_hint">下载 (https://github.com/user/repo.git)</string>
-  <string name="git_init_commit_hint">克什米尔</string>
-  <string name="git_init_commit_required">???????????????????????????????????????????????????????????????</string>
-  <string name="git_init_info">快速设置 快速安装 : .md README.md git初始化，git add . ( ) 巴巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 巴 )</string>
-  <string name="git_init_start">唷唷</string>
-  <string name="git_init_working">详细信息...</string>
-  <string name="git_init_url_required">???? (https://github.com/user/repo.git)</string>
+
+  <string name="tab_blame">追溯</string>
+
+  <string name="git_empty_changes_title">无更改</string>
+  <string name="git_empty_changes_desc">您的工作区是干净的。编辑过或新增的文件将显示在这里。</string>
+  <string name="git_empty_history_title">暂无提交</string>
+  <string name="git_empty_history_desc">进行第一次提交，其历史记录将显示在这里。</string>
+  <string name="git_empty_branches_title">无分支</string>
+  <string name="git_empty_branches_desc">创建分支以开始工作。</string>
+  <string name="git_empty_remotes_title">无远程仓库</string>
+  <string name="git_empty_remotes_desc">添加远程仓库（例如 origin）以推送您的提交。</string>
+  <string name="git_empty_stash_title">没有暂存的更改</string>
+  <string name="git_empty_stash_desc">暂存您的更改，以便稍后安全使用。</string>
+  <string name="git_empty_tags_title">无标签</string>
+  <string name="git_empty_tags_desc">创建标签以标记历史中的重要节点。</string>
+
+  <!-- Git init from GitHub URL -->
+  <string name="git_init_hint">仓库地址（https://github.com/user/repo.git）</string>
+  <string name="git_init_commit_hint">提交消息</string>
+  <string name="git_init_commit_required">请输入提交消息</string>
+  <string name="git_init_info">根据 GitHub 的快速设置说明自动完成：如果文件夹中没有 .md 文件，则会创建 README.md，然后执行 git init、git add .（尊重 .gitignore 的项目所有文件）、使用您自己的消息提交、将分支更改为 main、添加 origin 并推送。</string>
+  <string name="git_init_start">开始</string>
+  <string name="git_init_working">正在创建仓库并上传…请稍候</string>
+  <string name="git_init_url_required">请输入仓库地址（https://github.com/user/repo.git）</string>
 </resources>

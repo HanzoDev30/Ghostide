@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="ai_chat_title">Ghost AI</string>
+  <string name="ai_settings_title">AI 设置</string>
+  <string name="ai_input_hint">消息…</string>
+  <string name="ai_send">发送</string>
+  <string name="ai_clear_chat">清空聊天</string>
+  <string name="ai_settings_menu">AI 设置</string>
+  <string name="ai_no_api_key">请在“设置”→“AI 设置”中设置 API 密钥。</string>
+  <string name="ai_thinking">思考中…</string>
+  <string name="ai_key_saved">API 密钥已保存。</string>
+  <string name="ai_save">保存</string>
+
+  <!-- Provider names -->
+  <string name="provider_claude">Claude (Anthropic)</string>
+  <string name="provider_chatgpt">ChatGPT (OpenAI)</string>
+  <string name="provider_deepseek">DeepSeek</string>
+  <string name="provider_gemini">Gemini (Google)</string>
+
+  <!-- API Key hints -->
+  <string name="hint_claude_key">Claude API 密钥</string>
+  <string name="hint_chatgpt_key">OpenAI API 密钥</string>
+  <string name="hint_deepseek_key">DeepSeek API 密钥</string>
+  <string name="hint_gemini_key">Google AI API 密钥</string>
+
+  <!-- Message actions -->
+  <string name="chat_select_all">全选</string>
+  <string name="chat_copy">复制</string>
+  <string name="chat_cut">剪切</string>
+  <string name="chat_copied">已复制</string>
+</resources>

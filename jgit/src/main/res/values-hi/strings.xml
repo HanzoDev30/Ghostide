@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- General -->
+  <string name="app_name">GhostIDE Git</string>
+  <string name="cancel">रद्द करें</string>
+  <string name="confirm">पुष्टि करें</string>
+  <string name="ok">ठीक है</string>
+  <string name="delete">हटाएँ</string>
+  <string name="save">सहेजें</string>
+  <string name="close">बंद करें</string>
+  <string name="error">त्रुटि</string>
+  <string name="success">सफलता</string>
+  <string name="loading">लोड हो रहा है…</string>
+
+  <!-- Tabs -->
+  <string name="tab_changes">परिवर्तन</string>
+  <string name="tab_history">इतिहास</string>
+  <string name="tab_branches">शाखाएँ</string>
+  <string name="tab_remotes">रिमोट</string>
+  <string name="tab_stash">स्टैश</string>
+  <string name="tab_conflicts">विरोध</string>
+  <string name="tab_diff">अंतर</string>
+  <string name="tab_reset">रीसेट</string>
+  <string name="tab_tags">टैग</string>
+  <string name="tab_gitignore">Gitignore</string>
+
+  <!-- Branches -->
+  <string name="branch_new_hint">नई शाखा का नाम</string>
+  <string name="branch_create">बनाएँ</string>
+  <string name="branch_checkout">चेकआउट</string>
+  <string name="branch_merge">विलय करें</string>
+  <string name="branch_rebase">रीबेस</string>
+  <string name="branch_delete">हटाएँ</string>
+  <string name="branch_delete_confirm_title">शाखा हटाएँ</string>
+  <string name="branch_delete_confirm_msg">क्या शाखा \'%s\' हटाएँ?</string>
+  <string name="branch_merge_confirm_title">शाखा विलय</string>
+  <string name="branch_merge_confirm_msg">क्या \'%1$s\' का \'%2$s\' में विलय करें?</string>
+  <string name="branch_rebase_confirm_title">रीबेस</string>
+  <string name="branch_rebase_confirm_msg">क्या \'%1$s\' को \'%2$s\' पर रीबेस करें?\n\nइससे कमिट इतिहास फिर से लिखा जाएगा।</string>
+
+  <!-- Remotes -->
+  <string name="remote_add">रिमोट जोड़ें</string>
+  <string name="remote_remove">हटाएँ</string>
+  <string name="remote_remove_confirm_title">रिमोट हटाएँ</string>
+  <string name="remote_remove_confirm_msg">क्या रिमोट \'%s\' हटाएँ?</string>
+  <string name="remote_push">पुश</string>
+  <string name="remote_pull">पुल</string>
+  <string name="remote_fetch">फ़ेच</string>
+  <string name="remote_no_token">GitHub टोकन नहीं मिला। कृपया पहले लॉगिन करें।</string>
+  <string name="remote_uncommitted_title">बिना कमिट किए परिवर्तन</string>
+  <string name="remote_uncommitted_push_msg">आपके पास बिना कमिट किए परिवर्तन हैं। कृपया पुश करने से पहले उन्हें कमिट करें।</string>
+  <string name="remote_uncommitted_pull_msg">आपके पास बिना कमिट किए परिवर्तन हैं। पुल करने से विरोध हो सकता है। फिर भी जारी रखें?</string>
+  <string name="remote_fetching">%s से फ़ेच हो रहा है…</string>
+
+  <!-- Stash -->
+  <string name="stash_message_hint">स्टैश संदेश (वैकल्पिक)</string>
+  <string name="stash_save">स्टैश</string>
+  <string name="stash_pop">पॉप</string>
+  <string name="stash_apply">लागू करें</string>
+  <string name="stash_drop">हटाएँ</string>
+  <string name="stash_pop_confirm_title">स्टैश पॉप</string>
+  <string name="stash_pop_confirm_msg">क्या stash@{%d} लागू करके हटाएँ?</string>
+  <string name="stash_drop_confirm_title">स्टैश हटाएँ</string>
+  <string name="stash_drop_confirm_msg">क्या stash@{%d} हटाएँ? इसे पूर्ववत नहीं किया जा सकता।</string>
+  <string name="stash_saved_title">सहेजे गए स्टैश</string>
+
+  <!-- Conflicts -->
+  <string name="conflict_title">विरोध वाली फ़ाइलें</string>
+  <string name="conflict_no_conflicts">✅ कोई विरोध नहीं</string>
+  <string name="conflict_use_ours">अपना संस्करण रखें</string>
+  <string name="conflict_use_theirs">उनका संस्करण उपयोग करें</string>
+  <string name="conflict_edit">संपादित करें</string>
+  <string name="conflict_use_ours_title">अपना संस्करण रखें</string>
+  <string name="conflict_use_ours_msg">क्या अपना स्थानीय संस्करण रखें:\n%s?</string>
+  <string name="conflict_use_theirs_title">उनका संस्करण उपयोग करें</string>
+  <string name="conflict_use_theirs_msg">क्या आने वाले संस्करण का उपयोग करें:\n%s?</string>
+  <string name="conflict_manual_title">मैन्युअल समाधान: %s</string>
+  <string name="conflict_dialog_title">⚠️ विलय विरोध</string>
+  <string name="conflict_dialog_msg">विरोध पाए गए।\n\nविरोध वाली फ़ाइलों को परिवर्तन टैब में चिह्नित किया गया है।\nकृपया प्रत्येक विरोध को मैन्युअल रूप से हल करें, फिर स्टेज और कमिट करें।\n\nविवरण: %s</string>
+  <string name="conflict_go_to_changes">परिवर्तन पर जाएँ</string>
+  <string name="conflict_dismiss">खारिज करें</string>
+
+  <!-- Reset -->
+  <string name="reset_title">रीसेट</string>
+  <string name="reset_soft">Soft</string>
+  <string name="reset_mixed">Mixed</string>
+  <string name="reset_hard">Hard</string>
+  <string name="reset_soft_desc">परिवर्तनों को स्टेज किए रखें</string>
+  <string name="reset_mixed_desc">परिवर्तनों को बिना स्टेज किए रखें</string>
+  <string name="reset_hard_desc">सभी परिवर्तन त्यागें</string>
+  <string name="reset_confirm_title">रीसेट की पुष्टि करें</string>
+  <string name="reset_confirm_msg">क्या पिछले कमिट पर रीसेट करें?\n\nमोड: %s\n\nइसे पूर्ववत नहीं किया जा सकता।</string>
+  <string name="reset_steps_label">कितने चरण पीछे</string>
+
+  <!-- Tags -->
+  <string name="tag_title">टैग</string>
+  <string name="tag_name_hint">टैग का नाम (जैसे v1.0.0)</string>
+  <string name="tag_message_hint">टैग संदेश (वैकल्पिक)</string>
+  <string name="tag_create">टैग बनाएँ</string>
+  <string name="tag_delete">हटाएँ</string>
+  <string name="tag_delete_confirm_title">टैग हटाएँ</string>
+  <string name="tag_delete_confirm_msg">क्या टैग \'%s\' हटाएँ?</string>
+  <string name="tag_no_tags">अभी कोई टैग नहीं</string>
+
+  <!-- Gitignore -->
+  <string name="gitignore_title">.gitignore संपादक</string>
+  <string name="gitignore_hint">पैटर्न दर्ज करें, प्रत्येक पंक्ति में एक…</string>
+  <string name="gitignore_save">सहेजें</string>
+  <string name="gitignore_add_pattern">पैटर्न जोड़ें</string>
+  <string name="gitignore_pattern_hint">जैसे *.log, build/, .DS_Store</string>
+  <string name="gitignore_saved">Gitignore सहेजा गया</string>
+  <string name="gitignore_failed">Gitignore सहेजने में विफल</string>
+  <string name="gitignore_templates">टेम्पलेट</string>
+
+  <string name="tab_blame">ब्लेम</string>
+
+  <string name="git_empty_changes_title">कोई परिवर्तन नहीं</string>
+  <string name="git_empty_changes_desc">आपकी वर्किंग ट्री साफ़ है। संपादित या नई फ़ाइलें यहाँ दिखाई देंगी।</string>
+  <string name="git_empty_history_title">अभी कोई कमिट नहीं</string>
+  <string name="git_empty_history_desc">पहला कमिट करें और उसका इतिहास यहाँ दिखाई देगा।</string>
+  <string name="git_empty_branches_title">कोई शाखा नहीं</string>
+  <string name="git_empty_branches_desc">काम शुरू करने के लिए शाखा बनाएँ।</string>
+  <string name="git_empty_remotes_title">कोई रिमोट नहीं</string>
+  <string name="git_empty_remotes_desc">अपने कमिट पुश करने के लिए एक रिमोट (जैसे origin) जोड़ें।</string>
+  <string name="git_empty_stash_title">कुछ भी स्टैश नहीं</string>
+  <string name="git_empty_stash_desc">बाद के लिए सुरक्षित रखने हेतु अपने परिवर्तन स्टैश करें।</string>
+  <string name="git_empty_tags_title">कोई टैग नहीं</string>
+  <string name="git_empty_tags_desc">इतिहास में महत्वपूर्ण बिंदुओं को चिह्नित करने के लिए टैग बनाएँ।</string>
+
+  <!-- Git init from GitHub URL -->
+  <string name="git_init_hint">रिपॉज़िटरी का पता (https://github.com/user/repo.git)</string>
+  <string name="git_init_commit_hint">कमिट संदेश</string>
+  <string name="git_init_commit_required">कृपया कमिट संदेश दर्ज करें</string>
+  <string name="git_init_info">GitHub के Quick setup निर्देशों के अनुसार यह स्वचालित रूप से किया जाता है: यदि फ़ोल्डर में कोई .md फ़ाइल नहीं है तो README.md बनाया जाएगा, git init, git add . (सभी प्रोजेक्ट फ़ाइलें .gitignore का पालन करते हुए), अपने संदेश के साथ कमिट, शाखा को main में बदलना, origin जोड़ना और पुश।</string>
+  <string name="git_init_start">शुरू करें</string>
+  <string name="git_init_working">रिपॉज़िटरी बना रहे हैं और अपलोड कर रहे हैं… कृपया प्रतीक्षा करें</string>
+  <string name="git_init_url_required">कृपया रिपॉज़िटरी का पता दर्ज करें (https://github.com/user/repo.git)</string>
+</resources>

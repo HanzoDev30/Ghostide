@@ -1,0 +1,7 @@
+<resources>
+  <string name="paste_text">جای‌گذاری</string>
+  <string name="copy_text">کپی</string>
+  <string name="text_selection_more">بیشتر…</string>
+  <string name="terminal_completion_item_icon">نوع تکمیل</string>
+  <string name="terminal_completion_loading">در حال بارگذاری…</string>
+</resources>
