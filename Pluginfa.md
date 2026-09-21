@@ -302,12 +302,33 @@ context.registerDisposable(
   `android_asset` نمی تونه asset پلاگین رو باز کنه.
 - فقط یه اسم بر گردونید (مثل `file_type_kotlin`) تا از مجموعه داخلی `vscode_icons` استفاده بشه.
 - برای مپ کردن گروهی آیکون ها، یه فایل JSON با همون ساختار `data/file_icons.json` (`asset_dir`,
-  `extensions`, `filenames`, `folders`, `defaults`) به همراه SVG های خودتون داخل پلاگین بذارید
-  (`defaults` از کلیدهای `file`, `folder` و `root_folder` پشتیبانی می کنه؛ اگه اسمشون به یه SVG
-  داخل `asset_dir` خودتون اشاره کنه اون فایل استخراج و مثل بقیه آیکون ها به صورت `file://` سرو می شه) و
-  `JsonFileIconContributor` آماده رو ثبت کنید. این کلاس فقط SVG هایی که واقعا داخل پلاگین هستند
-  رو استخراج و به صورت `file://` سرو می کنه، و اسم های ناشناخته رو بدون تغییر به مجموعه داخلی
-  می سپاره:
+  `extensions`, `filenames`, `folders`, `defaults`) به همراه SVG های خودتون داخل پلاگین بذارید و
+  `JsonFileIconContributor` آماده رو ثبت کنید. این JSON **جزئیه** — فقط همون بخشی رو که می خواید
+  override کنید بنویسید، بقیه به مجموعه داخلی یا بقیه contributor ها می سپارن:
+
+```json
+{
+  "extensions": {
+    "hsi": "file_type_hsi",
+    "ghost": "file_type_ghost"
+  },
+  "filenames": {
+    "makefile": "file_type_makefile",
+    "ghostide.json": "file_type_ghost"
+  },
+  "folders": {
+    "components": "folder_type_components",
+    "node_modules": "folder_type_node"
+  }
+}
+```
+
+  معادل VS Code هم قبوله: `fileExtensions` / `fileNames` / `folderNames` / `folderNamesExpanded`
+  alias هستن، و کلید پسوند می تونه `hsi` یا `.hsi` یا `*.hsi` نوشته بشه — هر سه یکی‌ان.
+  `defaults` از کلیدهای `file`, `folder` و `root_folder` پشتیبانی می کنه؛ اگه اسمشون به یه SVG
+  داخل `asset_dir` خودتون اشاره کنه اون فایل استخراج و مثل بقیه آیکون ها به صورت `file://` سرو می شه.
+  این کلاس فقط SVG هایی که واقعا داخل پلاگین هستند رو استخراج و به صورت `file://` سرو می کنه، و
+  اسم های ناشناخته رو بدون تغییر به مجموعه داخلی می سپاره:
 
 ```java
 public void activate(PluginContext context) {
@@ -318,8 +339,11 @@ public void activate(PluginContext context) {
 }
 ```
 
-چند تا افزونه آیکون می تونن همزمان فعال باشن: به ترتیب اولویت نزولی پرسیده می شن و اولین جواب
-non-null برنده است. با unload شدن پلاگین، contribution هاش خودکار حذف می شن.
+چند تا افزونه آیکون می تونن همزمان فعال باشن. **جدیدترین پکی که نصب شده** اول پرسیده می شه
+(اولویت از زمان نصب فایل `.gpl` گرفته می شه و بعد از ری‌استارت هم حفظ می شه)؛ اولین جواب
+non-null برای هر مسیر برنده است، پس پک جدید روی کلیدهایی که تعریف می کنه پک های قدیمی تر رو
+override می کنه و بقیه جاها به اونا و در نهایت به مجموعه داخلی fallback می کنه. با unload شدن
+پلاگین، contribution هاش خودکار حذف می شن.
 
 ## ساخت پکیج `.gpl`
 

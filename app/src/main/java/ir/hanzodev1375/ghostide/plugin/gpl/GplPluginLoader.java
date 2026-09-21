@@ -115,7 +115,8 @@ public final class GplPluginLoader {
             descriptor,
             GlobalRegistry.extensions(),
             pluginServices,
-            new AndroidPluginLogger(manifest.id()));
+            new AndroidPluginLogger(manifest.id()),
+            installPriority(gplFile));
 
     plugin.activate(pluginContext);
 
@@ -207,5 +208,26 @@ public final class GplPluginLoader {
 
   public synchronized LoadedGplPlugin getLoaded(String pluginId) {
     return loaded.get(pluginId);
+  }
+
+  /**
+   * Newest-installed plugins must take precedence when several plugins answer the same extension
+   * point (e.g. icon packs registering a {@code FILE_ICON_CONTRIBUTOR}). The install time survives
+   * restarts, so rank the installed {@code .gpl} files by their last-modified time: older packs get
+   * a lower number and are queried last. A file not (yet) inside the install dir is treated as the
+   * newest one.
+   */
+  private int installPriority(File gplFile) {
+    List<File> installed = GplInstalledPlugins.listInstalled(appContext);
+    if (installed.isEmpty()) {
+      return 0;
+    }
+    installed.sort(java.util.Comparator.comparingLong(File::lastModified));
+    for (int i = 0; i < installed.size(); i++) {
+      if (installed.get(i).getAbsolutePath().equals(gplFile.getAbsolutePath())) {
+        return i;
+      }
+    }
+    return installed.size();
   }
 }

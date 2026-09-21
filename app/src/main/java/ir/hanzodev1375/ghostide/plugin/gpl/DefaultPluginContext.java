@@ -27,9 +27,10 @@ final class DefaultPluginContext implements PluginContext {
       PluginDescriptor descriptor,
       MutableExtensionRegistry extensions,
       MutableServiceRegistry services,
-      PluginLogger logger) {
+      PluginLogger logger,
+      int priority) {
     this.descriptor = descriptor;
-    this.extensions = new PluginScopedExtensions(extensions, descriptor.getId());
+    this.extensions = new PluginScopedExtensions(extensions, descriptor.getId(), priority);
     this.services = services;
     this.logger = logger;
   }

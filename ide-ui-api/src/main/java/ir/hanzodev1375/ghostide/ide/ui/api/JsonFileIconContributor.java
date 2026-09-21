@@ -12,20 +12,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * A ready-made {@link FileIconContributor} that loads icon mappings from a JSON file shipped in a
- * plugin's own assets, using exactly the same schema as the host's {@code data/file_icons.json}:
+ * plugin's own assets. The file uses the same schema as the host's {@code data/file_icons.json}
+ * but is <b>partial</b>: only the sections you declare are overridden, everything else is left to
+ * the built-in set (or to other contributors). The VS Code spelling for the section names is also
+ * accepted ({@code fileExtensions}, {@code fileNames}, {@code folderNames}, {@code
+ * folderNamesExpanded}):
  *
  * <pre>{@code
  * {
  *   "asset_dir": "myicons",
- *   "extensions": { ".ghost": "file_type_ghost" },
- *   "filenames": { "makefile": "file_type_makefile" },
- *   "folders": { "components": "folder_type_components" },
+ *   "extensions": { "hsi": "file_type_hsi" },
+ *   "fileNames": { "makefile": "file_type_makefile" },
+ *   "folderNames": { "components": "folder_type_components" },
  *   "defaults": {
  *     "file": "default_file",
  *     "folder": "default_folder",
@@ -34,11 +40,26 @@ import org.json.JSONObject;
  * }
  * }</pre>
  *
+ * <p>The simplest pack only needs an extension mapping, exactly like a VS Code override:
+ *
+ * <pre>{@code
+ * {
+ *   "extensions": { "hsi": "iconhsi" }
+ * }
+ * }</pre>
+ *
+ * <p>Extension keys may be written with or without the {@code *.} / {@code .} prefix, matching VS
+ * Code's {@code files.associations}/{@code fileExtensions} conventions: {@code "*.hsi"}, {@code
+ * ".hsi"} and {@code "hsi"} are all equivalent.
+ *
  * <p>Icon names may reference either your own artwork placed under {@code asset_dir} in the plugin
- * assets, or any icon of the built-in {@code vscode_icons} set. Custom artwork is extracted once
- * into the plugin's private {@code filesDir/ghost_icons/} folder at construction time and served
- * back as {@code file://} URIs (Glide can only open host assets through {@code android_asset});
- * unknown names fall back to the built-in set untouched.
+ * assets, or any icon of the built-in {@code vscode_icons} set. Custom artwork may be {@code .svg},
+ * {@code .png}, {@code .jpg}/{@code .jpeg} or {@code .webp}; it is extracted once into the plugin's
+ * private {@code filesDir/ghost_icons/} folder at construction time and served back as {@code
+ * file://} URIs (Glide can only open host assets through {@code android_asset}); unknown names fall
+ * back to the built-in set untouched. An {@code asset_dir} of {@code "."} (or {@code "/"}) means the
+ * plugin's assets root, so a pack can reuse an asset the plugin already ships — for example its own
+ * {@code plugin.json} icon.
  *
  * <p>Usage inside {@code activate()}:
  *
@@ -48,10 +69,15 @@ import org.json.JSONObject;
  *     PluginUiExtensionPoints.FILE_ICON_CONTRIBUTOR,
  *     new JsonFileIconContributor(pluginContext, "myicons.json")));
  * }</pre>
+ *
+ * <p>When several icon packs are installed, the newest installed one is consulted first (see {@code
+ * GplPluginLoader}); the first non-null answer wins per path, so newer packs override older ones on
+ * the keys they declare and fall back to older packs / the built-in set everywhere else.
  */
 public final class JsonFileIconContributor implements FileIconContributor {
 
   private static final String EXTRACT_DIR = "ghost_icons";
+  private static final String[] ARTWORK_EXTENSIONS = {".svg", ".png", ".jpg", ".jpeg", ".webp"};
   static final String TAG = "JsonFileIconContributor";
   private final JSONObject extensions;
   private final JSONObject filenames;
@@ -75,9 +101,9 @@ public final class JsonFileIconContributor implements FileIconContributor {
     defaultFolder = def == null ? "" : def.optString("folder", "");
     defaultRootFolder = def == null ? "" : def.optString("root_folder", "");
 
-    extensions = root == null ? null : root.optJSONObject("extensions");
-    filenames = root == null ? null : root.optJSONObject("filenames");
-    folders = root == null ? null : root.optJSONObject("folders");
+    extensions = extendKeys(merged(root, "extensions", "fileExtensions"));
+    filenames = merged(root, "filenames", "fileNames");
+    folders = merged(root, "folders", "folderNames", "folderNamesExpanded");
 
     List<String> keys = new ArrayList<>();
     if (extensions != null) {
@@ -95,7 +121,7 @@ public final class JsonFileIconContributor implements FileIconContributor {
     addIfPresent(custom, defaultRootFolder);
 
     File outDir = new File(new File(pluginContext.getFilesDir(), EXTRACT_DIR), safe(jsonAssetPath));
-    extractArtwork(pluginContext, assetDir, bundledNames(pluginContext, assetDir, custom), outDir);
+    extractArtwork(pluginContext, assetDir, bundledArtwork(pluginContext, assetDir, custom), outDir);
   }
 
   @Override
@@ -149,6 +175,52 @@ public final class JsonFileIconContributor implements FileIconContributor {
     }
   }
 
+  /**
+   * Merges the VS Code-style alias sections into the native one, native entries winning on key
+   * conflicts: {@code fileExtensions} into {@code extensions}, {@code fileNames} into {@code
+   * filenames}, {@code folderNames}/{@code folderNamesExpanded} into {@code folders}. Returns
+   * {@code null} when no section is present so the contributor answers nothing for that category.
+   */
+  private static JSONObject merged(JSONObject root, String primaryKey, String... aliasKeys) {
+    if (root == null) return null;
+    JSONObject out = new JSONObject();
+    if (aliasKeys != null) {
+      for (String alias : aliasKeys) putAll(out, root.optJSONObject(alias));
+    }
+    putAll(out, root.optJSONObject(primaryKey));
+    return out.length() == 0 ? null : out;
+  }
+
+  private static void putAll(JSONObject into, JSONObject from) {
+    if (from == null) return;
+    for (Iterator<String> it = from.keys(); it.hasNext(); ) {
+      String key = it.next();
+      try {
+        into.put(key, from.opt(key));
+      } catch (JSONException ignored) {
+      }
+    }
+  }
+
+  /** Normalizes extension keys like VS Code's {@code "*.hsi"} or {@code ".hsi"} to {@code "hsi"}. */
+  private static JSONObject extendKeys(JSONObject sections) {
+    if (sections == null) return null;
+    JSONObject out = new JSONObject();
+    for (Iterator<String> it = sections.keys(); it.hasNext(); ) {
+      String rawKey = it.next();
+      Object value = sections.opt(rawKey);
+      String key = rawKey;
+      while (key.startsWith("*.")) key = key.substring(2);
+      if (key.startsWith(".")) key = key.substring(1);
+      if (key.isEmpty()) continue;
+      try {
+        out.put(key.toLowerCase(Locale.ROOT), value);
+      } catch (JSONException ignored) {
+      }
+    }
+    return out.length() == 0 ? null : out;
+  }
+
   private static void markCustom(JSONObject section, Set<String> into) {
     if (section == null) return;
     for (Iterator<String> it = section.keys(); it.hasNext(); ) {
@@ -161,14 +233,26 @@ public final class JsonFileIconContributor implements FileIconContributor {
     if (name != null && !name.isEmpty()) into.add(name);
   }
 
-  /** Keeps only the names that actually exist as {@code <name>.svg} in the plugin assets. */
-  private static Set<String> bundledNames(Context context, String assetDir, Set<String> names) {
-    Set<String> bundled = new HashSet<>();
-    if (assetDir.isEmpty()) return bundled;
+  /**
+   * Keeps only the names that actually exist as artwork in the plugin assets, keyed to the real file
+   * name (so {@code tmlang.png} and {@code file_type_x.svg} both work). Supported formats are SVG,
+   * PNG, JPG/JPEG and WebP. An {@code asset_dir} of {@code ""}, {@code "."} or {@code "/"} means the
+   * assets root, which lets a pack reuse an asset the plugin already ships (e.g. its own icon).
+   */
+  private static Map<String, String> bundledArtwork(
+      Context context, String assetDir, Set<String> names) {
+    Map<String, String> bundled = new HashMap<>();
+    if (names.isEmpty()) return bundled;
     try {
-      for (String file : context.getAssets().list(assetDir)) {
-        String name = file.endsWith(".svg") ? file.substring(0, file.length() - 4) : null;
-        if (name != null && names.contains(name)) bundled.add(name);
+      for (String file : context.getAssets().list(listDir(assetDir))) {
+        String lower = file.toLowerCase(Locale.ROOT);
+        for (String ext : ARTWORK_EXTENSIONS) {
+          if (lower.endsWith(ext)) {
+            String name = file.substring(0, file.length() - ext.length());
+            if (names.contains(name)) bundled.put(name, file);
+            break;
+          }
+        }
       }
     } catch (Exception ignored) {
       Log.e(TAG, ignored.getLocalizedMessage());
@@ -176,11 +260,15 @@ public final class JsonFileIconContributor implements FileIconContributor {
     return bundled;
   }
 
-  private void extractArtwork(Context context, String assetDir, Set<String> names, File outDir) {
-    if (names.isEmpty() || assetDir.isEmpty()) return;
-    for (String name : names) {
-      File target = new File(outDir, safe(name) + ".svg");
-      try (InputStream is = context.getAssets().open(assetDir + "/" + name + ".svg")) {
+  private void extractArtwork(
+      Context context, String assetDir, Map<String, String> artwork, File outDir) {
+    if (artwork.isEmpty()) return;
+    for (Map.Entry<String, String> entry : artwork.entrySet()) {
+      String name = entry.getKey();
+      String file = entry.getValue();
+      String ext = file.substring(file.lastIndexOf('.'));
+      File target = new File(outDir, safe(name) + ext);
+      try (InputStream is = context.getAssets().open(assetPath(assetDir, file))) {
         outDir.mkdirs();
         try (FileOutputStream fos = new FileOutputStream(target)) {
           byte[] buf = new byte[8192];
@@ -192,6 +280,19 @@ public final class JsonFileIconContributor implements FileIconContributor {
         Log.e(TAG, ignored.getMessage());
       }
     }
+  }
+
+  /** Normalizes an {@code asset_dir} to an {@link android.content.res.AssetManager} folder. */
+  private static String listDir(String assetDir) {
+    if (assetDir == null) return "";
+    String dir = assetDir.trim();
+    if (dir.equals(".") || dir.equals("./") || dir.equals("/")) return "";
+    return dir;
+  }
+
+  private static String assetPath(String assetDir, String file) {
+    String dir = listDir(assetDir);
+    return dir.isEmpty() ? file : dir + "/" + file;
   }
 
   private static String safe(String raw) {

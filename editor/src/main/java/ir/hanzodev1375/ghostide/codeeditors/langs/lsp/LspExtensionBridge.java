@@ -106,6 +106,8 @@ public class LspExtensionBridge {
       CodeEditor editor) {
     LspServerRequest request = new LspServerRequest(new File(projectRoot), new File(filePath));
     LspServerDefinition definition = provider.createDefinition(request);
+    // اسکوپی که provider اعلام کرده بر نگاشت پسوند مقدم است تا گرامر اختصاصی افزونه رنگ بگیرد.
+    String grammarScope = definition.getGrammarScopeName();
     String projectKey = provider.getId() + "|" + projectRoot;
     LspProject project =
         PROJECTS.computeIfAbsent(
@@ -123,10 +125,11 @@ public class LspExtensionBridge {
             () -> {
               try {
                 LspEditor lspEditor = project.createEditor(filePath);
-                lspEditor.setWrapperLanguage(EditorLanguageFactory.create(context, filePath));
+                lspEditor.setWrapperLanguage(
+                    EditorLanguageFactory.create(context, filePath, grammarScope));
                 // گرامرها ممکن است هنوز آماده نباشند؛ وقتی آماده شد زبان واقعی را جایگزین می کنیم.
                 EditorLanguageFactory.createAsync(
-                    context, filePath, lspEditor::setWrapperLanguage);
+                    context, filePath, grammarScope, lspEditor::setWrapperLanguage);
                 lspEditor.setEditor(editor);
                 PreferencesUtils prefs = new PreferencesUtils(context);
                 lspEditor.setEnableHover(prefs.isHover());

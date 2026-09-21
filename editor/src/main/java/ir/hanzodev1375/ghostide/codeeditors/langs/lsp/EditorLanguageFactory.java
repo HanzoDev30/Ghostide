@@ -11,8 +11,17 @@ public final class EditorLanguageFactory {
   private EditorLanguageFactory() {}
 
   public static Language create(Context context, String filePath) {
+    return create(context, filePath, null);
+  }
+
+  /**
+   * زبان wrapper برای یک فایل. اگر {@code grammarScope} داده شود (از {@code
+   * LspServerDefinition.getGrammarScopeName()}) همان گرامر مبنا قرار می گیرد تا اسکوپ های افزونه هم
+   * با تم فعال ادیتور رنگ بگیرند.
+   */
+  public static Language create(Context context, String filePath, String grammarScope) {
     try {
-      Language language = TextMateLanguages.resolve(context, filePath);
+      Language language = TextMateLanguages.resolve(context, filePath, grammarScope);
       if (language != null) {
         return language;
       }
@@ -27,7 +36,15 @@ public final class EditorLanguageFactory {
    */
   public static void createAsync(
       Context context, String filePath, Consumer<Language> callback) {
+    createAsync(context, filePath, null, callback);
+  }
+
+  public static void createAsync(
+      Context context, String filePath, String grammarScope, Consumer<Language> callback) {
     TextMateLanguages.resolveAsync(
-        context, filePath, language -> callback.accept(language != null ? language : new EmptyLanguage()));
+        context,
+        filePath,
+        grammarScope,
+        language -> callback.accept(language != null ? language : new EmptyLanguage()));
   }
 }

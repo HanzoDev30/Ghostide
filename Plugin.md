@@ -302,10 +302,19 @@ default set) takes over.
 - Return a bare name (`file_type_kotlin`) to reuse any icon of the built-in `vscode_icons` set.
 - For bulk mappings, ship a JSON file with the same schema as `data/file_icons.json`
   (`asset_dir`, `extensions`, `filenames`, `folders`, `defaults`) plus your SVGs, then register
-  the ready-made `JsonFileIconContributor`. `defaults` supports `file`, `folder` and `root_folder`;
-  pointing any of them at artwork inside your `asset_dir` makes it extracted and served as a
-  `file://` URI, exactly like any mapped icon. It extracts only the SVGs actually present in your
-  plugin, serves them as `file://` URIs, and passes unknown names through to the built-in set:
+  the ready-made `JsonFileIconContributor`. The JSON is **partial** — declare only the sections
+  you override, everything else falls through to the built-in set or to other contributors:
+
+```json
+{ "extensions": { "hsi": "file_type_hsi" } }
+```
+
+  The VS Code spellings `fileExtensions`, `fileNames`, `folderNames` and `folderNamesExpanded`
+  are accepted as aliases, and extension keys may be written as `hsi`, `.hsi` or `*.hsi` — all
+  three are equivalent. `defaults` supports `file`, `folder` and `root_folder`; pointing any of
+  them at artwork inside your `asset_dir` makes it extracted and served as a `file://` URI,
+  exactly like any mapped icon. It extracts only the SVGs actually present in your plugin, serves
+  them as `file://` URIs, and passes unknown names through to the built-in set:
 
 ```java
 public void activate(PluginContext context) {
@@ -316,8 +325,11 @@ public void activate(PluginContext context) {
 }
 ```
 
-Multiple icon plugins can be active at once: they are queried in descending priority order and
-the first non-null answer wins. Unloading a plugin removes its contributions automatically.
+Multiple icon plugins can be active at once. The **newest installed** plugin is queried first
+(priority is derived from the `.gpl` install time and survives restarts); the first non-null
+answer wins per path, so a newer pack overrides older packs on the keys it declares and falls
+back to them — and finally to the built-in set — everywhere else. Unloading a plugin removes its
+contributions automatically.
 
 ## Building the `.gpl` package
 

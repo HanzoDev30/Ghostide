@@ -141,6 +141,11 @@ public final class LspServerDefinition {
       this.connectionFactory = factory;
     }
 
+    /**
+     * اسکوپ گرامر TextMate که ادیتور برای زبان wrapper این سرور استفاده می کند. اگر ست شود بر
+     * نگاشت پیش‌فرض پسوند فایل مقدم می شود، پس گرامرهای ثبت‌شده توسط پلاگین ها (خارج از
+     * languages.json هاست) هم با تم فعال ادیتور رنگ می گیرند.
+     */
     public Builder grammarScopeName(String grammarScopeName) {
       this.grammarScopeName = grammarScopeName;
       return this;

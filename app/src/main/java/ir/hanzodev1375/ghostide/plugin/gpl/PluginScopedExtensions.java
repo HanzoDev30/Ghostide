@@ -18,10 +18,13 @@ final class PluginScopedExtensions implements MutableExtensionRegistry {
 
   private final MutableExtensionRegistry delegate;
   private final String ownerPluginId;
+  private final int pluginPriority;
 
-  PluginScopedExtensions(MutableExtensionRegistry delegate, String ownerPluginId) {
+  PluginScopedExtensions(
+      MutableExtensionRegistry delegate, String ownerPluginId, int pluginPriority) {
     this.delegate = delegate;
     this.ownerPluginId = ownerPluginId;
+    this.pluginPriority = pluginPriority;
   }
 
   @Override
@@ -32,7 +35,7 @@ final class PluginScopedExtensions implements MutableExtensionRegistry {
 
   @Override
   public <T> Disposable register(ExtensionPoint<T> point, T extension) {
-    return delegate.register(point, extension, ownerPluginId, 0);
+    return delegate.register(point, extension, ownerPluginId, pluginPriority);
   }
 
   @Override
