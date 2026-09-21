@@ -22,7 +22,6 @@ import io.github.rosemoe.sora.event.ContentChangeEvent;
 import io.github.rosemoe.sora.event.LongPressEvent;
 import io.github.rosemoe.sora.event.SelectionChangeEvent;
 import io.github.rosemoe.sora.event.EditorFocusChangeEvent;
-import io.github.rosemoe.sora.lang.Language;
 import ir.hanzodev1375.ghostide.activity.EditorActivity;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.AndroidClasspathResolver;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.LspRouter;
@@ -172,8 +171,14 @@ public class EditorFragment extends Fragment {
       }
     }
 
-    Language lang = LanguageManager.resolve(getContext(), filePath);
-    if (lang != null) editor.setEditorLanguage(lang);
+    LanguageManager.resolveAsync(
+        getContext(),
+        filePath,
+        lang -> {
+          if (lang != null && editor != null) {
+            editor.setEditorLanguage(lang);
+          }
+        });
 
     applyReadOnly();
 
@@ -276,6 +281,9 @@ public class EditorFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
+    if (editor != null && theme != null) {
+      theme.applyEditor(editor);
+    }
     checkExternalChangesOnResume();
     refreshFileWatching();
   }

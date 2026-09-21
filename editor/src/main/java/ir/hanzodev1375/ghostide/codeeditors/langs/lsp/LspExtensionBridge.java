@@ -123,8 +123,10 @@ public class LspExtensionBridge {
             () -> {
               try {
                 LspEditor lspEditor = project.createEditor(filePath);
-                var language = EditorLanguageFactory.create(context, filePath);
-                lspEditor.setWrapperLanguage(language);
+                lspEditor.setWrapperLanguage(EditorLanguageFactory.create(context, filePath));
+                // گرامرها ممکن است هنوز آماده نباشند؛ وقتی آماده شد زبان واقعی را جایگزین می کنیم.
+                EditorLanguageFactory.createAsync(
+                    context, filePath, lspEditor::setWrapperLanguage);
                 lspEditor.setEditor(editor);
                 PreferencesUtils prefs = new PreferencesUtils(context);
                 lspEditor.setEnableHover(prefs.isHover());

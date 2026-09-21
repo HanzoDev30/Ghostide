@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.sidesheet.SideSheetDialog;
 import com.google.android.material.tabs.TabLayout;
+import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry;
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
 import ir.hanzodev1375.components.WebViewBottomSheetFragment;
 import ir.hanzodev1375.components.childern.ViewChilder;
@@ -190,6 +191,19 @@ public class ThemeUtils {
     GhostTheme theme = getTheme();
     if (theme == null || theme.getEditor() == null) return;
     EditorTheme t = theme.getEditor();
+
+    GhostColorScheme fresh = GhostColorScheme.create(t, true);
+    // ThemeRegistry سینگلتون است؛ اگر تِم سراسری با تِم فعال اپ یکی نیست (مثلاً پس از بستن
+    // شیت پیش‌نمایش تم) آن را همگام می کنیم و ادیتور را دوباره تحلیل می کنیم تا شاخص رنگ
+    // توکن ها با اسکیم جدید بخواند.
+    ThemeRegistry registry = ThemeRegistry.getInstance();
+    boolean registryOutOfSync = registry.getCurrentThemeModel() != fresh.getThemeModel();
+    if (registryOutOfSync) {
+      registry.setTheme(fresh.getThemeModel());
+    }
+    if (registryOutOfSync || editor.getColorScheme() != fresh) {
+      editor.setColorScheme(fresh);
+    }
     var scheme = editor.getColorScheme();
 
     scheme.setColor(GhostColorScheme.LINE_DIVIDER, parseColor(t.getLineDivider()));

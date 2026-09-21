@@ -4,10 +4,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.R;
 import ir.hanzodev1375.ghostide.codeeditors.langs.xml.XmlLanguage;
 import ir.hanzodev1375.ghostide.codeeditors.preview.EditorPopUp;
 import ir.hanzodev1375.ghostide.codeeditors.preview.Match;
+import ir.hanzodev1375.ghostide.codeeditors.textmate.TextMateScopeMap;
 
 import io.github.rosemoe.sora.event.SelectionChangeEvent;
 import io.github.rosemoe.sora.widget.CodeEditor;
@@ -49,6 +51,9 @@ public final class XmlAttrPreviewIde {
   }
 
   boolean isXmlLang() {
+    if (editor instanceof IdeEditor) {
+      return "text.xml".equals(TextMateScopeMap.scopeOf(((IdeEditor) editor).getCurrentFilePath()));
+    }
     return editor.getEditorLanguage() instanceof XmlLanguage;
   }
 

@@ -40,7 +40,7 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 #glass
-glass = "2.0.10"
+glass = "v2.0.11"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -56,6 +56,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 # Use the new version reference
 other-sora-editor-code = { group = "io.github.rosemoe", name = "editor", version.ref = "soraEditorVersion" }
 other-sora-editor-lsp = { group = "io.github.rosemoe", name = "editor-lsp", version.ref = "soraEditorVersion" }
+other-sora-editor-textmate = { group = "io.github.rosemoe", name = "language-textmate", version.ref = "soraEditorVersion" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gsonversion" }
 utilcode = { group = "com.blankj", name = "utilcodex",version.ref = "utilcodev" }
 powermenu = { group = "com.github.skydoves", name = "powermenu", version.ref = "powermenu" }

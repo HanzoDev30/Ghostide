@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import io.github.rosemoe.sora.event.SelectionChangeEvent;
 import io.github.rosemoe.sora.widget.CodeEditor;
-import ir.hanzodev1375.ghostide.codeeditors.langs.toml.TomlLanguage;
+import ir.hanzodev1375.ghostide.codeeditors.textmate.TextMateScopeMap;
 
 /**
  * Checks Gradle version catalog files (gradle/libs.versions.toml) for newer library versions.
@@ -21,9 +21,9 @@ public final class TomlDependencyCheckerIde extends DependencyCheckerIde {
 
   @Override
   protected boolean isMyLanguage() {
-    if (!(editor.getEditorLanguage() instanceof TomlLanguage)) return false;
     String path = getFilePath();
     if (path == null) return false;
+    if (!"source.toml".equals(TextMateScopeMap.scopeOf(path))) return false;
     String normalized = path.replace('\\', '/').toLowerCase(Locale.ROOT);
     return normalized.contains("/gradle/") && normalized.endsWith("libs.versions.toml");
   }

@@ -1684,7 +1684,7 @@ public class FileManagerActivity extends BaseCompat
                   try {
                     client.download(remotePath, localFile.getAbsolutePath());
                     runOnUiThread(
-                        () -> {
+                        () -> { 
                           GhostToast.makeText(
                                   FileManagerActivity.this,
                                   R.string.ftp_download_success,

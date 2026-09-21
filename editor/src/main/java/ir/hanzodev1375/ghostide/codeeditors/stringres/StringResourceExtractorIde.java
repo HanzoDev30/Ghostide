@@ -10,8 +10,7 @@ import io.github.rosemoe.sora.text.Cursor;
 import io.github.rosemoe.sora.widget.CodeEditor;
 
 import ir.hanzodev1375.ghostide.codeeditors.R;
-import ir.hanzodev1375.ghostide.codeeditors.langs.java.JavaLanguage;
-
+import ir.hanzodev1375.ghostide.codeeditors.textmate.TextMateScopeMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -61,9 +60,9 @@ public final class StringResourceExtractorIde {
         });
   }
 
-  /** حالا که کلاس واقعی رو می‌دونیم (langs.java.JavaLanguage توی همین ماژول)، مستقیم instanceof. */
+  /** مسیر به textmate مپ می‌شود؛ اگر گرامر java نبود false برمی‌گردد. */
   private boolean isJavaLanguage() {
-    return editor.getEditorLanguage() instanceof JavaLanguage;
+    return "source.java".equals(TextMateScopeMap.scopeOf(currentFilePath));
   }
 
   // ── نمایش دیالوگ ──────────────────────────────────────────────────────────

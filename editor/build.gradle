@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     api(libs.other.sora.editor.code)
     api(libs.other.sora.editor.lsp)
+    api(libs.other.sora.editor.textmate)
     implementation(libs.utilcode)
     implementation(libs.gson)
     implementation(libs.guava)

@@ -20,17 +20,14 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.colorscheme.GhostColorScheme;
-import ir.hanzodev1375.ghostide.codeeditors.langs.cpp.CppLanguage;
-import ir.hanzodev1375.ghostide.codeeditors.langs.html.HtmlLanguage;
-import ir.hanzodev1375.ghostide.codeeditors.langs.java.JavaLanguage;
-import ir.hanzodev1375.ghostide.codeeditors.langs.js.JsLanguage;
+import ir.hanzodev1375.ghostide.editorlangs.LanguageManager;
 import ir.hanzodev1375.components.childern.ViewChilder;
 import ir.hanzodev1375.components.sheet.BaseBlurBottomSheet;
 import ir.theme.ActivityTheme;
 import ir.theme.EditorTheme;
 import ir.theme.GhostTheme;
+import ir.theme.ThemeManager;
 import ir.theme.ThemeMediaPath;
-import ir.theme.WidgetTheme;
 import ir.theme.internal.ThemeRefResolver;
 
 public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
@@ -78,8 +75,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
   @Override
   protected void onContentReady(ViewGroup contentContainer) {
     View view =
-        getLayoutInflater()
-            .inflate(R.layout.bottom_sheet_preview_theme, contentContainer, false);
+        getLayoutInflater().inflate(R.layout.bottom_sheet_preview_theme, contentContainer, false);
     contentContainer.addView(
         view,
         new ViewGroup.LayoutParams(
@@ -99,6 +95,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
 
   @Override
   public void onDestroyView() {
+    restoreAppTheme();
     // Release the media child (video player / webview) when the sheet goes away.
     if (backgroundMedia != null) {
       backgroundMedia.clear();
@@ -106,10 +103,36 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
     super.onDestroyView();
   }
 
+  private void applyPreviewLanguage(String path) {
+    LanguageManager.resolveAsync(
+        getContext(),
+        path,
+        language -> {
+          if (language != null && editorPreview != null) {
+            editorPreview.setEditorLanguage(language);
+          }
+        });
+  }
+
+  /** تِم سراسری TextMate را به تِم فعال اپ برمی گرداند تا پیش‌نمایش روی ادیتورهای اصلی نماند. */
+  private void restoreAppTheme() {
+    try {
+      GhostTheme appTheme = new ThemeManager(requireContext()).getTheme();
+      if (appTheme != null && appTheme.getEditor() != null) {
+        GhostColorScheme.syncRegistryTo(appTheme.getEditor());
+      }
+    } catch (Exception ignored) {
+    }
+  }
+
   private void applyThemeToEditor() {
     if (currentTheme == null || currentTheme.getEditor() == null) return;
 
     EditorTheme t = currentTheme.getEditor();
+    GhostColorScheme fresh = GhostColorScheme.create(t, true);
+    if (editorPreview.getColorScheme() != fresh) {
+      editorPreview.setColorScheme(fresh);
+    }
     var scheme = editorPreview.getColorScheme();
     var widget = currentTheme.getWidget();
     if (widget != null) {
@@ -283,7 +306,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
   }
 
   private void applyBackgroundImage() {
-    WidgetTheme widget = currentTheme.getWidget();
+    var widget = currentTheme.getWidget();
     ActivityTheme activity = currentTheme.getActivity();
     String imagePath = widget != null ? widget.getImagepath() : null;
 
@@ -350,7 +373,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
                 + "        System.out.println(name + \": \" + value);\n"
                 + "    }\n"
                 + "}";
-        editorPreview.setEditorLanguage(new JavaLanguage(getContext()));
+        applyPreviewLanguage("Sample.java");
         break;
       case 1:
         code =
@@ -364,7 +387,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
                 + "    <p>This is a sample HTML file.</p>\n"
                 + "</body>\n"
                 + "</html>";
-        editorPreview.setEditorLanguage(new HtmlLanguage(getContext(), ""));
+        applyPreviewLanguage("sample.html");
         break;
       case 2:
         code =
@@ -374,7 +397,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
                 + "\n"
                 + "const result = greet('User');\n"
                 + "console.log(result);";
-        editorPreview.setEditorLanguage(new JsLanguage(getContext(), ""));
+        applyPreviewLanguage("app.js");
         break;
       case 3:
         code =
@@ -393,7 +416,7 @@ public class ThemePreviewBottomSheet extends BaseBlurBottomSheet {
                 + "    m.display();\n"
                 + "    return 0;\n"
                 + "}";
-        editorPreview.setEditorLanguage(new CppLanguage(getContext()));
+        applyPreviewLanguage("main.cpp");
         break;
       default:
         return;

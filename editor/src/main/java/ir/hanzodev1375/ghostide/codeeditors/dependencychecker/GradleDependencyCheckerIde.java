@@ -12,7 +12,7 @@ import java.util.Map;
 import com.moandjiezana.toml.Toml;
 import io.github.rosemoe.sora.event.SelectionChangeEvent;
 import io.github.rosemoe.sora.widget.CodeEditor;
-import ir.hanzodev1375.ghostide.codeeditors.langs.gradle.GradleLanguage;
+import ir.hanzodev1375.ghostide.codeeditors.textmate.TextMateScopeMap;
 
 /**
  * Checks Gradle build files for newer versions of declared dependencies.
@@ -40,7 +40,11 @@ public final class GradleDependencyCheckerIde extends DependencyCheckerIde
 
   @Override
   protected boolean isMyLanguage() {
-    return editor.getEditorLanguage() instanceof GradleLanguage;
+    String path = getFilePath();
+    if (path == null) {
+      return false;
+    }
+    return "source.groovy".equals(TextMateScopeMap.scopeOf(path));
   }
 
   @Override

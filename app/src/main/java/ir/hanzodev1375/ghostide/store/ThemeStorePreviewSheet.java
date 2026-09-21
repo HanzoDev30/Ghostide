@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import com.blankj.utilcode.util.FileIOUtils;
@@ -23,16 +22,14 @@ import com.google.android.material.slider.Slider;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
 import ir.hanzodev1375.components.sheet.BaseBlurBottomSheet;
+import ir.hanzodev1375.components.views.GhostToast;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.colorscheme.GhostColorScheme;
-import ir.hanzodev1375.ghostide.codeeditors.langs.cpp.CppLanguage;
-import ir.hanzodev1375.ghostide.codeeditors.langs.html.HtmlLanguage;
-import ir.hanzodev1375.ghostide.codeeditors.langs.java.JavaLanguage;
-import ir.hanzodev1375.ghostide.codeeditors.langs.js.JsLanguage;
+import ir.hanzodev1375.ghostide.editorlangs.LanguageManager;
 import ir.hanzodev1375.ghostide.databinding.SheetThemeStorePreviewBinding;
 import ir.theme.EditorTheme;
 import ir.theme.GhostTheme;
@@ -63,6 +60,7 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
   private GhostTheme appliedTheme;
   private File appliedThemeFile;
   private boolean themeReady = false;
+  private boolean themeApplied = false;
   private ThemeStorePreviewViewModel viewModel;
 
   public static ThemeStorePreviewSheet newInstance(ThemeItem theme) {
@@ -244,13 +242,13 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
   }
 
   private void onDownloadFailed() {
-    Toast.makeText(requireContext(), R.string.themes_download_failed, Toast.LENGTH_SHORT).show();
+    GhostToast.makeText(requireContext(), R.string.themes_download_failed, GhostToast.LENGTH_SHORT).show();
   }
 
   private void applyPreview(File themeFile) {
     String json = FileIOUtils.readFile2String(themeFile);
     if (json == null || json.isEmpty()) {
-      Toast.makeText(requireContext(), R.string.themes_download_failed, Toast.LENGTH_SHORT).show();
+      GhostToast.makeText(requireContext(), R.string.themes_download_failed, GhostToast.LENGTH_SHORT).show();
       return;
     }
     try {
@@ -275,12 +273,16 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
       binding.fabInstall.setEnabled(true);
       binding.fabInstall.setAlpha(1f);
     } catch (Exception e) {
-      Toast.makeText(requireContext(), R.string.themes_download_failed, Toast.LENGTH_SHORT).show();
+      GhostToast.makeText(requireContext(), R.string.themes_download_failed, GhostToast.LENGTH_SHORT).show();
     }
   }
 
   private void applyEditorTheme(GhostTheme theme) {
     EditorTheme t = theme.getEditor();
+    GhostColorScheme fresh = GhostColorScheme.create(t, true);
+    if (editorPreview.getColorScheme() != fresh) {
+      editorPreview.setColorScheme(fresh);
+    }
     var scheme = editorPreview.getColorScheme();
     scheme.setColor(GhostColorScheme.LINE_DIVIDER, parseColor(t.getLineDivider()));
     scheme.setColor(GhostColorScheme.LINE_NUMBER, parseColor(t.getLineNumber()));
@@ -530,7 +532,7 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
 
   private void installTheme(View root) {
     if (!themeReady || appliedThemeFile == null || !appliedThemeFile.exists()) {
-      Toast.makeText(requireContext(), R.string.themes_download_failed, Toast.LENGTH_SHORT).show();
+      GhostToast.makeText(requireContext(), R.string.themes_download_failed, GhostToast.LENGTH_SHORT).show();
       return;
     }
     try {
@@ -545,11 +547,12 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
       FileUtils.copy(appliedThemeFile.getAbsolutePath(), target.getAbsolutePath());
       copyBackground(appliedThemeFile, target);
       new ThemeManager(requireContext()).setThemeFromFile(target.getAbsolutePath());
-      Toast.makeText(requireContext(), R.string.themes_applied, Toast.LENGTH_SHORT).show();
+      GhostToast.makeText(requireContext(), R.string.themes_applied, GhostToast.LENGTH_SHORT).show();
       EventBus.getDefault().post(new ThemeInstalledEvent());
+      themeApplied = true;
       dismiss();
     } catch (Exception e) {
-      Toast.makeText(requireContext(), R.string.themes_download_failed, Toast.LENGTH_SHORT).show();
+      GhostToast.makeText(requireContext(), R.string.themes_download_failed, GhostToast.LENGTH_SHORT).show();
     }
   }
 
@@ -585,6 +588,31 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
     }
   }
 
+  private void applyPreviewLanguage(String path) {
+    LanguageManager.resolveAsync(
+        getContext(),
+        path,
+        language -> {
+          if (language != null && editorPreview != null) {
+            editorPreview.setEditorLanguage(language);
+          }
+        });
+  }
+
+  /** تِم سراسری TextMate را به تِم فعال اپ برمی گرداند تا پیش‌نمایش روی ادیتورهای اصلی نماند. */
+  private void restoreAppTheme() {
+    if (themeApplied) {
+      return;
+    }
+    try {
+      GhostTheme appTheme = new ThemeManager(requireContext()).getTheme();
+      if (appTheme != null && appTheme.getEditor() != null) {
+        GhostColorScheme.syncRegistryTo(appTheme.getEditor());
+      }
+    } catch (Exception ignored) {
+    }
+  }
+
   private void setSampleCode(int position) {
     String code;
     switch (position) {
@@ -603,7 +631,7 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
                 + "        System.out.println(name + \": \" + value);\n"
                 + "    }\n"
                 + "}";
-        editorPreview.setEditorLanguage(new JavaLanguage(getContext()));
+        applyPreviewLanguage("Sample.java");
         break;
       case 1:
         code =
@@ -612,7 +640,7 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
                 + "<head><title>Sample</title></head>\n"
                 + "<body><h1>Hello</h1><p>World</p></body>\n"
                 + "</html>";
-        editorPreview.setEditorLanguage(new HtmlLanguage(getContext(), ""));
+        applyPreviewLanguage("sample.html");
         break;
       case 2:
         code =
@@ -621,11 +649,11 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
                 + "}\n"
                 + "const result = greet('User');\n"
                 + "console.log(result);";
-        editorPreview.setEditorLanguage(new JsLanguage(getContext(), ""));
+        applyPreviewLanguage("app.js");
         break;
       default:
         code = "#include <iostream>\n" + "using namespace std;\n" + "int main() { return 0; }";
-        editorPreview.setEditorLanguage(new CppLanguage(getContext()));
+        applyPreviewLanguage("main.cpp");
         break;
     }
     editorPreview.setText(code);
@@ -633,6 +661,7 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
 
   @Override
   public void onDestroyView() {
+    restoreAppTheme();
     if (binding != null && binding.ivBackgroundImage != null) {
       binding.ivBackgroundImage.clear();
     }
