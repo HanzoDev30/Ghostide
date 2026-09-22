@@ -82,11 +82,11 @@
             android:paddingBottom="16dp"
             android:paddingHorizontal="12dp">
 
-            <com.google.android.material.chip.ChipGroup
+            <com.example.liquidglass.LiquidGlassChipGroup
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                app:chipSpacingVertical="4dp"
-                app:chipSpacingHorizontal="6dp"
+                app:glassChipSpacingVertical="4dp"
+                app:glassChipSpacingHorizontal="6dp"
                 android:id="@+id/chipGroupLanguages"/>
 
             <LinearLayout

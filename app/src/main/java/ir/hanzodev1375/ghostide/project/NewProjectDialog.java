@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import androidx.appcompat.app.AlertDialog;
-import com.google.android.material.chip.ChipGroup;
+import com.example.liquidglass.LiquidGlassChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import ir.hanzodev1375.ghostide.R;
@@ -32,7 +32,11 @@ public class NewProjectDialog {
   public void show() {
     View view = LayoutInflater.from(context).inflate(R.layout.dialog_new_project, null);
 
-    ChipGroup chipGroup = view.findViewById(R.id.chipGroupType);
+    LiquidGlassChipGroup chipGroup = view.findViewById(R.id.chipGroupType);
+    View chipBackdrop = findActivityContentView(context);
+    if (chipBackdrop != null) {
+      chipGroup.setBackdropSource(chipBackdrop);
+    }
     TextInputLayout tilName = view.findViewById(R.id.tilProjectName);
     TextInputEditText etName = view.findViewById(R.id.etProjectName);
     TextInputLayout tilPkg = view.findViewById(R.id.tilPackageName);
@@ -120,7 +124,18 @@ public class NewProjectDialog {
         });
   }
 
-  private ProjectCreator.ProjectType getSelectedType(ChipGroup group) {
+  private static View findActivityContentView(Context context) {
+    Context current = context;
+    while (current instanceof android.content.ContextWrapper) {
+      if (current instanceof android.app.Activity) {
+        return ((android.app.Activity) current).findViewById(android.R.id.content);
+      }
+      current = ((android.content.ContextWrapper) current).getBaseContext();
+    }
+    return null;
+  }
+
+  private ProjectCreator.ProjectType getSelectedType(LiquidGlassChipGroup group) {
     int id = group.getCheckedChipId();
     if (id == R.id.chipNodejs) return ProjectCreator.ProjectType.NODEJS;
     if (id == R.id.chipJava) return ProjectCreator.ProjectType.JAVA;

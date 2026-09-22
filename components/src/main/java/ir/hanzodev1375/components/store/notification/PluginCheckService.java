@@ -34,7 +34,7 @@ public class PluginCheckService extends Service {
           try {
             PluginNotifier.runCheck(PluginCheckService.this, null);
           } finally {
-            if (!handler.postDelayed(this, TimeUnit.HOURS.toHours(6))) {
+            if (!handler.postDelayed(this, TimeUnit.HOURS.toMillis(6))) {
               Log.w(TAG, "could not reschedule check");
             }
           }

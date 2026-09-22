@@ -97,7 +97,7 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
 
   @Override
   public void onClick(View v) {
-    setValue(!value);
+    binding.preferenceSwitch.setChecked(!binding.preferenceSwitch.isChecked());
   }
 
 
@@ -139,7 +139,11 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
 
 
   public void setSwitchChangedListener(CompoundButton.OnCheckedChangeListener listener) {
-    binding.preferenceSwitch.setOnCheckedChangeListener(listener);
+    binding.preferenceSwitch.setOnCheckedChangeListener(
+        (button, isChecked) -> {
+          value = isChecked;
+          if (listener != null) listener.onCheckedChanged(isChecked);
+        });
   }
 
 

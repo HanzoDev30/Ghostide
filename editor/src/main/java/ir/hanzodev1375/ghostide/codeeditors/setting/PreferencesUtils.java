@@ -803,6 +803,71 @@ public class PreferencesUtils {
     getDefaultPreferences().edit().putBoolean("editor_lsp_diagnostics", show).apply();
   }
 
+  // ========== Code Runner Settings ==========
+
+  public static final String KEY_RUNNER_MASTER = "code_runner_master";
+  public static final String KEY_RUNNER_SHELL = "code_runner_shell";
+  public static final String KEY_RUNNER_C = "code_runner_c";
+  public static final String KEY_RUNNER_CPP = "code_runner_cpp";
+  public static final String KEY_RUNNER_PYTHON = "code_runner_python";
+  public static final String KEY_RUNNER_GO = "code_runner_go";
+  public static final String KEY_RUNNER_NODE = "code_runner_node";
+  public static final String KEY_RUNNER_TYPESCRIPT = "code_runner_typescript";
+  public static final String KEY_RUNNER_PHP = "code_runner_php";
+  public static final String KEY_RUNNER_LUA = "code_runner_lua";
+  public static final String KEY_RUNNER_JAVA = "code_runner_java";
+  public static final String KEY_RUNNER_KOTLIN = "code_runner_kotlin";
+  public static final String KEY_RUNNER_SASS = "code_runner_sass";
+  public static final String KEY_CUSTOM_RUNNERS = "code_runner_custom";
+  public static final String LSP_SERVER_PREFIX = "lsp_server_";
+
+  public boolean isCodeRunnerEnabled() {
+    return getDefaultPreferences().getBoolean(KEY_RUNNER_MASTER, true);
+  }
+
+  public void setCodeRunnerEnabled(boolean enabled) {
+    getDefaultPreferences().edit().putBoolean(KEY_RUNNER_MASTER, enabled).apply();
+  }
+
+  /** Generic toggle for a code runner key (default is ON). */
+  public boolean isRunnerEnabled(String key) {
+    return getDefaultPreferences().getBoolean(key, true);
+  }
+
+  public void setRunnerEnabled(String key, boolean enabled) {
+    getDefaultPreferences().edit().putBoolean(key, enabled).apply();
+  }
+
+  /** Toggle for a built-in LSP server identified by its tag (default is ON). */
+  public boolean isLspServerEnabled(String tag) {
+    return getDefaultPreferences().getBoolean(LSP_SERVER_PREFIX + tag, true);
+  }
+
+  public void setLspServerEnabled(String tag, boolean enabled) {
+    getDefaultPreferences().edit().putBoolean(LSP_SERVER_PREFIX + tag, enabled).apply();
+  }
+
+  public String getCustomRunnersText() {
+    return getDefaultPreferences().getString(KEY_CUSTOM_RUNNERS, "");
+  }
+
+  public void setCustomRunnersText(String text) {
+    getDefaultPreferences().edit().putString(KEY_CUSTOM_RUNNERS, text).apply();
+  }
+
+  // ========== Icon Pack Settings ==========
+
+  /** Empty string means "no pack" (built-in icons). */
+  public static final String KEY_ICON_PACK = "icon_pack_selected";
+
+  public String getIconPack() {
+    return getDefaultPreferences().getString(KEY_ICON_PACK, "");
+  }
+
+  public void setIconPack(String id) {
+    getDefaultPreferences().edit().putString(KEY_ICON_PACK, id == null ? "" : id).apply();
+  }
+
   public boolean isBackgroundZoomMod() {
     return getDefaultPreferences().getBoolean(Constants.SharedPreferenceKeys.KEY_CONSTZOOM, false);
   }

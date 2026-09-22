@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import ir.hanzodev1375.components.searchdata.FileSearchEngine;
 import ir.hanzodev1375.components.searchdata.model.FileSearchResult;
 import ir.hanzodev1375.components.searchdata.model.SearchQuery;
+import ir.hanzodev1375.components.searchdata.utils.GlobExcluder;
+import ir.hanzodev1375.components.utils.ComponentsPrefs;
 
 public class SearchViewModel extends AndroidViewModel {
   public enum State {
@@ -62,6 +64,8 @@ public class SearchViewModel extends AndroidViewModel {
         () ->
             engine.search(
                 query,
+                new GlobExcluder(
+                    new ComponentsPrefs(getApplication()).getExcludedFilesText()),
                 cancelled,
                 new FileSearchEngine.SearchCallback() {
                   @Override

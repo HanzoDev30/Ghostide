@@ -124,8 +124,8 @@ public class SettingsAdapter extends RecyclerView.Adapter<SettingsAdapter.ViewHo
     if (item.getIconRes() != 0) {
       holder.switchGroup.setIcon(item.getIconRes());
     }
-    holder.switchGroup.setValue(item.isChecked());
     holder.switchGroup.getSwitch().setOnCheckedChangeListener(null);
+    holder.switchGroup.setValue(item.isChecked());
     if (item.getListener() != null) {
       holder.switchGroup.getSwitch().setVisibility(View.VISIBLE);
       holder.switchGroup.setSwitchChangedListener(

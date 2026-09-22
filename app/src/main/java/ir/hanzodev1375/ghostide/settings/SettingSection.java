@@ -153,9 +153,6 @@ public abstract class SettingSection {
         .show();
   }
 
-  // ---------------------------------------------------------------------
-  // Shortcuts
-  // ---------------------------------------------------------------------
 
   protected String getString(int res) {
     return activity.getString(res);

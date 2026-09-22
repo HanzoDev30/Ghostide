@@ -85,6 +85,11 @@
   <string name="search_no_results">نتیجه ای یافت نشد</string>
   <string name="search_result_count">%d نتیجه</string>
   <string name="search_found">%d فایل یافت شد</string>
+  <string name="search_exclude_title">استثناهای جستجو</string>
+  <string name="search_exclude_hint">هر خط یک الگوی glob. پوشه/فایل‌هایی که با هر الگو مطابقت داشته باشند از جستجو حذف می‌شوند. (مثل **/build/**)</string>
+  <string name="search_exclude_save">ذخیره</string>
+  <string name="search_exclude_reset">بازنشانی</string>
+  <string name="search_exclude_saved">استثناها ذخیره شد</string>
   <string name="search_error_invalid_regex">الگوی Regex نامعتبر است</string>
   <string name="web_sheet_loading">در حال بارگیری…</string>
   <string name="web_sheet_link_copied">لینک کپی شد</string>

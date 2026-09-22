@@ -13,92 +13,94 @@
     android:textAppearance="?textAppearanceLabelLarge"
     android:text="@string/project_type" />
 
-  <com.google.android.material.chip.ChipGroup
+  <com.example.liquidglass.LiquidGlassChipGroup
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:layout_marginBottom="16dp"
-    app:singleSelection="true"
-    app:selectionRequired="true"
+    app:glassSingleSelection="true"
+    app:glassSelectionRequired="true"
+    app:glassChipSpacingHorizontal="8dp"
+    app:glassChipSpacingVertical="8dp"
     android:id="@+id/chipGroupType">
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipHtml"
       android:text="HTML" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipNodejs"
       android:text="Node.js" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipJava"
       android:text="Java" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipFlutter"
       android:text="Flutter" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipPython"
       android:text="Python" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipPythonC"
       android:text="PythonC" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipPhp"
       android:text="PHP" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipC"
       android:text="C" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipCpp"
       android:text="C++" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipRuby"
       android:text="Ruby" />
 
-    <com.google.android.material.chip.Chip
+    <com.example.liquidglass.LiquidGlassChip
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      style="@style/Widget.Material3.Chip.Filter"
+      android:checkable="true"
       android:id="@+id/chipAndroidModule"
       android:text="Android Module" />
 
-  </com.google.android.material.chip.ChipGroup>
+  </com.example.liquidglass.LiquidGlassChipGroup>
 
   <com.google.android.material.textfield.TextInputLayout
     android:layout_height="wrap_content"

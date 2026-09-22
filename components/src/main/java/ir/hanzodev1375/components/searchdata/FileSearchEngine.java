@@ -14,9 +14,11 @@ import ir.hanzodev1375.components.searchdata.model.FileSearchResult;
 import ir.hanzodev1375.components.searchdata.model.SearchMode;
 import ir.hanzodev1375.components.searchdata.model.SearchQuery;
 import ir.hanzodev1375.components.searchdata.model.SearchType;
+import ir.hanzodev1375.components.searchdata.utils.GlobExcluder;
 
 public class FileSearchEngine {
   private static final int MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+  private GlobExcluder excluder = new GlobExcluder(null);
   private static final String[] TEXT_EXTENSIONS = {
     ".java",
     ".kt",
@@ -66,6 +68,15 @@ public class FileSearchEngine {
   }
 
   public void search(SearchQuery query, AtomicBoolean cancelled, SearchCallback callback) {
+    search(query, null, cancelled, callback);
+  }
+
+  public void search(
+      SearchQuery query,
+      GlobExcluder excluder,
+      AtomicBoolean cancelled,
+      SearchCallback callback) {
+    if (excluder != null) this.excluder = excluder;
     if (!query.isValid()) {
       callback.onError("Invalid query");
       return;
@@ -98,8 +109,10 @@ public class FileSearchEngine {
     for (File file : files) {
       if (cancelled.get()) return;
       if (file.isDirectory()) {
+        if (excluder.isExcluded(file.getAbsolutePath())) continue;
         searchRecursive(file, query, pattern, cancelled, callback, count);
       } else {
+        if (excluder.isExcluded(file.getAbsolutePath())) continue;
         FileSearchResult result = matchFile(file, query, pattern);
         if (result != null) {
           count[0]++;

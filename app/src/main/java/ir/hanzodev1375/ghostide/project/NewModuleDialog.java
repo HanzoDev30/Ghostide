@@ -8,8 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.example.liquidglass.LiquidGlassChip;
+import com.example.liquidglass.LiquidGlassChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import ir.theme.M3Theme;
@@ -46,11 +46,16 @@ public class NewModuleDialog {
 
     TextInputLayout tilLibs = view.findViewById(R.id.tilLibraries);
     TextInputEditText etLibs = view.findViewById(R.id.etLibraries);
-    ChipGroup chipGroupModules = view.findViewById(R.id.chipGroupModules);
+    LiquidGlassChipGroup chipGroupModules = view.findViewById(R.id.chipGroupModules);
+
+    View chipBackdrop = findActivityContentView(context);
+    if (chipBackdrop != null) {
+      chipGroupModules.setBackdropSource(chipBackdrop);
+    }
 
     List<String> existingModules = ModuleScanner.scanModules(projectRootPath);
     for (String moduleName : existingModules) {
-      Chip chip = new Chip(context);
+      LiquidGlassChip chip = new LiquidGlassChip(context);
       chip.setText(moduleName);
       chip.setCheckable(true);
       chip.setChecked(false);
@@ -142,8 +147,8 @@ public class NewModuleDialog {
                     List<String> selectedModules = new ArrayList<>();
                     for (int i = 0; i < chipGroupModules.getChildCount(); i++) {
                       View child = chipGroupModules.getChildAt(i);
-                      if (child instanceof Chip && ((Chip) child).isChecked()) {
-                        selectedModules.add(((Chip) child).getText().toString());
+                      if (child instanceof LiquidGlassChip && ((LiquidGlassChip) child).isChecked()) {
+                        selectedModules.add(((LiquidGlassChip) child).getText().toString());
                       }
                     }
 
@@ -198,6 +203,17 @@ public class NewModuleDialog {
    * @return لیست کتابخانه‌ها، یا لیست خالی اگر ورودی خالی باشد. اگر فرمت نادرست باشد {@code null}
    *     برمی‌گرداند و خطا را در {@code tilLibs} نشان می‌دهد.
    */
+  private static View findActivityContentView(Context context) {
+    Context current = context;
+    while (current instanceof android.content.ContextWrapper) {
+      if (current instanceof android.app.Activity) {
+        return ((android.app.Activity) current).findViewById(android.R.id.content);
+      }
+      current = ((android.content.ContextWrapper) current).getBaseContext();
+    }
+    return null;
+  }
+
   private List<LibraryManager.Library> parseLibraries(String raw, TextInputLayout tilLibs) {
     List<LibraryManager.Library> result = new ArrayList<>();
 

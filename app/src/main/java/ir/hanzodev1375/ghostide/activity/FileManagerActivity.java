@@ -23,6 +23,7 @@ import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.components.effect.ripple.WaterRipple;
 import ir.hanzodev1375.components.effect.ThanosEffect;
 import ir.hanzodev1375.components.effect.ThanosItemAnimator;
+import ir.hanzodev1375.ghostide.iconpack.IconPackManager;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -1318,6 +1319,9 @@ public class FileManagerActivity extends BaseCompat
     super.onResume();
     relaxPulseRoot();
     setupHeader();
+    if (IconPackManager.shouldRefresh(this)) {
+      refreshFileList();
+    }
     if (appsetting.isShowBackground()) {
       bind.headtop.setBackgroundColor(0);
       bind.headline.setBackgroundColor(0);

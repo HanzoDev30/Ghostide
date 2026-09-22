@@ -21,6 +21,7 @@ import ir.hanzodev1375.ghostide.ide.ui.api.FileIconContributor;
 import ir.hanzodev1375.ghostide.ide.ui.api.IdeHostServices;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
 import ir.hanzodev1375.ghostide.materialfileicon.core.JsonFileIconHelper;
+import ir.hanzodev1375.ghostide.plugin.api.ExtensionRegistration;
 import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplInstalledPlugins;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplPluginLoader;
@@ -71,11 +72,16 @@ public class GhostIdeAppLoader extends Application {
         .register(IdeHostServices.UI_FEEDBACK, uiFeedbackHost);
     JsonFileIconHelper.setExternalResolver(
         path -> {
-          for (FileIconContributor contributor :
+          String selected = setting.getIconPack();
+          if (selected == null || selected.isEmpty()) {
+            return null;
+          }
+          for (ExtensionRegistration<FileIconContributor> registration :
               GlobalRegistry.extensions()
-                  .extensions(PluginUiExtensionPoints.FILE_ICON_CONTRIBUTOR)) {
+                  .registrations(PluginUiExtensionPoints.FILE_ICON_CONTRIBUTOR)) {
+            if (!selected.equals(registration.ownerPluginId())) continue;
             try {
-              String icon = contributor.getIcon(path);
+              String icon = registration.extension().getIcon(path);
               if (icon != null && !icon.trim().isEmpty()) return icon;
             } catch (Throwable ignored) {
             }

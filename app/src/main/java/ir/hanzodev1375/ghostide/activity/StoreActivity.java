@@ -4,12 +4,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
+import com.example.liquidglass.LiquidGlassTabBar;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import ir.hanzodev1375.components.sheet.PluginSetupSheet;
 import ir.hanzodev1375.components.store.adapter.ViewPagerAdapter;
 import ir.hanzodev1375.components.store.event.PluginSetupEvent;
@@ -29,7 +30,7 @@ import org.greenrobot.eventbus.ThreadMode;
 public class StoreActivity extends BaseCompat {
 
   private ViewPager2 viewPager;
-  private BottomNavigationView bottomNav;
+  private LiquidGlassTabBar bottomNav;
   private MaterialToolbar toolbar;
   private GplPluginInstallerHost installerHost;
 
@@ -49,7 +50,7 @@ public class StoreActivity extends BaseCompat {
     toolbar.setNavigationOnClickListener(v -> finish());
 
     setupBackgroundBlur(findViewById(R.id.backgroundIconStore), appBarLayout, storeContent);
-    tintContentForBackground(appBarLayout, storeContent, bottomNav);
+    tintContentForBackground(appBarLayout, storeContent);
 
     View appBar = findViewById(R.id.appBarLayout);
     ViewCompat.setOnApplyWindowInsetsListener(
@@ -81,27 +82,7 @@ public class StoreActivity extends BaseCompat {
           }
         });
 
-    bottomNav.setOnItemSelectedListener(
-        item -> {
-          int id = item.getItemId();
-          if (id == R.id.menu_projects) {
-            viewPager.setCurrentItem(ViewPagerAdapter.PAGE_PROJECTS, true);
-            return true;
-          } else if (id == R.id.menu_themes) {
-            viewPager.setCurrentItem(ViewPagerAdapter.PAGE_THEMES, true);
-            return true;
-          } else if (id == R.id.menu_fonts) {
-            viewPager.setCurrentItem(ViewPagerAdapter.PAGE_FONTS, true);
-            return true;
-          } else if (id == R.id.menu_plugins) {
-            viewPager.setCurrentItem(ViewPagerAdapter.PAGE_PLUGINS, true);
-            return true;
-          } else if (id == R.id.menu_icons) {
-            viewPager.setCurrentItem(ViewPagerAdapter.PAGE_ICONS, true);
-            return true;
-          }
-          return false;
-        });
+    setupTabBar();
     M3Theme.applyTopLevel(root);
   }
 
@@ -145,26 +126,38 @@ public class StoreActivity extends BaseCompat {
   }
 
   private void syncNavItem(int position) {
-    int id;
-    switch (position) {
-      case ViewPagerAdapter.PAGE_THEMES:
-        id = R.id.menu_themes;
-        break;
-      case ViewPagerAdapter.PAGE_FONTS:
-        id = R.id.menu_fonts;
-        break;
-      case ViewPagerAdapter.PAGE_PLUGINS:
-        id = R.id.menu_plugins;
-        break;
-      case ViewPagerAdapter.PAGE_ICONS:
-        id = R.id.menu_icons;
-        break;
-      case ViewPagerAdapter.PAGE_PROJECTS:
-      default:
-        id = R.id.menu_projects;
-        break;
+    bottomNav.setSelectedIndex(position);
+  }
+
+  private void setupTabBar() {
+    View backdrop = findViewById(android.R.id.content);
+    if (backdrop != null) {
+      bottomNav.setBackdropSource(backdrop);
     }
-    bottomNav.setSelectedItemId(id);
+    bottomNav.setEnableDynamicBackground(true);
+    Integer primary = M3Theme.primary();
+    if (primary != null) {
+      bottomNav.setSelectedTintColor(primary);
+    }
+    bottomNav.setTabs(
+        java.util.Arrays.asList(
+            tabItem(R.drawable.ic_outline_project, R.string.store_tab_projects),
+            tabItem(R.drawable.ic_outline_palette, R.string.store_tab_themes),
+            tabItem(R.drawable.ic_outline_font, R.string.store_tab_fonts),
+            tabItem(R.drawable.ic_outline_extension, R.string.store_tab_plugins),
+            tabItem(R.drawable.ic_outline_grid, R.string.store_tab_icons)));
+    bottomNav.setOnTabSelected(
+        index -> {
+          if (index >= 0 && index < ViewPagerAdapter.PAGE_COUNT) {
+            viewPager.setCurrentItem(index, true);
+          }
+          return kotlin.Unit.INSTANCE;
+        });
+  }
+
+  private LiquidGlassTabBar.TabItem tabItem(int iconRes, int titleRes) {
+    return new LiquidGlassTabBar.TabItem(
+        getString(titleRes), ContextCompat.getDrawable(this, iconRes));
   }
 
   private void updateTitle(int position) {

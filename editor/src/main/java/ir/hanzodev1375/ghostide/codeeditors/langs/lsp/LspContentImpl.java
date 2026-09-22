@@ -18,6 +18,7 @@ import io.github.rosemoe.sora.lsp.editor.LspEditor;
 import io.github.rosemoe.sora.lsp.editor.LspProject;
 import io.github.rosemoe.sora.widget.CodeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.langs.formatHelp.DebianBootstrap;
+import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 
 /**
  * Abstract base class for all LSP language servers.
@@ -68,6 +69,10 @@ public abstract class LspContentImpl {
    */
   public LspEditor connectFile(
       Context context, String projectRoot, String filePath, CodeEditor editor) {
+    if (!new PreferencesUtils(context).isLspServerEnabled(tag)) {
+      Log.d(tag, serverName + " is disabled in Code Runner settings; skipping.");
+      return null;
+    }
     String executablePath = findInstalledExecutable(context);
     if (executablePath == null) {
       Log.e(

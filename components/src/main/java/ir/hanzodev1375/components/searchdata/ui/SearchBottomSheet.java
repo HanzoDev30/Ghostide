@@ -105,6 +105,8 @@ public class SearchBottomSheet extends BaseBlurBottomSheet {
         });
     binding.btnClear.setOnClickListener(v -> binding.etSearch.setText(""));
     binding.btnSearch.setOnClickListener(v -> triggerSearch());
+    binding.btnExclude.setOnClickListener(
+        v -> new ExcludedSearchSheet().show(getChildFragmentManager(), ExcludedSearchSheet.TAG));
     binding.etSearch.setOnEditorActionListener(
         (v, actionId, event) -> {
           if (actionId == EditorInfo.IME_ACTION_SEARCH) {

@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import ir.hanzodev1375.ghostide.codeeditors.langs.lsp.AndroidClasspathResolver;
 import ir.hanzodev1375.ghostide.codeeditors.langs.formatHelp.DebianBootstrap;
+import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.hanzodev1375.ghostide.terminal.activity.TerminalActivity;
 import ir.hanzodev1375.ghostide.terminal.sheet.TerminalBottomSheetFragment;
 import java.io.BufferedReader;
@@ -17,14 +18,17 @@ import java.io.FileReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class CodeRuner {
 
     private Context context;
+    private final PreferencesUtils prefs;
 
     public CodeRuner(Context context) {
         this.context = context;
+        this.prefs = new PreferencesUtils(context);
     }
 
     public void bindof(String path, boolean asBottomSheet) {
@@ -41,6 +45,7 @@ public class CodeRuner {
     /** Runs a raw shell command, without building one from a file. */
     public void runShell(String command, boolean asBottomSheet) {
         if (command == null || command.trim().isEmpty()) return;
+        if (!prefs.isCodeRunnerEnabled() || !prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_SHELL)) return;
         if (asBottomSheet) {
             runInBottomSheet(command);
         } else {
@@ -90,35 +95,116 @@ public class CodeRuner {
     }
 
     private String buildCommand(String path) {
-        if (path.endsWith(".c")) {
-            return c(path);
-        } else if (path.endsWith(".cpp")
-                || path.endsWith(".h")
-                || path.endsWith(".hpp")
-                || path.endsWith(".cc")) {
-            return cpp(path);
-        } else if (path.endsWith(".py")) {
-            return python(path);
-        } else if (path.endsWith(".php")) {
-            return php(path);
-        } else if (path.endsWith(".go")) {
-            return go(path);
-        } else if (path.endsWith(".js")) {
-            return node(path);
-        } else if (path.endsWith(".ts")) {
-            return typescript(path);
-        } else if (path.endsWith(".lua")) {
-            return lua(path);
-        } else if (path.endsWith(".java")) {
-            return java(path);
-        } else if (path.endsWith(".scss") || path.endsWith(".sass")) {
-            return sass(path);
-        } else if (path.endsWith(".kt")) {
-            return kotlin(path);
-        } else if (path.endsWith(".kts")) {
-            return kotlinScript(path);
+        if (path == null) return null;
+        if (!prefs.isCodeRunnerEnabled()) return null;
+
+        String custom = customCommand(path);
+        if (custom != null) return custom;
+
+        String lower = path.toLowerCase(Locale.ROOT);
+        if (lower.endsWith(".c")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_C)) return c(path);
+            return null;
+        }
+        if (lower.endsWith(".cpp")
+                || lower.endsWith(".h")
+                || lower.endsWith(".hpp")
+                || lower.endsWith(".cc")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_CPP)) return cpp(path);
+            return null;
+        }
+        if (lower.endsWith(".py")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_PYTHON)) return python(path);
+            return null;
+        }
+        if (lower.endsWith(".php")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_PHP)) return php(path);
+            return null;
+        }
+        if (lower.endsWith(".go")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_GO)) return go(path);
+            return null;
+        }
+        if (lower.endsWith(".js")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_NODE)) return node(path);
+            return null;
+        }
+        if (lower.endsWith(".ts")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_TYPESCRIPT)) return typescript(path);
+            return null;
+        }
+        if (lower.endsWith(".lua")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_LUA)) return lua(path);
+            return null;
+        }
+        if (lower.endsWith(".java")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_JAVA)) return java(path);
+            return null;
+        }
+        if (lower.endsWith(".scss") || lower.endsWith(".sass")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_SASS)) return sass(path);
+            return null;
+        }
+        if (lower.endsWith(".kt")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_KOTLIN)) return kotlin(path);
+            return null;
+        }
+        if (lower.endsWith(".kts")) {
+            if (prefs.isRunnerEnabled(PreferencesUtils.KEY_RUNNER_KOTLIN)) return kotlinScript(path);
+            return null;
         }
         return null;
+    }
+
+    // ==================== Custom runners ====================
+
+    /**
+     * Looks up the file against user-defined custom runners.
+     *
+     * <p>Format, one per line: {@code ext:command}. Multiple extensions separated by comma, e.g.
+     * {@code rb:ruby "{file}"}. Supported placeholders: {@code {file}} (full path), {@code {dir}},
+     * {@code {file_name}}, {@code {base}} (name without extension).
+     */
+    private String customCommand(String path) {
+        String text = prefs.getCustomRunnersText();
+        if (text == null || text.trim().isEmpty()) return null;
+        String ext = extensionOf(path);
+        if (ext.isEmpty()) return null;
+        for (String line : text.split("\n")) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty()) continue;
+            int colon = trimmed.indexOf(':');
+            if (colon <= 0) continue;
+            String exts = trimmed.substring(0, colon).trim();
+            String cmd = trimmed.substring(colon + 1).trim();
+            if (cmd.isEmpty()) continue;
+            for (String e : exts.split(",")) {
+                if (e.trim().equalsIgnoreCase(ext)) return buildCustomCommand(cmd, path);
+            }
+        }
+        return null;
+    }
+
+    private String buildCustomCommand(String cmd, String path) {
+        File file = new File(path);
+        String name = file.getName();
+        String base = name;
+        int dot = base.lastIndexOf('.');
+        if (dot > 0) base = base.substring(0, dot);
+        String dir = file.getParent();
+        if (dir == null) dir = ".";
+        cmd =
+                cmd.replace("{file}", path)
+                        .replace("{dir}", dir)
+                        .replace("{file_name}", name)
+                        .replace("{base}", base);
+        return "clear; cd \"" + dir + "\" && " + cmd;
+    }
+
+    private static String extensionOf(String path) {
+        int dot = path.lastIndexOf('.');
+        if (dot < 0 || dot == path.length() - 1) return "";
+        return path.substring(dot + 1).toLowerCase(Locale.ROOT);
     }
 
     // ==================== زبان‌ها ====================
