@@ -36,6 +36,7 @@ import ir.hanzodev1375.ghostide.codeeditors.preview.url.UrlPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.preview.xmlattr.XmlAttrPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.setting.Constants;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
+import ir.hanzodev1375.ghostide.codeeditors.shortcut.ShortcutManager;
 import ir.hanzodev1375.ghostide.codeeditors.snippets.UserSnippetProvider;
 import ir.hanzodev1375.ghostide.codeeditors.style.BitmapHandleStyle;
 import io.github.rosemoe.sora.widget.style.builtin.HandleStyleSideDrop;
@@ -52,6 +53,7 @@ import android.view.KeyEvent;
 import io.github.rosemoe.sora.event.DoubleClickEvent;
 import io.github.rosemoe.sora.event.EditorKeyEvent;
 import io.github.rosemoe.sora.event.InterceptTarget;
+import io.github.rosemoe.sora.event.KeyBindingEvent;
 import io.github.rosemoe.sora.widget.style.LineNumberTipTextProvider;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,6 +142,18 @@ public class IdeEditor extends CodeEditor
     onGotoLineRequest = r;
   }
 
+  public Runnable getOnSaveRequest() {
+    return onSaveRequest;
+  }
+
+  public Runnable getOnSearchRequest() {
+    return onSearchRequest;
+  }
+
+  public Runnable getOnGotoLineRequest() {
+    return onGotoLineRequest;
+  }
+
   public IdeEditor(Context context) {
     super(context);
     init();
@@ -152,6 +166,7 @@ public class IdeEditor extends CodeEditor
 
   private void init() {
     setting = new PreferencesUtils(getContext());
+    ShortcutManager.init(getContext());
     ghostCompletionManager = new GhostTextCompletionManager(this);
     ghostCompletionManager.setEnabled(setting.enableGhostTextCompletion());
     registerInlayHintRenderer(GhostTextInlayHintRenderer.DefaultInstance);
@@ -214,35 +229,25 @@ public class IdeEditor extends CodeEditor
         });
 
     subscribeEvent(DoubleClickEvent.class, (ev, un) -> selectWord(ev.getLine(), ev.getColumn()));
+    // کلید ترکیبی برای / پشتیبانی نمی‌شود ولی سورا فقط برای کلیدهای مشخص KeyBindingEvent فایر می‌کند؛
+    // برای همین Toggle comment با Ctrl+/ این‌جا ثابت و بدون شخصی‌سازی باقی می‌ماند.
     subscribeEvent(
         EditorKeyEvent.class,
         (ev, un) -> {
           if (ev.getEventType() != EditorKeyEvent.Type.DOWN || !ev.isCtrlPressed()) {
             return;
           }
-          switch (ev.getKeyCode()) {
-            case KeyEvent.KEYCODE_S:
-              if (onSaveRequest != null) {
-                onSaveRequest.run();
-                ev.intercept(InterceptTarget.TARGET_EDITOR);
-              }
-              break;
-            case KeyEvent.KEYCODE_F:
-              if (onSearchRequest != null) {
-                onSearchRequest.run();
-                ev.intercept(InterceptTarget.TARGET_EDITOR);
-              }
-              break;
-            case KeyEvent.KEYCODE_G:
-              if (onGotoLineRequest != null) {
-                onGotoLineRequest.run();
-                ev.intercept(InterceptTarget.TARGET_EDITOR);
-              }
-              break;
-            case KeyEvent.KEYCODE_SLASH:
-              toggleCommentForCurrentLine();
-              ev.intercept(InterceptTarget.TARGET_EDITOR);
-              break;
+          if (ev.getKeyCode() == KeyEvent.KEYCODE_SLASH) {
+            toggleCommentForCurrentLine();
+            ev.intercept(InterceptTarget.TARGET_EDITOR);
+          }
+        });
+    subscribeEvent(
+        KeyBindingEvent.class,
+        (ev, un) -> {
+          if (ev.getEventType() != EditorKeyEvent.Type.DOWN) return;
+          if (ShortcutManager.handleEvent(this, ev)) {
+            ev.markAsConsumed();
           }
         });
   }

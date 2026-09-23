@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.lsp4j.DocumentSymbol;
@@ -33,40 +32,14 @@ public final class LspRouter {
 
   private enum Lang {
     NONE,
-    PYTHON,
-    CPP,
-    GO,
-    CSS,
     HTML,
-    VUE,
-    JSON,
-    MARKDOWN,
-    PHP,
-    SASS,
-    JS,
-    RUBY,
-    CSHARP,
     GTH
   }
 
   private static Lang langOf(String filePath) {
     if (filePath == null) return Lang.NONE;
-    String lower = filePath.toLowerCase(Locale.ROOT);
-    if (lower.endsWith(".py")) return Lang.PYTHON;
     if (GthServer.INSTANCE.isSupportedFile(filePath)) return Lang.GTH;
-
-    if (ClangdServer.INSTANCE.isSupportedFile(filePath)) return Lang.CPP;
-    if (TsServer.INSTANCE.isSupportedFile(filePath)) return Lang.JS;
-    if (PhpServer.INSTANCE.isSupportedFile(filePath)) return Lang.PHP;
     if (HtmlServer.INSTANCE.isSupportedFile(filePath)) return Lang.HTML;
-    if (VueServer.INSTANCE.isSupportedFile(filePath)) return Lang.VUE;
-    if (CssServer.INSTANCE.isSupportedFile(filePath)) return Lang.CSS;
-    if (JsonServer.INSTANCE.isSupportedFile(filePath)) return Lang.JSON;
-    if (MarkdownServer.INSTANCE.isSupportedFile(filePath)) return Lang.MARKDOWN;
-    if (GoServer.INSTANCE.isSupportedFile(filePath)) return Lang.GO;
-    if (SassServer.INSTANCE.isSupportedFile(filePath)) return Lang.SASS;
-    if (RubyServer.INSTANCE.isSupportedFile(filePath)) return Lang.RUBY;
-    if (CsharpServer.INSTANCE.isSupportedFile(filePath)) return Lang.CSHARP;
     return Lang.NONE;
   }
 
@@ -80,33 +53,8 @@ public final class LspRouter {
     if (LspExtensionBridge.findProviderForFile(filePath) != null) return true;
 
     switch (langOf(filePath)) {
-      case PYTHON:
-        return PylspServer.INSTANCE.isInstalled(context);
-
-      case CPP:
-        return ClangdServer.INSTANCE.isInstalled(context);
-      case GO:
-        return GoServer.INSTANCE.isInstalled(context);
-      case CSS:
-        return CssServer.INSTANCE.isInstalled(context);
       case HTML:
         return HtmlServer.INSTANCE.isInstalled(context);
-      case VUE:
-        return VueServer.INSTANCE.isInstalled(context);
-      case PHP:
-        return PhpServer.INSTANCE.isInstalled(context);
-      case SASS:
-        return SassServer.INSTANCE.isInstalled(context);
-      case JS:
-        return TsServer.INSTANCE.isInstalled(context);
-      case RUBY:
-        return RubyServer.INSTANCE.isInstalled(context);
-      case CSHARP:
-        return CsharpServer.INSTANCE.isInstalled(context);
-      case JSON:
-        return JsonServer.INSTANCE.isInstalled(context);
-      case MARKDOWN:
-        return MarkdownServer.INSTANCE.isInstalled(context);
       case GTH:
         return GthServer.INSTANCE.isInstalled(context);
       default:
@@ -128,33 +76,8 @@ public final class LspRouter {
       switch (langOf(filePath)) {
         case GTH:
           return GthServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case PYTHON:
-          return PylspServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-
-        case CPP:
-          return ClangdServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case GO:
-          return GoServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case CSS:
-          return CssServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
         case HTML:
           return HtmlServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case VUE:
-          return VueServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case PHP:
-          return PhpServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case SASS:
-          return SassServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case JS:
-          return TsServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case RUBY:
-          return RubyServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case CSHARP:
-          return CsharpServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case JSON:
-          return JsonServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
-        case MARKDOWN:
-          return MarkdownServer.INSTANCE.connectFile(context, projectRoot, filePath, editor);
         default:
           return null;
       }

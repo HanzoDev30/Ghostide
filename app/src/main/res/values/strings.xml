@@ -603,4 +603,17 @@
     <string name="terminal_close_tab_confirm">Do you want to close this terminal session?</string>
     <string name="terminal_action_close">Close</string>
     <string name="terminal_service_lost">Terminal service disconnected.</string>
+    <string name="shortcuts_title">Keyboard shortcuts</string>
+    <string name="shortcuts_desc">Customize editor key bindings</string>
+    <string name="shortcut_press">Press the key combination</string>
+    <string name="shortcut_recording">Recording… press a key</string>
+    <string name="shortcut_ctrl">Ctrl</string>
+    <string name="shortcut_shift">Shift</string>
+    <string name="shortcut_alt">Alt</string>
+    <string name="shortcut_use_default">Use default</string>
+    <string name="shortcut_conflict">This combination is already used by &quot;%1$s&quot;</string>
+    <string name="shortcut_not_supported">This combination is not supported</string>
+    <string name="shortcuts_reset_all">Reset all</string>
+    <string name="shortcuts_reset_all_confirm">Reset all shortcuts to their defaults?</string>
+    <string name="shortcuts_empty">No default binding</string>
 </resources>

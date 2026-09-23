@@ -7,6 +7,7 @@ import ir.hanzodev1375.ghostide.activity.SettingActivity;
 import ir.hanzodev1375.ghostide.codeeditors.IdeEditor;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.hanzodev1375.ghostide.codeeditors.util.TranslateLanguages;
+import ir.hanzodev1375.ghostide.dialogs.ShortcutSettingsDialog;
 import ir.hanzodev1375.ghostide.models.CursorPack;
 import ir.hanzodev1375.ghostide.models.SettingItem;
 import ir.hanzodev1375.ghostide.utils.FileUtil;
@@ -32,6 +33,7 @@ public class EditorSettingSection extends SettingSection {
   private static final int POS_CURSOR_WIDTH = 33;
   private static final int POS_DIVIDER_WIDTH = 34;
   private static final int POS_DIVIDER_MARGIN = 35;
+  private static final int POS_SHORTCUTS = 39;
 
   private final PreferencesUtils prefs;
 
@@ -262,6 +264,13 @@ public class EditorSettingSection extends SettingSection {
             R.string.pref_sticky_line_indicator_desc,
             prefs.stickyLineIndicator(),
             prefs::setStickyLineIndicator));
+    items.add(
+        new SettingItem(
+            getString(R.string.shortcuts_title),
+            getString(R.string.shortcuts_desc),
+            false,
+            R.drawable.outline_keyboard,
+            null));
     return items;
   }
 
@@ -300,6 +309,9 @@ public class EditorSettingSection extends SettingSection {
         break;
       case POS_DIVIDER_MARGIN:
         showDividerMarginDialog();
+        break;
+      case POS_SHORTCUTS:
+        new ShortcutSettingsDialog(activity).showList();
         break;
       default:
         break;

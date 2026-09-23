@@ -600,4 +600,17 @@
   <string name="terminal_close_tab_confirm">آیا می خواهید این جلسه ترمینال را ببندید؟</string>
   <string name="terminal_action_close">بستن</string>
   <string name="terminal_service_lost">سرویس ترمینال قطع شد.</string>
+  <string name="shortcuts_title">میان‌برهای صفحه‌کلید</string>
+  <string name="shortcuts_desc">شخصی‌سازی میان‌برهای ادیتور</string>
+  <string name="shortcut_press">ترکیب کلید را بفشارید</string>
+  <string name="shortcut_recording">در حال ضبط… کلیدی را بفشارید</string>
+  <string name="shortcut_ctrl">Ctrl</string>
+  <string name="shortcut_shift">Shift</string>
+  <string name="shortcut_alt">Alt</string>
+  <string name="shortcut_use_default">استفاده از پیش‌فرض</string>
+  <string name="shortcut_conflict">این ترکیب از قبل توسط &quot;%1$s&quot; استفاده می‌شود</string>
+  <string name="shortcut_not_supported">این ترکیب پشتیبانی نمی‌شود</string>
+  <string name="shortcuts_reset_all">بازنشانی همه</string>
+  <string name="shortcuts_reset_all_confirm">همه میان‌برها به حالت پیش‌فرض بازگردد؟</string>
+  <string name="shortcuts_empty">بدون میان‌بر</string>
 </resources>

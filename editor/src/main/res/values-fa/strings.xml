@@ -76,6 +76,11 @@
   <string name="editor_duplicate_line">تکراری کردن خط</string>
   <string name="editor_select_current_word">انتخاب کلمه فعلی</string>
   <string name="editor_toggle_comment">کامنت/آن\u200Cکامنت</string>
+  <string name="editor_save">ذخیره</string>
+  <string name="editor_find">جستجو در فایل</string>
+  <string name="editor_goto_line">رفتن به خط</string>
+  <string name="editor_undo">بازگردانی</string>
+  <string name="editor_redo">بازانجام</string>
   <string name="whitespace_dialog_title">کاراکترهای فاصله</string>
   <string name="whitespace_dialog_ok">تأیید</string>
   <string-array name="whitespace_flag_labels">

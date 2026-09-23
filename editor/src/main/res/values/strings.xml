@@ -143,6 +143,11 @@
   <string name="editor_duplicate_line">Duplicate line</string>
   <string name="editor_select_current_word">Select current word</string>
   <string name="editor_toggle_comment">Toggle comment</string>
+  <string name="editor_save">Save</string>
+  <string name="editor_find">Find in file</string>
+  <string name="editor_goto_line">Go to line</string>
+  <string name="editor_undo">Undo</string>
+  <string name="editor_redo">Redo</string>
   <string name="whitespace_dialog_title">Whitespace characters</string>
   <string name="whitespace_dialog_ok">OK</string>
   <string-array name="whitespace_flag_labels">
