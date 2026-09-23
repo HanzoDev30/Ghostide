@@ -23,7 +23,6 @@
         android:imeOptions="actionDone"
         android:inputType="textNoSuggestions"
         android:selectAllOnFocus="true"
-        android:showSoftInputOnFocus="false"
         android:textAppearance="?attr/textAppearanceHeadlineSmall" />
 
     <LinearLayout
