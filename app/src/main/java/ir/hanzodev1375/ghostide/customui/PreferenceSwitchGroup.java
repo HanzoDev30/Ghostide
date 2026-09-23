@@ -23,7 +23,6 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
   private boolean value = false;
   private int lastListPosition = -1;
   private int lastListTotal = -1;
-  
 
   public PreferenceSwitchGroup(Context context) {
     super(context);
@@ -45,9 +44,9 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
     setOnClickListener(this);
     showIcon(false);
     M3Theme.materialSwitch(binding.preferenceSwitch);
-    M3Theme.text(binding.preferenceDescription,binding.preferenceName);
-    //این گزینه خیلی سنگین هست چون لیست در لیست میشه
-   // M3Theme.applyTopLevel(binding.getRoot());
+    M3Theme.text(binding.preferenceDescription, binding.preferenceName);
+    // این گزینه خیلی سنگین هست چون لیست در لیست میشه
+    // M3Theme.applyTopLevel(binding.getRoot());
   }
 
   @Override
@@ -100,7 +99,6 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
     binding.preferenceSwitch.setChecked(!binding.preferenceSwitch.isChecked());
   }
 
-
   public void setTitle(CharSequence title) {
     binding.preferenceName.setText(title);
   }
@@ -137,15 +135,13 @@ public class PreferenceSwitchGroup extends RelativeLayout implements View.OnClic
     binding.preferenceIcon.setColorFilter(color);
   }
 
-
   public void setSwitchChangedListener(CompoundButton.OnCheckedChangeListener listener) {
     binding.preferenceSwitch.setOnCheckedChangeListener(
         (button, isChecked) -> {
           value = isChecked;
-          if (listener != null) listener.onCheckedChanged(isChecked);
+          if (listener != null) listener.onCheckedChanged(button, isChecked);
         });
   }
-
 
   public MaterialSwitch getSwitch() {
     return binding.preferenceSwitch;
