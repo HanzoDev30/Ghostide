@@ -1,7 +1,7 @@
 {
-  "title": "Ghost IDE 1.1.5beta3",
-  "massges": "## Ghost ide 1.1.5beta3\r\n\r\n- Fixing reported errors\r\n- The previous repository was removed for specific reasons and moved to the main repository.\r\n- Open Code ai added using it \r\n\r\nusing \r\n\r\n```shell\r\nnpm i -g opencode-ai\r\n\r\n```\r\n\r\nand try to run \r\n\r\n```shell\r\n\r\nopencode serve --hostname 0.0.0.0 --port 4096\r\n\r\n```",
-  "version": "1.1.5beta3",
-  "link": "https://github.com/HanzoDev30/Ghostide/releases/download/1.1.5beta3/app-release.apk",
+  "title": "Ghost IDE 1.1.5",
+  "massges": "Ghost ide 1.1.5 🎃\r\n\r\n- Fixed reported bugs 🐛\r\n- Improved plugin performance ⚡\r\n- Added LSP settings ⚙️\r\n- Added icon pack selection 🎨\r\n- Fixed an error where clicking a plugin only displayed a toast 🍞\r\n- Removed manually coded programming languages; they have been replaced with textmate 📝\r\n- Application performance has become more stable 📈\r\n- The application UI has improved compared to previous versions ✨",
+  "version": "1.1.5",
+  "link": "",
   "appname": "Ghost IDE"
 }
