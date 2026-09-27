@@ -14,39 +14,47 @@ import ir.hanzodev1375.ghostide.R;
  * drawable and label. No other code needs to change.
  */
 public enum AppIcon {
-  DEFAULT("ir.hanzodev1375.ghostide.SplashActivity", R.mipmap.ic_lego, R.string.icon_name_default),
-  DARK("ir.hanzodev1375.ghostide.IconAliasBlue", R.drawable.iconblue, R.string.icon_name_glassblue),
-  HELLISH(
-      "ir.hanzodev1375.ghostide.IconAliasHellish",
-      R.drawable.iconhellish,
-      R.string.icon_name_hellish),
-  ATOMGHOST(
-      "ir.hanzodev1375.ghostide.IconAliasatomicghost",
-      R.drawable.atomicghost,
-      R.string.icon_atomicghost),
-  EVILICON(
-      "ir.hanzodev1375.ghostide.IconAliasdevilishpurple",
-      R.drawable.devilishpurple,
-      R.string.icon_devilishpurple),
-  NEON(
-      "ir.hanzodev1375.ghostide.IconAliasneonpurple",
-      R.drawable.neonpurple,
-      R.string.icon_neonpurple),
-  BLACKMAGIC(
-      "ir.hanzodev1375.ghostide.IconAliasblackmagic",
-      R.drawable.blackmagic,
-      R.string.icon_blackmagic),
-  PURPLEWITCH(
-      "ir.hanzodev1375.ghostide.IconAliaspurplewitch",
-      R.drawable.purplewitch,
-      R.string.icon_purplewitch);
-  public final String componentName;
-  public final int previewRes;
-  @StringRes public final int labelRes;
+    DEFAULT("ir.hanzodev1375.ghostide.SplashActivity", R.mipmap.ic_lego, R.string.icon_name_default),
+    DARK("ir.hanzodev1375.ghostide.IconAliasBlue", R.drawable.iconblue, R.string.icon_name_glassblue),
+    HELLISH(
+            "ir.hanzodev1375.ghostide.IconAliasHellish",
+            R.drawable.iconhellish,
+            R.string.icon_name_hellish),
+    ATOMGHOST(
+            "ir.hanzodev1375.ghostide.IconAliasatomicghost",
+            R.drawable.atomicghost,
+            R.string.icon_atomicghost),
+    EVILICON(
+            "ir.hanzodev1375.ghostide.IconAliasdevilishpurple",
+            R.drawable.devilishpurple,
+            R.string.icon_devilishpurple),
+    NEON(
+            "ir.hanzodev1375.ghostide.IconAliasneonpurple",
+            R.drawable.neonpurple,
+            R.string.icon_neonpurple),
+    BLACKMAGIC(
+            "ir.hanzodev1375.ghostide.IconAliasblackmagic",
+            R.drawable.blackmagic,
+            R.string.icon_blackmagic),
+    PURPLEWITCH(
+            "ir.hanzodev1375.ghostide.IconAliaspurplewitch",
+            R.drawable.purplewitch,
+            R.string.icon_purplewitch),
+    DEVIL1(
+            "ir.hanzodev1375.ghostide.IconAliasdevil1",
+            R.drawable.devil1,
+            R.string.icon_purplewitch),
+    DEVIL2(
+            "ir.hanzodev1375.ghostide.IconAliasdevil2",
+            R.drawable.devil2,
+            R.string.icon_purplewitch);
+    public final String componentName;
+    public final int previewRes;
+    @StringRes public final int labelRes;
 
-  AppIcon(String componentName, int previewRes, @StringRes int labelRes) {
-    this.componentName = componentName;
-    this.previewRes = previewRes;
-    this.labelRes = labelRes;
-  }
+    AppIcon(String componentName, int previewRes, @StringRes int labelRes) {
+        this.componentName = componentName;
+        this.previewRes = previewRes;
+        this.labelRes = labelRes;
+    }
 }

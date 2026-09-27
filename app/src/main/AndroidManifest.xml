@@ -320,6 +320,31 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
+        <activity-alias
+            android:name=".IconAliasdevil1"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/devil1"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".IconAliasdevil2"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/devil2"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <service
             android:name=".pulse.PulseService"

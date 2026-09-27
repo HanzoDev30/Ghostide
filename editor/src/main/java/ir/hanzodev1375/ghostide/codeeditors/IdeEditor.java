@@ -229,8 +229,8 @@ public class IdeEditor extends CodeEditor
         });
 
     subscribeEvent(DoubleClickEvent.class, (ev, un) -> selectWord(ev.getLine(), ev.getColumn()));
-    // کلید ترکیبی برای / پشتیبانی نمی‌شود ولی سورا فقط برای کلیدهای مشخص KeyBindingEvent فایر می‌کند؛
-    // برای همین Toggle comment با Ctrl+/ این‌جا ثابت و بدون شخصی‌سازی باقی می‌ماند.
+    // کلید ترکیبی برای / پشتیبانی نمی شود ولی سورا فقط برای کلیدهای مشخص KeyBindingEvent فایر می کند؛
+    // برای همین Toggle comment با Ctrl+/ این جا ثابت و بدون شخصی سازی باقی می ماند.
     subscribeEvent(
         EditorKeyEvent.class,
         (ev, un) -> {
@@ -418,12 +418,12 @@ public class IdeEditor extends CodeEditor
     return currentFilePath;
   }
 
-  /** Provider پیش‌فرض سراسری که همه IdeEditorها (مگر override شوند) استفاده می‌کنند. */
+  /** Provider پیش فرض سراسری که همه IdeEditorها (مگر override شوند) استفاده می کنند. */
   public static void setDefaultUserSnippetProvider(@Nullable UserSnippetProvider provider) {
     defaultUserSnippetProvider = provider;
   }
 
-  /** Provider اسنیپت این ادیتور؛ جابه‌جایی به default سراسری. */
+  /** Provider اسنیپت این ادیتور؛ جابه جایی به default سراسری. */
   @Nullable
   public UserSnippetProvider getUserSnippetProvider() {
     return userSnippetProvider != null ? userSnippetProvider : defaultUserSnippetProvider;
