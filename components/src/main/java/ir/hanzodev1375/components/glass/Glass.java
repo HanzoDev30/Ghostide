@@ -3,10 +3,16 @@ package ir.hanzodev1375.components.glass;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.view.View;
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.drawable.DrawableCompat;
 import com.example.liquidglass.LiquidGlassChipGroup;
 import com.example.liquidglass.LiquidGlassView;
+import ir.hanzodev1375.components.colors.AccentPalette;
 import ir.hanzodev1375.components.utils.ComponentsPrefs;
 import ir.theme.M3Theme;
 
@@ -22,6 +28,152 @@ import ir.theme.M3Theme;
 public final class Glass {
 
   private Glass() {}
+
+  static {
+    // Hands the glass widgets to M3Theme's traversal so they are re-themed with everything else on
+    // every theme change. M3Theme cannot import them (that would be a module cycle), hence the hook.
+    M3Theme.setGlassThemeApplier(
+        new M3Theme.GlassThemeApplier() {
+          @Override
+          public boolean applyGlassView(View v) {
+            return applyGlassChip(v) || applyGlassButton(v);
+          }
+
+          @Override
+          public boolean applyGlassChip(View v) {
+            if (!(v instanceof ChipCompat)) {
+              return false;
+            }
+            applyChip((ChipCompat) v);
+            return true;
+          }
+
+          @Override
+          public boolean applyGlassButton(View v) {
+            if (!(v instanceof ButtonCompat)) {
+              return false;
+            }
+            applyButton((ButtonCompat) v);
+            return true;
+          }
+        });
+  }
+
+  /**
+   * Applies a chip's material, then the accent of the tone it was given.
+   *
+   * <p>Tones are the only place a gold/green accent enters the app: callers just ask for {@link
+   * ChipCompat.Tone#GOLD} and the colour is resolved from the active theme, so nothing has to be
+   * hard-coded per screen and light/dark stay in sync.
+   */
+  public static void applyChip(ChipCompat chip) {
+    chip.setChipIconTintEnabled(chip.getTone() == ChipCompat.Tone.DEFAULT);
+    applyThemeTint(chip);
+    applyChipTone(chip);
+  }
+
+  /**
+   * Applies a glass button's material and adaptive foreground.
+   *
+   * <p>An {@code ERROR} tone overrides the plain surface with the theme's error colour. The tint is
+   * applied as an opaque colour and left to the library to blend, so a theme that lowers the glass
+   * tint strength cannot wash the destructive action out.
+   */
+  public static void applyButton(ButtonCompat button) {
+    button.setEnableAdaptiveTint(true);
+    if (button.getTone() == ButtonCompat.Tone.ERROR) {
+      applyErrorTint(button);
+      return;
+    }
+    applyThemeTint(button);
+  }
+
+  private static void applyErrorTint(ButtonCompat button) {
+    Context context = button.getContext();
+    Integer error = M3Theme.error();
+    if (context == null || error == null) {
+      applyThemeTint(button);
+      return;
+    }
+    button.setGlassTint(error);
+    if (!new ComponentsPrefs(context).isGlassMaterialColor()) {
+      // Without the surface tint the label would sit on a plain error-coloured panel, so it needs
+      // the error container's foreground to stay readable.
+      Integer onError = M3Theme.onError();
+      if (onError != null) {
+        button.setTextColor(onError);
+      }
+    }
+  }
+
+  private static void applyChipTone(ChipCompat chip) {
+    float strength = toneTintStrength(chip);
+    switch (chip.getTone()) {
+      case GOLD:
+        chip.setTextColor(gold());
+        chip.setGlassTint(gold(), strength);
+        // The library's adaptive icon tint would repaint the star with the plain foreground, so it
+        // is turned off and the accent is baked into the drawable instead.
+        applyIconTint(chip, gold());
+        break;
+      case GREEN:
+        chip.setTextColor(green());
+        chip.setGlassTint(green(), strength);
+        break;
+      case DEFAULT:
+      default:
+        Integer onSurface = M3Theme.onSurface();
+        if (onSurface != null) {
+          chip.setTextColor(onSurface);
+        }
+        break;
+    }
+  }
+
+  private static void applyIconTint(ChipCompat chip, @ColorInt int color) {
+    int iconRes = chip.getIconRes();
+    if (iconRes == 0) {
+      return;
+    }
+    Drawable drawable = AppCompatResources.getDrawable(chip.getContext(), iconRes);
+    if (drawable == null) {
+      return;
+    }
+    DrawableCompat.setTintList(drawable, ColorStateList.valueOf(color));
+    chip.setChipIcon(drawable);
+  }
+
+  /** Amber accent, brightened for dark themes. */
+  public static int gold() {
+    return isDarkTheme() ? 0xFFFFD54F : 0xFFB8860B;
+  }
+
+  /** Green accent, lightened for dark themes. */
+  public static int green() {
+    return isDarkTheme() ? 0xFF81C784 : 0xFF2E7D32;
+  }
+
+  /**
+   * Accent tones are weaker than the plain surface tint on purpose: the colour should tint the
+   * glass, not replace it, so the backdrop still shows through.
+   */
+  private static float toneTintStrength(View view) {
+    Context context = view.getContext();
+    float strength = context == null ? 0.35f : new ComponentsPrefs(context).getGlassTint();
+    return Math.min(strength, 0.35f);
+  }
+
+  private static boolean isDarkTheme() {
+    Integer surface = M3Theme.surfaceContainer();
+    if (surface == null) {
+      Integer background = M3Theme.background();
+      surface = background;
+    }
+    if (surface == null) {
+      return false;
+    }
+    return AccentPalette.perceivedBrightness(surface) < 0.5f;
+  }
 
   /** Unwraps {@code context} until the hosting {@link Activity} is found, or null. */
   @Nullable

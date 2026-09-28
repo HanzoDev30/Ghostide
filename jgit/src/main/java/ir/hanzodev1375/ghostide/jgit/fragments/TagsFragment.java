@@ -10,9 +10,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import ir.hanzodev1375.components.views.EmptyView;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.adapter.TagAdapter;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
@@ -43,7 +43,7 @@ public class TagsFragment extends Fragment {
     M3Theme.apply(view);
     TextInputEditText editName = view.findViewById(R.id.editTagName);
     TextInputEditText editMsg = view.findViewById(R.id.editTagMessage);
-    MaterialButton btnCreate = view.findViewById(R.id.btnCreateTag);
+    ButtonCompat btnCreate = view.findViewById(R.id.btnCreateTag);
 
     viewModel.tags.observe(getViewLifecycleOwner(), tags -> adapter.submitList(tags));
     viewModel.refreshTags();

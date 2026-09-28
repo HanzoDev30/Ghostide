@@ -1,15 +1,14 @@
 package ir.hanzodev1375.ghostide.jgit.adapter;
 
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.theme.M3Theme;
 
@@ -75,8 +74,6 @@ public class BranchAdapter extends RecyclerView.Adapter<BranchAdapter.ViewHolder
       holder.btnRebase.setEnabled(!branch.equals(currentBranch));
     }
     M3Theme.listCard(holder.itemView);
-    Integer error = M3Theme.error();
-    if (error != null) holder.btnDelete.setBackgroundTintList(ColorStateList.valueOf(error));
   }
 
   @Override
@@ -86,13 +83,14 @@ public class BranchAdapter extends RecyclerView.Adapter<BranchAdapter.ViewHolder
 
   static class ViewHolder extends RecyclerView.ViewHolder {
     TextView tvBranchName;
-    Button btnCheckout, btnDelete, btnMerge, btnRebase;
+    ButtonCompat btnCheckout, btnDelete, btnMerge, btnRebase;
 
     ViewHolder(View itemView) {
       super(itemView);
       tvBranchName = itemView.findViewById(R.id.tvBranchName);
       btnCheckout = itemView.findViewById(R.id.btnCheckout);
       btnDelete = itemView.findViewById(R.id.btnDelete);
+      btnDelete.setTone(ButtonCompat.Tone.ERROR);
       btnMerge = itemView.findViewById(R.id.btnMerge);
       btnRebase = itemView.findViewById(R.id.btnRebase);
     }

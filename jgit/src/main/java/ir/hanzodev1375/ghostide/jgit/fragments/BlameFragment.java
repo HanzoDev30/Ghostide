@@ -10,9 +10,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.adapter.BlameAdapter;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
@@ -41,7 +41,7 @@ public class BlameFragment extends Fragment {
     ProgressBar progress = view.findViewById(R.id.blameProgress);
     MaterialTextView tvEmpty = view.findViewById(R.id.tvBlameEmpty);
     TextInputEditText editPath = view.findViewById(R.id.editBlamePath);
-    MaterialButton btnBlame = view.findViewById(R.id.btnLoadBlame);
+    ButtonCompat btnBlame = view.findViewById(R.id.btnLoadBlame);
 
     // If a file was selected in diff/changes, pre-fill
     viewModel.selectedDiffFile.observe(

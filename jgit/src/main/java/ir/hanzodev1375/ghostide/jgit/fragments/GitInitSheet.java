@@ -8,9 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import ir.hanzodev1375.components.sheet.BaseBlurBottomSheet;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.components.views.ButtonProgress;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
@@ -34,7 +34,7 @@ public class GitInitSheet extends BaseBlurBottomSheet {
   private TextView tvInfo;
   private TextView tvStatus;
   private ButtonProgress bpStart;
-  private MaterialButton btnCancel;
+  private ButtonCompat btnCancel;
   private boolean running = false;
   private GitHubClient gitHubClient;
   private OnGitInitListener onGitInitListener;
@@ -74,7 +74,6 @@ public class GitInitSheet extends BaseBlurBottomSheet {
     M3Theme.text(tvInfo, etUrl, etCommit, tvStatus);
     M3Theme.input((TextInputLayout) view.findViewById(R.id.tilRepoUrl));
     M3Theme.input((TextInputLayout) view.findViewById(R.id.tilCommitMessage));
-    M3Theme.button(btnCancel);
     M3Theme.apply(view);
 
     bpStart.setText(R.string.git_init_start);

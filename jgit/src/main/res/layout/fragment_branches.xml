@@ -19,7 +19,7 @@
              android:layout_weight="1"
              android:id="@+id/editBranchName" />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              android:id="@+id/btnCreateBranch"

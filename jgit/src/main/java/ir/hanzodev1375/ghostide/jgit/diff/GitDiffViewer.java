@@ -14,6 +14,7 @@ import ir.hanzodev1375.components.views.GhostToast;
 import java.util.*;
 import java.util.concurrent.*;
 import android.text.*;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 
 public class GitDiffViewer extends View {
   private List<DiffLine> diffLines = new ArrayList<>();
@@ -527,15 +528,15 @@ public class GitDiffViewer extends View {
     popupLayout.setBackgroundColor(Color.rgb(50, 50, 50));
     popupLayout.setPadding(20, 20, 20, 20);
 
-    Button selectAllBtn = new Button(getContext());
+    ButtonCompat selectAllBtn = new ButtonCompat(getContext());
     selectAllBtn.setText("انتخاب همه");
     selectAllBtn.setOnClickListener(v -> selectAll());
 
-    Button copyBtn = new Button(getContext());
+    ButtonCompat copyBtn = new ButtonCompat(getContext());
     copyBtn.setText("کپی");
     copyBtn.setOnClickListener(v -> copySelection());
 
-    Button cancelBtn = new Button(getContext());
+    ButtonCompat cancelBtn = new ButtonCompat(getContext());
     cancelBtn.setText("بستن");
     cancelBtn.setOnClickListener(v -> clearSelection());
 

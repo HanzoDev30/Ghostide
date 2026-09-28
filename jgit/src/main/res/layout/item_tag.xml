@@ -45,13 +45,10 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:id="@+id/btnDeleteTag"
-            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="?attr/colorErrorContainer"
-            android:textColor="?attr/colorOnErrorContainer"
             android:text="@string/tag_delete" />
 
     </LinearLayout>

@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -18,6 +19,8 @@ import android.widget.ImageView;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 import com.example.liquidglass.GlassMaterial;
 import com.google.android.material.transition.platform.MaterialSharedAxis;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat;
@@ -83,11 +86,49 @@ public class SearchLayout extends FrameLayout {
     post(
         () -> {
           if (!isAttachedToWindow()) return;
-          View backdrop = activity.findViewById(android.R.id.content);
+          View backdrop = findBackdrop(activity);
           if (backdrop != null) {
             glass.setBackdropSource(backdrop);
           }
         });
+  }
+
+  /**
+   * Resolves the view the glass panel samples.
+   *
+   * <p>It must be the page this bar lives on, never the Activity's content view. The library
+   * re-draws the whole backdrop tree synchronously from {@code onDraw} and only hides glass views
+   * that share the glass's parent, so a backdrop that contains the ViewPager2 re-draws every
+   * sibling page — and each of those pages' own glass bars captures the window again, recursively.
+   * With the store's offscreen page limit that turns into a visible stall, and the panel paints a
+   * sample of where the page was a frame ago instead of what is behind it now.
+   */
+  private View findBackdrop(Activity activity) {
+    View page = findPageRoot();
+    if (page != null) {
+      return page;
+    }
+    return activity.findViewById(android.R.id.content);
+  }
+
+  /**
+   * The page this bar is displayed on: the direct child of the ViewPager2's internal RecyclerView
+   * that contains this view, or null when the bar is not inside a ViewPager2.
+   */
+  @Nullable
+  private View findPageRoot() {
+    ViewGroup parent = getParent() instanceof ViewGroup ? (ViewGroup) getParent() : null;
+    while (parent != null) {
+      ViewParent grandParent = parent.getParent();
+      if (grandParent instanceof RecyclerView && ((RecyclerView) grandParent).getParent() instanceof ViewPager2) {
+        return parent;
+      }
+      if (!(grandParent instanceof ViewGroup)) {
+        return null;
+      }
+      parent = (ViewGroup) grandParent;
+    }
+    return null;
   }
 
   private static Activity resolveActivity(Context context) {

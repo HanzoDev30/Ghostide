@@ -19,7 +19,7 @@
         android:orientation="horizontal"
         android:layout_marginTop="8dp">
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -27,7 +27,7 @@
             android:id="@+id/btnUseOurs"
             android:text="Use Ours" />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -35,7 +35,7 @@
             android:id="@+id/btnUseTheirs"
             android:text="Use Theirs" />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"

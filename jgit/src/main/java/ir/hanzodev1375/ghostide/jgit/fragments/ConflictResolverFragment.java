@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import ir.hanzodev1375.components.views.GhostToast;
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import ir.theme.M3Theme;
 import java.util.ArrayList;
 import java.util.List;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.ConflictFile;
@@ -102,7 +102,7 @@ M3Theme.apply(view);
 
     class VH extends RecyclerView.ViewHolder {
       TextView tvPath;
-      Button btnOurs, btnTheirs, btnEdit;
+      ButtonCompat btnOurs, btnTheirs, btnEdit;
       VH(View v) {
         super(v);
         tvPath = v.findViewById(R.id.tvConflictPath);

@@ -17,14 +17,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import ir.hanzodev1375.components.store.api.PluginStoreApi;
+import ir.hanzodev1375.components.store.event.PluginProgressEvent;
 import ir.hanzodev1375.components.store.model.PluginDoc;
 import ir.hanzodev1375.components.store.model.PluginItem;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.greenrobot.eventbus.EventBus;
 
 public class PluginRepository {
 
@@ -46,6 +50,8 @@ public class PluginRepository {
 
     void onError(String message);
   }
+
+  private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
 
   public void fetchPlugins(Callback<List<PluginItem>> callback) {
     if (callback == null) return;
@@ -119,9 +125,55 @@ public class PluginRepository {
       if (!response.isSuccessful() || response.body() == null) {
         throw new IOException("HTTP " + response.code());
       }
-      writeTo(response.body().byteStream(), out);
+      long total = response.body().contentLength();
+      writeToWithProgress(response.body().byteStream(), out, item, total);
     }
     return out;
+  }
+
+  /** Asks the server for the package size without downloading the body. */
+  public void fetchSize(PluginItem item, Callback<Long> callback) {
+    if (callback == null) return;
+    if (item == null || !item.hasGpl()) {
+      postError(callback, "no gpl url");
+      return;
+    }
+    ioExecutor.execute(
+        () -> {
+          Request request =
+              new Request.Builder().url(toGithubRawUrl(item.gplfile())).head().build();
+          try (Response response = CLIENT.newCall(request).execute()) {
+            long length = response.header("Content-Length") != null
+                ? Long.parseLong(response.header("Content-Length"))
+                : -1L;
+            if (length < 0 && response.body() != null) {
+              length = response.body().contentLength();
+            }
+            postSuccess(callback, length);
+          } catch (Exception e) {
+            postError(callback, e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
+          }
+        });
+  }
+
+  /** Copies the stream to {@code out} while posting {@link PluginProgressEvent} updates. */
+  private void writeToWithProgress(
+      InputStream input, File out, PluginItem item, long total) throws IOException {
+    File parent = out.getParentFile();
+    if (parent != null && !parent.exists() && !parent.mkdirs()) {
+      throw new IOException("could not create " + parent);
+    }
+    long done = 0L;
+    byte[] buffer = new byte[8192];
+    try (FileOutputStream fos = new FileOutputStream(out)) {
+      int read;
+      while ((read = input.read(buffer)) != -1) {
+        fos.write(buffer, 0, read);
+        done += read;
+        float value = total > 0 ? (float) done / (float) total : PluginProgressEvent.INDETERMINATE;
+        EventBus.getDefault().post(new PluginProgressEvent(item, value));
+      }
+    }
   }
 
   /** Turns a github.com/.../blob/... URL into the raw file URL so it can be downloaded. */

@@ -30,7 +30,7 @@ import java.util.List;
 
 public class GitHubProfileSheet extends BaseBlurBottomSheet {
 
-  private static final String PENDING_STAT = "—";
+  private static final String PENDING_STAT = "0";
 
   private GitHubClient gitHub;
   private RecyclerView recyclerView;
@@ -114,10 +114,13 @@ public class GitHubProfileSheet extends BaseBlurBottomSheet {
   }
 
   private void setupStatChips() {
-    // Placeholder until the counters land, so the header never claims a zero it has not measured.
+    // Zero from the start rather than a dash: an account with no issues or no stars genuinely
+    // reads "0", so a dash would promise a value the header is about to show as empty anyway.
     chipIssues = chipGroupStats.addChip(PENDING_STAT);
+    chipIssues.setTone(ChipCompat.Tone.GOLD);
     chipIssues.setIconResource(R.drawable.issue_24px);
     chipStars = chipGroupStats.addChip(PENDING_STAT);
+    chipStars.setTone(ChipCompat.Tone.GOLD);
     chipStars.setIconResource(R.drawable.star_24px);
   }
 
@@ -146,7 +149,10 @@ public class GitHubProfileSheet extends BaseBlurBottomSheet {
             requireActivity()
                 .runOnUiThread(
                     () -> {
-                      chipGroupStats.setVisibility(View.GONE);
+                      // The counters stay on screen at zero: hiding the row makes the header jump,
+                      // and a failed counter is not a reason to claim the row does not exist.
+                      chipIssues.setStat(R.drawable.issue_24px, 0);
+                      chipStars.setStat(R.drawable.star_24px, 0);
                     });
           }
         });

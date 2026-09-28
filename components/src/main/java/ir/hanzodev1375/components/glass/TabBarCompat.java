@@ -58,13 +58,34 @@ public class TabBarCompat extends LiquidGlassTabBar {
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    Glass.autoBackdrop(this);
+    // The host Activity's content view has no size yet at attach time, so capturing it here
+    // yields an empty backdrop and the panel renders at the wrong scale.
+    post(this::refreshGlass);
   }
 
   @Override
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
     applyEndPadding();
+    // applyEndPadding() can change the padding, which re-enters layout. The pass that settles the
+    // final size still has to redraw the panel, otherwise the items keep the geometry of an
+    // intermediate size until something else forces a resize.
+    post(this::refreshGlass);
+  }
+
+  /**
+   * Rebuilds the backdrop capture and redraws the panel once the current layout pass is over.
+   *
+   * <p>{@code LiquidGlassView.onSizeChanged} recycles the cached backdrop and displacement maps, so
+   * the capture itself is redone on the next draw. What is missing is that draw: without it the
+   * bar keeps painting the last size it was measured at.
+   */
+  private void refreshGlass() {
+    if (!isAttachedToWindow()) {
+      return;
+    }
+    Glass.autoBackdrop(this);
+    invalidate();
   }
 
   /**

@@ -153,6 +153,10 @@ public class StoreActivity extends BaseCompat {
           }
           return kotlin.Unit.INSTANCE;
         });
+    // The ViewPager fires onPageSelected as soon as the adapter is attached, which happens
+    // before the tabs exist, so that sync was dropped. Apply the initial selection here, after
+    // setTabs(), otherwise the first tab renders without the glass selection indicator.
+    bottomNav.setSelectedIndex(viewPager.getCurrentItem());
   }
 
   private LiquidGlassTabBar.TabItem tabItem(int iconRes, int titleRes) {

@@ -16,6 +16,21 @@ import java.util.Locale;
  */
 public class ChipCompat extends LiquidGlassChip {
 
+  /**
+   * Accent a chip can carry instead of the plain theme surface.
+   *
+   * <p>The colour itself is resolved in {@link Glass} from the active theme, so a screen only ever
+   * names the tone and never picks a hex value.
+   */
+  public enum Tone {
+    DEFAULT,
+    GOLD,
+    GREEN
+  }
+
+  private Tone tone = Tone.DEFAULT;
+  private int iconRes;
+
   public ChipCompat(Context context) {
     super(context);
     init();
@@ -38,14 +53,32 @@ public class ChipCompat extends LiquidGlassChip {
     setEnableAdaptiveTint(true);
     setPressScale(0.96f);
     setTextSize(13f);
-    setChipIconTintEnabled(true);
-    Glass.applyThemeTint(this);
+    Glass.applyChip(this);
   }
 
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
     Glass.autoBackdrop(this);
+  }
+
+  /**
+   * Gives the chip an accent tone, re-resolving the text, icon and glass colours for the current
+   * theme. Pass {@link Tone#DEFAULT} to go back to the plain surface.
+   */
+  public ChipCompat setTone(Tone tone) {
+    this.tone = tone == null ? Tone.DEFAULT : tone;
+    Glass.applyChip(this);
+    return this;
+  }
+
+  public Tone getTone() {
+    return tone;
+  }
+
+  /** The leading icon this chip was last given, or 0 when it has none. */
+  public int getIconRes() {
+    return iconRes;
   }
 
   /** Convenience alias for {@code setText}. */
@@ -58,6 +91,7 @@ public class ChipCompat extends LiquidGlassChip {
    * chip's adaptive light/dark foreground instead of fighting it.
    */
   public void setIconResource(int iconRes) {
+    this.iconRes = iconRes;
     if (iconRes == 0) {
       setChipIcon(null);
       return;

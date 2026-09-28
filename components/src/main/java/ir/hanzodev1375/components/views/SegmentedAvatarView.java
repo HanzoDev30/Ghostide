@@ -19,6 +19,8 @@ import android.graphics.SweepGradient;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import ir.hanzodev1375.components.R;
 import ir.hanzodev1375.components.colors.AccentPalette;
@@ -73,6 +75,17 @@ public class SegmentedAvatarView extends ImageViewAnimator {
   private float progress = 1f;
   private float ringRadiusOverride = 0f; // 0 = auto-size from the view bounds
 
+  // ---- Loading progress (indeterminate, driven by setLoading) ---------------
+
+  private static final long LOADING_SWEEP_DURATION = 1500L;
+  private static final long LOADING_SETTLE_DURATION = 480L;
+  private static final float LOADING_SPIN_DEGREES = 220f;
+
+  private boolean loading;
+  private float loadingT;
+  private float loadingBaseRotation;
+  private ValueAnimator loadingAnimator;
+
   // ---- Cached drawing state (avoid allocations inside onDraw) ------------
 
   private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -99,7 +112,7 @@ public class SegmentedAvatarView extends ImageViewAnimator {
   private static final int DEFAULT_BADGE_GRADIENT_TOP = 0xFF6FD5FF;
   private static final int DEFAULT_BADGE_GRADIENT_BOTTOM = 0xFF8E4EFF;
 
-  /** مبنای طراحی حلقه/ذرات؛ وقتی رنگ آواتار «اکسنت» می‌شه این دو استاپ به سمتش شیفت می‌خورن. */
+  /** مبنای طراحی حلقه/ذرات؛ وقتی رنگ آواتار «اکسنت» می شه این دو استاپ به سمتش شیفت می خورن. */
   private static final int BASE_RING_START = DEFAULT_BADGE_GRADIENT_TOP;
 
   private static final int BASE_RING_END = DEFAULT_BADGE_GRADIENT_BOTTOM;
@@ -385,8 +398,8 @@ public class SegmentedAvatarView extends ImageViewAnimator {
   }
 
   /**
-   * رنگ اصلی (Swatch خوشه‌ای) آواتار → «اکسنت»: حلقه و گرادیان ستاره/ذرات با AccentPalette به سمت
-   * hue اکسنت شیفت می‌خورن.
+   * رنگ اصلی (Swatch خوشه ای) آواتار → «اکسنت»: حلقه و گرادیان ستاره/ذرات با AccentPalette به سمت
+   * hue اکسنت شیفت می خورن.
    */
   private void applyAvatarAccent(int accent) {
     boolean isDark = isBackgroundDark();
@@ -417,7 +430,7 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     invalidate();
   }
 
-  /** بک‌گراند فعلی تم (سرفیسِ M3)؛ روی این رنگ آواتار/حلقه رسم می‌شود. */
+  /** بک گراند فعلی تم (سرفیسِ M3)؛ روی این رنگ آواتار/حلقه رسم می شود. */
   private boolean isBackgroundDark() {
     Integer bg = M3Theme.surfaceContainer();
     int backgroundColor = bg != null ? bg : 0xFFFFFFFF;
@@ -573,6 +586,9 @@ public class SegmentedAvatarView extends ImageViewAnimator {
         && loginFxAnimator.isRunning()) {
       starParticles.setPaused(false);
     }
+    if (loading && loadingAnimator == null) {
+      startLoadingSweep();
+    }
   }
 
   @Override
@@ -581,6 +597,7 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     if (starParticles != null) {
       starParticles.setPaused(true);
     }
+    cancelLoadingAnimator();
   }
 
   private void drawSegmentedRing(Canvas canvas) {
@@ -738,6 +755,93 @@ public class SegmentedAvatarView extends ImageViewAnimator {
 
   public float getProgress() {
     return progress;
+  }
+
+  // ---- Loading progress -----------------------------------------------------
+
+  /**
+   * Spins the ring to mark an indeterminate operation, without changing its state.
+   *
+   * <p>Loading does not repurpose the ring: it stays in whatever state the caller left it in — full
+   * by default — for the whole animation, and only the sweep gradient turns, so the view never
+   * appears to empty out and refill while a git operation runs. There is no error state: when
+   * loading ends the gradient rotation animates back to the angle it started at.
+   *
+   * <p>Safe to call repeatedly and from any thread; the animation is always restarted from the
+   * value currently on screen, and it is cancelled when the view leaves the window.
+   */
+  public void setLoading(boolean loading) {
+    if (this.loading == loading) {
+      return;
+    }
+    this.loading = loading;
+
+    cancelLoadingAnimator();
+    if (loading) {
+      startLoadingSweep();
+    } else {
+      settleLoading();
+    }
+  }
+
+  public boolean isLoading() {
+    return loading;
+  }
+
+  private void startLoadingSweep() {
+    loadingBaseRotation = gradientRotation;
+    loadingT = 0f;
+
+    loadingAnimator = ValueAnimator.ofFloat(0f, 1f);
+    loadingAnimator.setDuration(LOADING_SWEEP_DURATION);
+    loadingAnimator.setInterpolator(new LinearInterpolator());
+    loadingAnimator.setRepeatCount(ValueAnimator.INFINITE);
+    loadingAnimator.addUpdateListener(
+        animation -> {
+          loadingT = (float) animation.getAnimatedValue();
+          applyLoadingFrame();
+        });
+    loadingAnimator.start();
+    invalidate();
+  }
+
+  private void settleLoading() {
+    final float fromRotation = loadingBaseRotation + LOADING_SPIN_DEGREES * loadingT;
+
+    loadingAnimator = ValueAnimator.ofFloat(0f, 1f);
+    loadingAnimator.setDuration(LOADING_SETTLE_DURATION);
+    loadingAnimator.setInterpolator(new DecelerateInterpolator(1.6f));
+    loadingAnimator.addUpdateListener(
+        animation -> {
+          float t = (float) animation.getAnimatedValue();
+          loadingT = 1f - t;
+          gradientRotation = fromRotation + (loadingBaseRotation - fromRotation) * t;
+          applyLoadingFrame();
+        });
+    loadingAnimator.addListener(
+        new AnimatorListenerAdapter() {
+          @Override
+          public void onAnimationEnd(Animator animation) {
+            loadingT = 0f;
+            gradientRotation = loadingBaseRotation;
+            applyLoadingFrame();
+          }
+        });
+    loadingAnimator.start();
+    invalidate();
+  }
+
+  /** Single place that pushes an in-flight loading frame to the drawing state. */
+  private void applyLoadingFrame() {
+    applyGradientRotation();
+    invalidate();
+  }
+
+  private void cancelLoadingAnimator() {
+    if (loadingAnimator != null) {
+      loadingAnimator.cancel();
+      loadingAnimator = null;
+    }
   }
 
   /**

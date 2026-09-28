@@ -25,6 +25,7 @@ import ir.hanzodev1375.components.SearchLayout;
 import ir.hanzodev1375.components.store.adapter.PluginStoreAdapter;
 import ir.hanzodev1375.components.store.event.PluginStoreEvent;
 import ir.hanzodev1375.components.store.model.PluginItem;
+import ir.hanzodev1375.components.store.sheet.PluginDetailSheet;
 import ir.hanzodev1375.components.store.viewmodel.PluginStoreViewModel;
 import ir.theme.M3Theme;
 import org.greenrobot.eventbus.EventBus;
@@ -69,7 +70,7 @@ public class PluginStoreFragment extends Fragment {
 
     viewModel =
         new ViewModelProvider(
-                this,
+                requireActivity(),
                 new ViewModelProvider.AndroidViewModelFactory(requireActivity().getApplication()))
             .get(PluginStoreViewModel.class);
 
@@ -105,11 +106,9 @@ public class PluginStoreFragment extends Fragment {
       return;
     }
     Set<String> installedSet = viewModel.getInstalled().getValue();
-    if (installedSet != null && installedSet.contains(event.plugin.name())) {
-      viewModel.requestSetup(event.plugin);
-    } else {
-      viewModel.install(event.plugin, false);
-    }
+    boolean installed = installedSet != null && installedSet.contains(event.plugin.name());
+    PluginDetailSheet.newInstance(event.plugin, installed)
+        .show(requireActivity().getSupportFragmentManager(), "plugin_detail");
   }
 
   private void onPlugins(List<PluginItem> plugins) {

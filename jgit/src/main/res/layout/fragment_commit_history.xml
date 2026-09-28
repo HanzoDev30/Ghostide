@@ -6,7 +6,7 @@
      android:layout_width="match_parent"
      android:orientation="vertical">
 
-    <Button
+    <ir.hanzodev1375.components.glass.ButtonCompat
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:id="@+id/btnRefreshHistory"

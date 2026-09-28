@@ -78,9 +78,8 @@
         android:orientation="horizontal"
         android:gravity="end|center_vertical">
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:id="@+id/btnCancel"
-            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cancel" />

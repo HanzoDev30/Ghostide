@@ -107,9 +107,8 @@
             android:text="@string/reset_steps_label"
             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:id="@+id/btnStepsMinus"
-            style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:text="−"
@@ -123,20 +122,18 @@
             android:text="1"
             android:textAppearance="?attr/textAppearanceTitleMedium" />
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:id="@+id/btnStepsPlus"
-            style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:text="+"
             android:layout_marginStart="8dp" />
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
+    <ir.hanzodev1375.components.glass.ButtonCompat
         android:id="@+id/btnDoReset"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/colorError"
         android:text="@string/reset_title" />
 
 </LinearLayout>

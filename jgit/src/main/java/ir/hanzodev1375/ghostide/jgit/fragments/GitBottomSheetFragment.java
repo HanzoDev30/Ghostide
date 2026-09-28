@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -28,6 +27,11 @@ import ir.hanzodev1375.ghostide.jgit.model.GitTab;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import ir.hanzodev1375.components.glass.ChipCompat;
+import ir.hanzodev1375.components.glass.ChipGroupCompat;
+import ir.hanzodev1375.ghostide.jgit.GitHubClient;
+import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.RemoteInfo;
+import java.util.Locale;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.DialogCompat;
 import ir.theme.M3Theme;
 
@@ -39,10 +43,11 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
   private static final int TAB_REMOTES = 3;
 
   private GitViewModel viewModel;
-  private LinearProgressIndicator progressBar;
+  private SegmentedAvatarView avatar;
   private ViewPager2 viewPager;
   private String repoPath;
   private boolean isInitialized = false;
+  private boolean statsRequested = false;
 
   public void setRepoPath(String repoPath) {
     this.repoPath = repoPath;
@@ -72,13 +77,15 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
     contentContainer.addView(view);
     viewModel = new ViewModelProvider(requireActivity()).get(GitViewModel.class);
     setHasPeekMod(false);
-    progressBar = view.findViewById(R.id.progressBar);
     setupHeader(view);
     M3Theme.apply(view);
     viewModel.progressMessage.observe(
         getViewLifecycleOwner(),
         msg -> {
-          progressBar.setVisibility(msg != null ? View.VISIBLE : View.GONE);
+          // The avatar's segmented ring is the only progress indicator in this sheet.
+          if (avatar != null) {
+            avatar.setLoading(msg != null);
+          }
           if (msg != null) {
             GhostToast.makeText(getContext(), msg, GhostToast.LENGTH_SHORT).show();
           }
@@ -88,6 +95,7 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
         getViewLifecycleOwner(),
         status -> {
           if (status == RepositoryStatus.OPENED || status == RepositoryStatus.INITIALIZED) {
+            loadRepoStats();
             PreferencesUtils prefsUtils = new PreferencesUtils(requireContext());
             if (prefsUtils.hasGitLocalUserConfig()) {
               viewModel.setUserConfig(
@@ -125,9 +133,10 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
   }
 
   private void setupHeader(View root) {
-    SegmentedAvatarView ivAvatar = root.findViewById(R.id.ivGitAvatar);
+    avatar = root.findViewById(R.id.ivGitAvatar);
     TextView tvUsername = root.findViewById(R.id.tvGitUsername);
     TextView tvRepoName = root.findViewById(R.id.tvGitRepoName);
+    ChipGroupCompat chipGroup = root.findViewById(R.id.chipGroupRepoStats);
 
     PreferencesUtils prefsUtils = new PreferencesUtils(requireContext());
     String username = prefsUtils.getGitHubUsername();
@@ -137,8 +146,162 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
     tvRepoName.setText(repoPath != null && !repoPath.isEmpty() ? new File(repoPath).getName() : "");
 
     if (!TextUtils.isEmpty(avatarUrl)) {
-      Glide.with(this).load(avatarUrl).into(ivAvatar);
+      Glide.with(this).load(avatarUrl).into(avatar);
     }
+
+    // Both counters start on screen at zero rather than hidden. The star count is unknown until
+    // the remote request lands, and a chip that pops in once the number arrives shifts the whole
+    // header sideways; zero is also the truthful reading for a repo nobody starred yet.
+    ChipCompat chipStars = chipGroup.addChip("0");
+    chipStars.setTone(ChipCompat.Tone.GOLD);
+    chipStars.setIconResource(R.drawable.star_24px);
+
+    ChipCompat chipSize = chipGroup.addChip("0");
+    chipSize.setTone(ChipCompat.Tone.GREEN);
+  }
+
+  private void loadRepoStats() {
+    if (statsRequested) {
+      return;
+    }
+    statsRequested = true;
+    loadRepoSize();
+    loadRepoStars();
+  }
+
+  private void loadRepoSize() {
+    if (repoPath == null || repoPath.isEmpty()) {
+      return;
+    }
+    ChipGroupCompat chipGroup = getView() == null ? null : getView().findViewById(R.id.chipGroupRepoStats);
+    if (chipGroup == null) {
+      return;
+    }
+    ChipCompat chip = (ChipCompat) chipGroup.getChildAt(1);
+    new Thread(
+            () -> {
+              long bytes = directorySize(new File(repoPath));
+              String text = formatSize(bytes);
+              if (getActivity() == null) {
+                return;
+              }
+              requireActivity()
+                  .runOnUiThread(
+                      () -> {
+                        if (isAdded() && chipGroup.getChildCount() > 1) {
+                          chip.setText(text);
+                        }
+                      });
+            })
+        .start();
+  }
+
+  private void loadRepoStars() {
+    List<RemoteInfo> remotes = viewModel.remotes.getValue();
+    if (remotes == null) {
+      return;
+    }
+    for (RemoteInfo remote : remotes) {
+      String slug = githubSlug(remote.getFetchUrl());
+      if (slug == null) {
+        continue;
+      }
+      new GitHubClient(requireContext())
+          .get(
+              "https://api.github.com/repos/" + slug,
+              new GitHubClient.GitHubRequestCallback() {
+                @Override
+                public void onSuccess(org.json.JSONObject response) {
+                  int stars = response.optInt("stargazers_count", 0);
+                  if (getActivity() == null) {
+                    return;
+                  }
+                  requireActivity()
+                      .runOnUiThread(
+                          () -> {
+                            View chipGroupView = getView() == null ? null : getView();
+                            if (!isAdded() || chipGroupView == null) {
+                              return;
+                            }
+                            ChipGroupCompat group = chipGroupView.findViewById(R.id.chipGroupRepoStats);
+                            if (group == null || group.getChildCount() == 0) {
+                              return;
+                            }
+                            ChipCompat chip = (ChipCompat) group.getChildAt(0);
+                            chip.setText(ChipCompat.formatStat(stars));
+                          });
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                  // The chip is already showing its zero placeholder; leaving it as-is keeps the
+                  // header from moving when the request fails.
+                }
+              });
+      return;
+    }
+  }
+
+  /** "git@github.com:owner/repo.git" and "https://github.com/owner/repo" both give "owner/repo". */
+  private static String githubSlug(String url) {
+    if (url == null) {
+      return null;
+    }
+    String path = url.trim();
+    int at = path.indexOf('@');
+    int scheme = path.indexOf("://");
+    if (at >= 0 && (scheme < 0 || at > scheme)) {
+      path = path.substring(at + 1);
+    } else if (scheme >= 0) {
+      path = path.substring(scheme + 3);
+    }
+    int colon = path.indexOf(':');
+    if (colon >= 0) {
+      path = path.substring(0, colon) + "/" + path.substring(colon + 1);
+    }
+    int slash = path.indexOf('/');
+    if (slash < 0) {
+      return null;
+    }
+    path = path.substring(slash + 1);
+    if (path.endsWith(".git")) {
+      path = path.substring(0, path.length() - 4);
+    }
+    String[] parts = path.split("/");
+    return parts.length == 2 && !parts[0].isEmpty() && !parts[1].isEmpty() ? parts[0] + "/" + parts[1] : null;
+  }
+
+  private static long directorySize(File dir) {
+    if (dir == null || !dir.exists()) {
+      return 0L;
+    }
+    if (dir.isFile()) {
+      return dir.length();
+    }
+    long total = 0L;
+    File[] children = dir.listFiles();
+    if (children == null) {
+      return 0L;
+    }
+    for (File child : children) {
+      total += directorySize(child);
+    }
+    return total;
+  }
+
+  private static String formatSize(long bytes) {
+    if (bytes < 1024L) {
+      return bytes + " B";
+    }
+    double kb = bytes / 1024.0;
+    if (kb < 1024.0) {
+      return String.format(Locale.getDefault(), "%.1f KB", kb);
+    }
+    double mb = kb / 1024.0;
+    if (mb < 1024.0) {
+      return String.format(Locale.getDefault(), "%.1f MB", mb);
+    }
+    return String.format(Locale.getDefault(), "%.2f GB", mb / 1024.0);
   }
 
   private void setupViewPager(View root) {

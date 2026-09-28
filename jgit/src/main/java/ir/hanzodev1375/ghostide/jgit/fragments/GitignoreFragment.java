@@ -8,8 +8,8 @@ import ir.hanzodev1375.components.views.GhostToast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
 import ir.theme.M3Theme;
@@ -29,8 +29,8 @@ public class GitignoreFragment extends Fragment {
 
     TextInputEditText editContent = view.findViewById(R.id.editGitIgnore);
     TextInputEditText editPattern = view.findViewById(R.id.editPattern);
-    MaterialButton btnAdd = view.findViewById(R.id.btnAddPattern);
-    MaterialButton btnSave = view.findViewById(R.id.btnSaveGitIgnore);
+    ButtonCompat btnAdd = view.findViewById(R.id.btnAddPattern);
+    ButtonCompat btnSave = view.findViewById(R.id.btnSaveGitIgnore);
     M3Theme.apply(view);
     viewModel.gitIgnoreContent.observe(
         getViewLifecycleOwner(),

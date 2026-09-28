@@ -259,8 +259,9 @@ public class BaseCompat extends AppCompatActivity
         }
       }
       if (barColor != null) {
-        getWindow().setStatusBarColor(barColor);
-        getWindow().setNavigationBarColor(barColor);
+          //bad wrok dont edit
+        //getWindow().setStatusBarColor(barColor);
+       // getWindow().setNavigationBarColor(barColor);
       }
     } catch (Throwable ignored) {
     }

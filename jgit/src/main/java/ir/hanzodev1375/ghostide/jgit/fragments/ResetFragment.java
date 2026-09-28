@@ -1,5 +1,4 @@
 package ir.hanzodev1375.ghostide.jgit.fragments;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import android.view.LayoutInflater;
@@ -10,8 +9,8 @@ import ir.hanzodev1375.components.views.GhostToast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.components.utils.GlassColors;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.theme.M3Theme;
@@ -34,10 +33,11 @@ public class ResetFragment extends Fragment {
     viewModel = new ViewModelProvider(requireActivity()).get(GitViewModel.class);
 
     MaterialTextView tvSteps = view.findViewById(R.id.tvStepsCount);
-    MaterialButton btnMinus = view.findViewById(R.id.btnStepsMinus);
-    MaterialButton btnPlus = view.findViewById(R.id.btnStepsPlus);
+    ButtonCompat btnMinus = view.findViewById(R.id.btnStepsMinus);
+    ButtonCompat btnPlus = view.findViewById(R.id.btnStepsPlus);
     RadioGroup radioGroup = view.findViewById(R.id.radioGroupReset);
-    MaterialButton btnReset = view.findViewById(R.id.btnDoReset);
+    ButtonCompat btnReset = view.findViewById(R.id.btnDoReset);
+    btnReset.setTone(ButtonCompat.Tone.ERROR);
 
     GlassColors.setBackgroundAlpha(
         view.findViewById(R.id.cardResetOptions), fallback(M3Theme.surface(), 0), 120);
@@ -80,9 +80,6 @@ public class ResetFragment extends Fragment {
             GhostToast.makeText(getContext(), result.getMessage(), GhostToast.LENGTH_SHORT).show();
         });
     M3Theme.applyTopLevel(view);
-
-    Integer error = M3Theme.error();
-    if (error != null) btnReset.setBackgroundTintList(ColorStateList.valueOf(error));
   }
 
   private static int fallback(Integer value, int def) {

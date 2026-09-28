@@ -1,13 +1,12 @@
 package ir.hanzodev1375.ghostide.jgit.adapter;
 
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.components.utils.GlassColors;
 import ir.theme.M3Theme;
 import java.text.SimpleDateFormat;
@@ -61,10 +60,7 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder> {
     }
     holder.btnDelete.setOnClickListener(v -> { if (listener != null) listener.onDelete(tag); });
     M3Theme.listCard(holder.itemView);
-    Integer error = M3Theme.errorContainer();
-    if (error != null) holder.btnDelete.setBackgroundTintList(ColorStateList.valueOf(error));
-    Integer onError = M3Theme.onErrorContainer();
-    if (onError != null) holder.btnDelete.setTextColor(onError);
+    holder.btnDelete.setTone(ButtonCompat.Tone.ERROR);
   }
 
   @Override
@@ -72,13 +68,14 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder> {
 
   static class ViewHolder extends RecyclerView.ViewHolder {
     MaterialTextView tvName, tvHash, tvMessage;
-    MaterialButton btnDelete;
+    ButtonCompat btnDelete;
     ViewHolder(View v) {
       super(v);
       tvName = v.findViewById(R.id.tvTagName);
       tvHash = v.findViewById(R.id.tvTagHash);
       tvMessage = v.findViewById(R.id.tvTagMessage);
       btnDelete = v.findViewById(R.id.btnDeleteTag);
+      btnDelete.setTone(ButtonCompat.Tone.ERROR);
     }
   }
 

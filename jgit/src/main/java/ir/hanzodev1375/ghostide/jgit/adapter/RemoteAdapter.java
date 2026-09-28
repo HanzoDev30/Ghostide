@@ -1,15 +1,14 @@
 package ir.hanzodev1375.ghostide.jgit.adapter;
 
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import ir.hanzodev1375.components.glass.ButtonCompat;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.RemoteInfo;
 import ir.theme.M3Theme;
@@ -68,8 +67,6 @@ public class RemoteAdapter extends RecyclerView.Adapter<RemoteAdapter.ViewHolder
           if (listener != null) listener.onFetch(remote);
         });
     M3Theme.listCard(holder.itemView);
-    Integer error = M3Theme.error();
-    if (error != null) holder.btnRemove.setBackgroundTintList(ColorStateList.valueOf(error));
   }
 
   @Override
@@ -79,13 +76,14 @@ public class RemoteAdapter extends RecyclerView.Adapter<RemoteAdapter.ViewHolder
 
   static class ViewHolder extends RecyclerView.ViewHolder {
     TextView tvName, tvUrl;
-    Button btnRemove, btnPush, btnPull, btnFetch;
+    ButtonCompat btnRemove, btnPush, btnPull, btnFetch;
 
     ViewHolder(View itemView) {
       super(itemView);
       tvName = itemView.findViewById(R.id.tvRemoteName);
       tvUrl = itemView.findViewById(R.id.tvRemoteUrl);
       btnRemove = itemView.findViewById(R.id.btnRemoveRemote);
+      btnRemove.setTone(ButtonCompat.Tone.ERROR);
       btnPush = itemView.findViewById(R.id.btnPush);
       btnPull = itemView.findViewById(R.id.btnPull);
       btnFetch = itemView.findViewById(R.id.btnFetch);

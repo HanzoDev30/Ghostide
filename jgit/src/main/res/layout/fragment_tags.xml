@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:id="@+id/btnCreateTag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

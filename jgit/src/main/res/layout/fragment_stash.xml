@@ -19,7 +19,7 @@
             android:hint="Stash message (optional)"
             android:id="@+id/editStashMessage" />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_marginStart="8dp"

@@ -31,7 +31,7 @@
         android:layout_marginTop="12dp"
         >
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_marginEnd="8dp"
@@ -40,7 +40,7 @@
             android:text="Push"
             />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_marginEnd="8dp"
@@ -49,7 +49,7 @@
             android:text="Pull"
             />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_marginEnd="8dp"
@@ -58,10 +58,9 @@
             android:text="Fetch"
             />
 
-        <Button
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:backgroundTint="?attr/colorError"
             android:id="@+id/btnRemoveRemote"
             android:text="Remove"
             />

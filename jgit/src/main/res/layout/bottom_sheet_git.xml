@@ -63,14 +63,15 @@
 
     </LinearLayout>
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/progressBar"
+    <ir.hanzodev1375.components.glass.ChipGroupCompat
+        android:id="@+id/chipGroupRepoStats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:indeterminate="true"
-        android:visibility="gone" />
+        android:layout_marginBottom="8dp"
+        app:singleLine="true"
+        app:singleSelection="false" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"

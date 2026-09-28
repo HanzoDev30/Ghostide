@@ -62,6 +62,29 @@ public final class M3Theme {
 
   private static ThemeBus.ThemeChangeListener autoRefreshListener;
 
+  /**
+   * Implemented by the module that owns the Liquid Glass compat widgets.
+   *
+   * <p>Those views cannot be referenced from here: the components module depends on this one, so
+   * adding the reverse edge to reach {@code ButtonCompat} / {@code ChipCompat} would be a cycle.
+   * The components module therefore installs an applier at class-init time and this class simply
+   * hands the views to it, which keeps {@code M3Theme.apply()} able to re-theme glass widgets on
+   * every theme change.
+   */
+  public interface GlassThemeApplier {
+
+    /** @return true when {@code v} is a glass widget and was themed. */
+    boolean applyGlassView(View v);
+
+    /** @return true when {@code v} is a glass chip and was themed. */
+    boolean applyGlassChip(View v);
+
+    /** @return true when {@code v} is a glass button and was themed. */
+    boolean applyGlassButton(View v);
+  }
+
+  private static GlassThemeApplier glassThemeApplier;
+
   private M3Theme() {}
 
   public static void init(Context context) {
@@ -444,11 +467,50 @@ public final class M3Theme {
     }
   }
 
+  /** Installed by the components module so glass widgets can take part in the normal theming pass. */
+  public static void setGlassThemeApplier(@Nullable GlassThemeApplier applier) {
+    glassThemeApplier = applier;
+  }
+
+  /**
+   * Re-themes a glass chip: the library's own foreground for the text, the icon tint and the
+   * adaptive glass material, so the chip matches the active M3 theme.
+   *
+   * <p>Any tone the chip was given with {@code ChipCompat.setTone(...)} wins over the plain theme
+   * colours, so gold/green accents survive a theme change.
+   */
+  public static void glassChip(View chip) {
+    GlassThemeApplier applier = glassThemeApplier;
+    if (applier != null && chip != null) {
+      applier.applyGlassChip(chip);
+    }
+  }
+
+  /**
+   * Re-themes a glass button: adaptive glass material plus the theme foreground, exactly like
+   * {@code ButtonCompat} does when it is inflated.
+   */
+  public static void glassButton(View button) {
+    GlassThemeApplier applier = glassThemeApplier;
+    if (applier != null && button != null) {
+      applier.applyGlassButton(button);
+    }
+  }
+
+  /** @return true when {@code v} was handled as a glass widget. */
+  private static boolean applyGlassView(View v) {
+    GlassThemeApplier applier = glassThemeApplier;
+    return applier != null && v != null && applier.applyGlassView(v);
+  }
+
   public static void applyShallow(View v) {
     if (v == null) {
       return;
     }
     try {
+      if (applyGlassView(v)) {
+        return;
+      }
       if (v instanceof MaterialButton) {
         materialButton((MaterialButton) v);
       } else if (v instanceof FloatingActionButton) {

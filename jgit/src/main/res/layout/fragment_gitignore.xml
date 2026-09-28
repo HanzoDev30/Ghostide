@@ -28,12 +28,10 @@
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
             android:id="@+id/btnAddPattern"
-            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:icon="@android:drawable/ic_input_add" />
+            android:layout_height="48dp" />
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider
@@ -70,7 +68,7 @@
             android:textSize="13sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
+    <ir.hanzodev1375.components.glass.ButtonCompat
         android:id="@+id/btnSaveGitIgnore"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

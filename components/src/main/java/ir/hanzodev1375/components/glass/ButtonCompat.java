@@ -22,6 +22,20 @@ import com.example.liquidglass.LiquidGlassButton;
  */
 public class ButtonCompat extends LiquidGlassButton {
 
+  /**
+   * Accent a button can carry instead of the plain theme surface.
+   *
+   * <p>The colour itself is resolved in {@link Glass} from the active theme, so a screen only ever
+   * names the tone and never picks a hex value.
+   */
+  public enum Tone {
+    DEFAULT,
+    ERROR
+  }
+
+  private static final float ERROR_TINT_STRENGTH = 0.35f;
+
+  private Tone tone = Tone.DEFAULT;
   private LinearLayout contentRow;
   private TextView label;
   private ImageView iconView;
@@ -54,6 +68,20 @@ public class ButtonCompat extends LiquidGlassButton {
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
     Glass.autoBackdrop(this);
+  }
+
+  /**
+   * Gives the button an accent tone, re-resolving the glass colour and the label for the current
+   * theme. Pass {@link Tone#DEFAULT} to go back to the plain surface.
+   */
+  public ButtonCompat setTone(Tone tone) {
+    this.tone = tone == null ? Tone.DEFAULT : tone;
+    Glass.applyButton(this);
+    return this;
+  }
+
+  public Tone getTone() {
+    return tone;
   }
 
   /** Convenience alias for {@link #setText(CharSequence)}. */

@@ -109,6 +109,15 @@
   <string name="pluginstore_install_error">Install failed: %s</string>
   <string name="pluginstore_source_saved">Source saved to %s</string>
   <string name="pluginstore_source_error">Source download failed: %s</string>
+  <string name="pluginstore_size">SIZE</string>
+  <string name="pluginstore_size_unknown">Unknown</string>
+  <string name="pluginstore_source">SOURCE</string>
+  <string name="pluginstore_source_available">Available</string>
+  <string name="pluginstore_source_missing">Not available</string>
+  <string name="pluginstore_description">DESCRIPTION</string>
+  <string name="pluginstore_by_dev">by %s</string>
+  <string name="pluginstore_no_gpl">This plugin has no installable package</string>
+  <string name="pluginstore_open_source">Open source</string>
   <string name="plugin_notify_channel">New plugins</string>
   <string name="plugin_notify_channel_desc">Alerts when a new plugin is published in the store</string>
   <string name="plugin_notify_title">New plugin available</string>

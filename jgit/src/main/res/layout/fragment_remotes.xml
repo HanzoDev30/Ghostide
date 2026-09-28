@@ -15,7 +15,7 @@
          android:paddingEnd="16dp"
          android:paddingBottom="14dp">
 
-        <com.google.android.material.button.MaterialButton
+        <ir.hanzodev1375.components.glass.ButtonCompat
              android:id="@+id/btnAddRemote"
              android:layout_height="wrap_content"
              android:layout_width="match_parent"

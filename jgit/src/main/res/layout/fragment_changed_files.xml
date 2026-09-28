@@ -30,15 +30,14 @@
              android:baselineAligned="false"
              android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
+            <ir.hanzodev1375.components.glass.ButtonCompat
                  android:id="@+id/btnStageAll"
-                 style="@style/Widget.Material3.Button.TonalButton"
                  android:layout_height="wrap_content"
                  android:layout_width="0dp"
                  android:layout_weight="1"
                  android:text="@string/git_stage_all" />
 
-            <com.google.android.material.button.MaterialButton
+            <ir.hanzodev1375.components.glass.ButtonCompat
                  android:id="@+id/btnCommit"
                  android:layout_height="wrap_content"
                  android:layout_width="0dp"
