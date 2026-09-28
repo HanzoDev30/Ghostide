@@ -246,7 +246,7 @@ public final class Glass {
     if (!prefs.isGlassMaterialColor()) {
       return;
     }
-    Integer surface = M3Theme.surface();
+    Integer surface = M3Theme.primary();
     if (surface != null) {
       glass.setGlassTint(surface, prefs.getGlassTint());
     }
