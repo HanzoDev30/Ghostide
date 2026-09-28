@@ -24,10 +24,13 @@ import ir.hanzodev1375.ghostide.databinding.FragmentWelcomeBinding;
 import ir.hanzodev1375.ghostide.databinding.ItemOnboardingPermissionBinding;
 import ir.hanzodev1375.ghostide.utils.PermissionUtils;
 import ir.theme.M3Theme;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WelcomeFragment extends Fragment {
 
   private static final int REQ_NOTIFICATION = 2030;
+  private static final int REQ_RUNTIME = 1001;
 
   private FragmentWelcomeBinding binding;
   private ActivityResultLauncher<Intent> storageLauncher;
@@ -70,6 +73,28 @@ public class WelcomeFragment extends Fragment {
         registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> refreshGranted());
     refreshGranted();
+    autoRequestMissing();
+  }
+
+  /** اولین باری که این صفحه باز می‌شود، هر مجوزِ نگرفته را خودکار درخواست می‌کند؛ دکمه‌های
+   * پایینش برای گرفتن دستی/دوباره باقی می‌مانند. */
+  private void autoRequestMissing() {
+    if (!PermissionUtils.hasManageStoragePermission(requireContext())) {
+      requestFiles();
+    }
+    if (!PermissionUtils.hasPermissions(requireContext())) {
+      List<String> missing = new ArrayList<>();
+      for (String perm : PermissionUtils.getRequiredPermissions()) {
+        if (ContextCompat.checkSelfPermission(requireContext(), perm)
+            != PackageManager.PERMISSION_GRANTED) {
+          missing.add(perm);
+        }
+      }
+      if (!missing.isEmpty()) {
+        requestPermissions(missing.toArray(new String[0]), REQ_RUNTIME);
+      }
+    }
+    requestNotifications();
   }
 
   @Override
@@ -163,7 +188,8 @@ public class WelcomeFragment extends Fragment {
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    if (requestCode == REQ_NOTIFICATION && binding != null) refreshGranted();
+    if ((requestCode == REQ_NOTIFICATION || requestCode == REQ_RUNTIME) && binding != null)
+      refreshGranted();
   }
 
   private static void tintCard(MaterialCardView card, int color) {

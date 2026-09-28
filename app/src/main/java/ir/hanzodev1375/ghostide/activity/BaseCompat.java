@@ -65,6 +65,7 @@ public class BaseCompat extends AppCompatActivity
         .post(
             () -> {
               applyJsonThemeBackground();
+              applyWindowBarColors();
               View decor = getWindow().getDecorView();
               if (decor != null) {
                 M3Theme.applyTopLevel(decor);
@@ -227,7 +228,42 @@ public class BaseCompat extends AppCompatActivity
     ThemeUtils themeUtils = new ThemeUtils(new ThemeManager(this));
     themeUtils.applyActivity(this);
     applyJsonThemeBackground();
+    applyWindowBarColors();
     applyOwnTheme(themeUtils);
+  }
+
+  private void applyWindowBarColors() {
+    if (isFinishing()) {
+      return;
+    }
+    try {
+      Integer barColor = null;
+      if (new PreferencesUtils(this).isShowBackground()) {
+        GhostTheme theme = new ThemeUtils(new ThemeManager(this)).getTheme();
+        boolean hasImage =
+            theme != null
+                && theme.getWidget() != null
+                && theme.getWidget().getImagepath() != null
+                && !theme.getWidget().getImagepath().isEmpty();
+        if (hasImage
+            && theme.getActivity() != null
+            && theme.getActivity().getBackground() != null
+            && !theme.getActivity().getBackground().isEmpty()) {
+          barColor = Color.parseColor(theme.getActivity().getBackground());
+        }
+      }
+      if (barColor == null) {
+        barColor = M3Theme.surface();
+        if (barColor == null) {
+          barColor = M3Theme.surfaceContainer();
+        }
+      }
+      if (barColor != null) {
+        getWindow().setStatusBarColor(barColor);
+        getWindow().setNavigationBarColor(barColor);
+      }
+    } catch (Throwable ignored) {
+    }
   }
 
   /** One-shot full restyle: repaints every themed view in the window's decor tree. */
@@ -240,9 +276,12 @@ public class BaseCompat extends AppCompatActivity
       M3Theme.apply(decor);
     }
     applyThemeNow();
+    onThemeReapplied();
   }
 
   protected void applyOwnTheme(ThemeUtils themeUtils) {}
+
+  protected void onThemeReapplied() {}
 
   protected void setupBackgroundBlur(ViewChilder backgroundView, View... tintViews) {
     boolean showBg = new PreferencesUtils(this).isShowBackground();
@@ -280,6 +319,8 @@ public class BaseCompat extends AppCompatActivity
 
     if (hasImage && theme.getActivity() != null && theme.getActivity().getBackground() != null) {
       int bgColor = Color.parseColor(theme.getActivity().getBackground());
+      //getWindow().setStatusBarColor(bgColor);
+    //  getWindow().setNavigationBarColor(bgColor);
       for (View v : tintViews) {
         if (v != null && v != backgroundView) {
           v.setBackgroundColor(bgColor);

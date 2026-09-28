@@ -2,6 +2,8 @@ package ir.ghostide.logcat;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,6 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MaterialLogCatView extends LinearLayout {
@@ -27,6 +31,12 @@ public class MaterialLogCatView extends LinearLayout {
   private FloatingActionButton btnSave;
   private LogAdapter adapter;
   private static final int PERMISSION_REQUEST_CODE = 100;
+  private final ExecutorService loader = Executors.newSingleThreadExecutor();
+  private volatile boolean loading;
+
+  private void postOnMain(Runnable action) {
+    new Handler(Looper.getMainLooper()).post(action);
+  }
 
   public MaterialLogCatView(Context context) {
     super(context);
@@ -47,9 +57,9 @@ public class MaterialLogCatView extends LinearLayout {
     M3Theme.editText(searchBox);
 
     recyclerView.setLayoutManager(new LinearLayoutManager(context));
+    recyclerView.setHasFixedSize(true);
 
-    List<LogEntry> logs = LogcatReader.getCurrentAppLogs();
-    adapter = new LogAdapter(logs);
+    adapter = new LogAdapter(new java.util.ArrayList<>());
     recyclerView.setAdapter(adapter);
     recyclerView.addItemDecoration(new MarginItemDecoration());
 
@@ -68,6 +78,8 @@ public class MaterialLogCatView extends LinearLayout {
         });
 
     btnSave.setOnClickListener(v -> saveLogsToFile());
+
+    refreshLogs();
   }
 
   private void saveLogsToFile() {
@@ -105,8 +117,25 @@ public class MaterialLogCatView extends LinearLayout {
   }
 
   public void refreshLogs() {
-    List<LogEntry> newLogs = LogcatReader.getCurrentAppLogs();
-    adapter.updateData(newLogs);
+    if (loading) {
+      return;
+    }
+    loading = true;
+    searchBox.setEnabled(false);
+    loader.execute(
+        () -> {
+          List<LogEntry> newLogs = LogcatReader.getCurrentAppLogs();
+          postOnMain(
+              () -> {
+                loading = false;
+                if (searchBox != null) {
+                  searchBox.setEnabled(true);
+                }
+                if (adapter != null) {
+                  adapter.updateData(newLogs);
+                }
+              });
+        });
   }
 
   public class MarginItemDecoration extends RecyclerView.ItemDecoration {

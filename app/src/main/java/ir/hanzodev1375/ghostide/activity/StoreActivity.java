@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.liquidglass.LiquidGlassTabBar;
 import com.google.android.material.appbar.MaterialToolbar;
+import ir.hanzodev1375.components.glass.TabBarCompat;
 import ir.hanzodev1375.components.sheet.PluginSetupSheet;
 import ir.hanzodev1375.components.store.adapter.ViewPagerAdapter;
 import ir.hanzodev1375.components.store.event.PluginSetupEvent;
@@ -30,7 +31,7 @@ import org.greenrobot.eventbus.ThreadMode;
 public class StoreActivity extends BaseCompat {
 
   private ViewPager2 viewPager;
-  private LiquidGlassTabBar bottomNav;
+  private TabBarCompat bottomNav;
   private MaterialToolbar toolbar;
   private GplPluginInstallerHost installerHost;
 
@@ -64,7 +65,10 @@ public class StoreActivity extends BaseCompat {
         bottomNav,
         (v, insets) -> {
           int bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-          v.setPadding(0, 0, 0, bottom);
+          // Margin, not padding: padding would stretch the glass panel and leave a large
+          // empty area under the icons, and it would wipe the padding that keeps the end
+          // tabs clear of the bar's corner curve.
+          ((TabBarCompat) v).applySystemBottomInset(bottom);
           return insets;
         });
 
@@ -130,11 +134,7 @@ public class StoreActivity extends BaseCompat {
   }
 
   private void setupTabBar() {
-    View backdrop = findViewById(android.R.id.content);
-    if (backdrop != null) {
-      bottomNav.setBackdropSource(backdrop);
-    }
-    bottomNav.setEnableDynamicBackground(true);
+    // The backdrop, the live backdrop refresh and the theme tint are all handled by TabBarCompat.
     Integer primary = M3Theme.primary();
     if (primary != null) {
       bottomNav.setSelectedTintColor(primary);

@@ -66,9 +66,12 @@ public class ToolbarListAdapter extends RecyclerView.Adapter<ToolbarListAdapter.
     }
 
     public void bind(ToolbarModel model, OnItemClickListener<ToolbarModel> clickListener) {
-      int tint = fallback(M3Theme.onSurface(), Color.parseColor("#8A000000"));
-      icon.setColorFilter(tint);
       icon.setImageResource(model.getIcon());
+      icon.setColorFilter(null);
+      M3Theme.imageView(icon);
+      if (icon.getColorFilter() == null) {
+        icon.setColorFilter(fallback(M3Theme.onSurface(), Color.parseColor("#8A000000")));
+      }
       icon.setOnClickListener(
           v -> {
             if (clickListener != null) {

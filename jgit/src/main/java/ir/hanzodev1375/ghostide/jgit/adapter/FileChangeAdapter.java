@@ -6,15 +6,29 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.ArrayList;
-import java.util.List;
 import ir.hanzodev1375.ghostide.jgit.R;
+import ir.hanzodev1375.ghostide.jgit.jgitandroid.ChangeType;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.FileChange;
 import ir.theme.M3Theme;
 
-public class FileChangeAdapter extends RecyclerView.Adapter<FileChangeAdapter.ViewHolder> {
-  private List<FileChange> changes = new ArrayList<>();
+public class FileChangeAdapter extends ListAdapter<FileChange, FileChangeAdapter.ViewHolder> {
+
+  private static final DiffUtil.ItemCallback<FileChange> DIFF =
+      new DiffUtil.ItemCallback<FileChange>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull FileChange a, @NonNull FileChange b) {
+          return a.getPath().equals(b.getPath());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull FileChange a, @NonNull FileChange b) {
+          return a.equals(b);
+        }
+      };
+
   private OnItemClickListener listener;
 
   public interface OnItemClickListener {
@@ -25,13 +39,12 @@ public class FileChangeAdapter extends RecyclerView.Adapter<FileChangeAdapter.Vi
     void onDiscardClick(FileChange change);
   }
 
-  public void setOnItemClickListener(OnItemClickListener listener) {
-    this.listener = listener;
+  public FileChangeAdapter() {
+    super(DIFF);
   }
 
-  public void submitList(List<FileChange> list) {
-    changes = list != null ? list : new ArrayList<>();
-    notifyDataSetChanged();
+  public void setOnItemClickListener(OnItemClickListener listener) {
+    this.listener = listener;
   }
 
   @NonNull
@@ -44,10 +57,14 @@ public class FileChangeAdapter extends RecyclerView.Adapter<FileChangeAdapter.Vi
 
   @Override
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-    FileChange change = changes.get(position);
+    FileChange change = getItem(position);
+    M3Theme.listCard(holder.itemView);
     holder.tvFileName.setText(change.getPath());
-    holder.tvChangeType.setText(change.getChangeType().name());
+    holder.tvChangeType.setText(labelOf(change.getChangeType()));
     holder.chkStage.setChecked(change.isStaged());
+    // باید بعد از listCard اعمال شود چون listCard رنگ متن همه TextView ها را ریست می‌کند
+    Integer accent = accentOf(change.getChangeType());
+    if (accent != null) holder.tvChangeType.setTextColor(accent);
 
     holder.itemView.setOnLongClickListener(
         v -> {
@@ -64,12 +81,35 @@ public class FileChangeAdapter extends RecyclerView.Adapter<FileChangeAdapter.Vi
             listener.onStageClick(change);
           }
         });
-    M3Theme.listCard(holder.itemView);
   }
 
-  @Override
-  public int getItemCount() {
-    return changes.size();
+  private static String labelOf(ChangeType type) {
+    switch (type) {
+      case ADDED:
+        return "Added";
+      case MODIFIED:
+        return "Modified";
+      case DELETED:
+        return "Deleted";
+      case CONFLICTING:
+        return "Conflict";
+      default:
+        return "Untracked";
+    }
+  }
+
+  private static Integer accentOf(ChangeType type) {
+    switch (type) {
+      case ADDED:
+        return M3Theme.tertiary();
+      case DELETED:
+      case CONFLICTING:
+        return M3Theme.error();
+      case MODIFIED:
+        return M3Theme.primary();
+      default:
+        return M3Theme.onSurfaceVariant();
+    }
   }
 
   static class ViewHolder extends RecyclerView.ViewHolder {

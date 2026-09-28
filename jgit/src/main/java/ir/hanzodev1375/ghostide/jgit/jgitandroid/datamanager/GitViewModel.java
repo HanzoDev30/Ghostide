@@ -84,6 +84,9 @@ public class GitViewModel extends ViewModel {
   private final MutableLiveData<String> _commitDiff = new MutableLiveData<>();
   public final LiveData<String> commitDiff = _commitDiff;
 
+  private final MutableLiveData<String> _fullDiff = new MutableLiveData<>();
+  public final LiveData<String> fullDiff = _fullDiff;
+
   private final MutableLiveData<Boolean> _commitCompleted = new MutableLiveData<>();
   public final LiveData<Boolean> commitCompleted = _commitCompleted;
 
@@ -93,6 +96,22 @@ public class GitViewModel extends ViewModel {
   private GitManager replaceManager(GitManager next) {
     if (gitManager != null) gitManager.close();
     return gitManager = next;
+  }
+
+  /**
+   * اگر همان مخزن از قبل باز است دوباره بازش نمی‌کنیم؛ باز کردن مجدد یعنی خواندن دوباره‌ی config،
+   * refها و index که روی پروژه‌های بزرگ کاملاً محسوس است.
+   */
+  private GitManager managerFor(String path) {
+    if (gitManager != null && path.equals(gitManager.getProjectPath()) && gitManager.isOpen()) {
+      return gitManager;
+    }
+    return replaceManager(new GitManager(path));
+  }
+
+  /** بعد از هر عملیات نوشتنی، کش کوتاه‌مدت JGit را باطل می‌کنیم. */
+  private void invalidateGitCaches() {
+    if (gitManager != null) gitManager.invalidateCaches();
   }
 
   public void setUserConfig(String name, String email) {
@@ -112,15 +131,16 @@ public class GitViewModel extends ViewModel {
   public void checkRepositoryStatus(String projectPath) {
     executor.execute(
         () -> {
-          replaceManager(new GitManager(projectPath));
-          boolean initialized = gitManager.isRepositoryInitialized();
+          GitManager manager = managerFor(projectPath);
+          boolean initialized = manager.isRepositoryInitialized();
           _isRepositoryInitialized.postValue(initialized);
 
           if (initialized) {
-            boolean opened = gitManager.openRepository();
+            boolean opened = manager.isOpen() || manager.openRepository();
             if (opened) {
+              _currentRepoPath.postValue(projectPath);
               _repositoryStatus.postValue(RepositoryStatus.OPENED);
-              refreshAll();
+              refreshAllNow();
             }
           }
         });
@@ -130,13 +150,13 @@ public class GitViewModel extends ViewModel {
     _progressMessage.postValue("Initializing repository...");
     executor.execute(
         () -> {
-          replaceManager(new GitManager(path));
-          boolean success = gitManager.initRepository(initialBranch);
+          GitManager manager = managerFor(path);
+          boolean success = manager.initRepository(initialBranch);
           if (success) {
-            gitManager.openRepository();
+            manager.openRepository();
             _repositoryStatus.postValue(RepositoryStatus.INITIALIZED);
             _currentRepoPath.postValue(path);
-            refreshAll();
+            refreshAllNow();
           } else {
             _repositoryStatus.postValue(RepositoryStatus.ERROR);
           }
@@ -156,12 +176,12 @@ public class GitViewModel extends ViewModel {
     _progressMessage.postValue("Opening repository...");
     executor.execute(
         () -> {
-          replaceManager(new GitManager(path));
-          boolean success = gitManager.openRepository();
+          GitManager manager = managerFor(path);
+          boolean success = manager.isOpen() || manager.openRepository();
           if (success) {
             _repositoryStatus.postValue(RepositoryStatus.OPENED);
             _currentRepoPath.postValue(path);
-            refreshAll();
+            refreshAllNow();
           } else {
             _repositoryStatus.postValue(RepositoryStatus.ERROR);
           }
@@ -267,7 +287,8 @@ public class GitViewModel extends ViewModel {
 
             _repositoryStatus.postValue(RepositoryStatus.OPENED);
             _currentRepoPath.postValue(path);
-            refreshAll();
+            invalidateGitCaches();
+            refreshAllNow();
             _progressMessage.postValue(null);
             _gitInitResult.postValue(result);
           } catch (Exception e) {
@@ -320,11 +341,12 @@ public class GitViewModel extends ViewModel {
     _progressMessage.postValue("Cloning repository...");
     executor.execute(
         () -> {
-          replaceManager(new GitManager(localPath));
-          boolean success = gitManager.clone(remoteUrl, localPath, username, password);
+          GitManager manager = managerFor(localPath);
+          boolean success = manager.clone(remoteUrl, localPath, username, password);
           if (success) {
+            _currentRepoPath.postValue(localPath);
             _repositoryStatus.postValue(RepositoryStatus.INITIALIZED);
-            refreshAll();
+            refreshAllNow();
           } else {
             _repositoryStatus.postValue(RepositoryStatus.ERROR);
             _operationResult.postValue(new OperationResult(false, "Failed to clone repository"));
@@ -346,6 +368,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.stageFile(filePath)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshChangedFiles();
           _progressMessage.postValue(null);
         });
@@ -360,6 +383,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.stageAllFiles()
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshChangedFiles();
           _progressMessage.postValue(null);
         });
@@ -374,6 +398,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.unstageFile(filePath)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshChangedFiles();
           _progressMessage.postValue(null);
         });
@@ -388,6 +413,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.discardChanges(filePath)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshChangedFiles();
           _progressMessage.postValue(null);
         });
@@ -403,6 +429,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshCommitHistory();
             _commitCompleted.postValue(true);
@@ -420,6 +447,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshCommitHistory();
             _commitCompleted.postValue(true);
@@ -434,6 +462,7 @@ public class GitViewModel extends ViewModel {
           boolean success = gitManager != null && gitManager.createBranch(branchName);
           _operationResult.postValue(
               new OperationResult(success, success ? "Branch created" : "Failed to create branch"));
+          invalidateGitCaches();
           if (success) refreshBranches();
           _progressMessage.postValue(null);
         });
@@ -447,7 +476,8 @@ public class GitViewModel extends ViewModel {
           _operationResult.postValue(
               new OperationResult(
                   success, success ? "Switched to " + branchName : "Failed to checkout branch"));
-          if (success) refreshAll();
+          invalidateGitCaches();
+          if (success) refreshAllNow();
           _progressMessage.postValue(null);
         });
   }
@@ -459,6 +489,7 @@ public class GitViewModel extends ViewModel {
           boolean success = gitManager != null && gitManager.deleteBranch(branchName);
           _operationResult.postValue(
               new OperationResult(success, success ? "Branch deleted" : "Failed to delete branch"));
+          invalidateGitCaches();
           if (success) refreshBranches();
           _progressMessage.postValue(null);
         });
@@ -480,6 +511,7 @@ public class GitViewModel extends ViewModel {
           _operationResult.postValue(
               new OperationResult(
                   success, success ? "Remote added successfully" : "Failed to add remote"));
+          invalidateGitCaches();
           if (success) refreshRemotes();
         });
   }
@@ -490,6 +522,7 @@ public class GitViewModel extends ViewModel {
           boolean success = gitManager != null && gitManager.removeRemote(name);
           _operationResult.postValue(
               new OperationResult(success, success ? "Remote removed" : "Failed to remove remote"));
+          invalidateGitCaches();
           if (success) refreshRemotes();
         });
   }
@@ -522,7 +555,8 @@ public class GitViewModel extends ViewModel {
                   : new PullResult(false, "Git manager not initialized");
           _pushPullResult.postValue(
               new RemoteOperationResult(result.isSuccess(), result.getMessage(), "pull"));
-          if (result.isSuccess()) refreshAll();
+          invalidateGitCaches();
+          if (result.isSuccess()) refreshAllNow();
           _progressMessage.postValue(null);
         });
   }
@@ -541,6 +575,7 @@ public class GitViewModel extends ViewModel {
                   : new FetchResult(false, "Git manager not initialized");
           _pushPullResult.postValue(
               new RemoteOperationResult(result.isSuccess(), result.getMessage(), "fetch"));
+          invalidateGitCaches();
           if (result.isSuccess()) refreshCommitHistory();
           _progressMessage.postValue(null);
         });
@@ -550,11 +585,29 @@ public class GitViewModel extends ViewModel {
     fetch("origin", null, null);
   }
 
+  /**
+   * یک تسک برای هر چهار رفرش صف می‌شد و هرکدام دوباره status/log/branches را می‌زد. حالا همه در
+   * همان ترد اجراکننده و پشت سر هم انجام می‌شوند و کش JGit هم معتبر می‌ماند.
+   */
   public void refreshAll() {
-    refreshChangedFiles();
-    refreshCommitHistory();
-    refreshBranches();
-    refreshRemotes();
+    executor.execute(this::refreshAllNow);
+  }
+
+  private void refreshAllNow() {
+    GitManager manager = gitManager;
+    if (manager == null) return;
+    if (!manager.isOpen()) return;
+
+    _changedFiles.postValue(manager.getChangedFiles());
+    _commitHistory.postValue(manager.getCommitHistory());
+    postBranchState(manager);
+    _remotes.postValue(manager.getRemotes());
+  }
+
+  private void postBranchState(GitManager manager) {
+    String current = manager.getCurrentBranch();
+    _currentBranch.postValue(current != null ? current : "");
+    _branches.postValue(manager.getAllBranches());
   }
 
   public void refreshChangedFiles() {
@@ -583,15 +636,25 @@ public class GitViewModel extends ViewModel {
         });
   }
 
+  /**
+   * diff کل worktree. قبلاً هر بار که تب Diff باز می‌شد یک ترد خام و یک مخزن دوم ساخته می‌شد و کل
+   * diff دوباره تولید می‌گشت؛ حالا از همان مخزن ویومدل و کش داخلی GitManager استفاده می‌شود.
+   */
+  public void loadFullDiff() {
+    _progressMessage.postValue("Loading diff…");
+    executor.execute(
+        () -> {
+          GitManager manager = gitManager;
+          String diff = manager != null && manager.isOpen() ? manager.getFullDiff() : "";
+          _fullDiff.postValue(diff);
+          _progressMessage.postValue(null);
+        });
+  }
+
   public void refreshBranches() {
     executor.execute(
         () -> {
-          String current = gitManager != null ? gitManager.getCurrentBranch() : null;
-          _currentBranch.postValue(current != null ? current : "");
-
-          List<String> allBranches =
-              gitManager != null ? gitManager.getAllBranches() : Collections.emptyList();
-          _branches.postValue(allBranches);
+          if (gitManager != null) postBranchState(gitManager);
         });
   }
 
@@ -607,6 +670,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshStashList();
           }
@@ -632,6 +696,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.stashApply(index)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshChangedFiles();
           _progressMessage.postValue(null);
         });
@@ -647,6 +712,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshStashList();
           }
@@ -663,6 +729,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.stashDrop(index)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshStashList();
           _progressMessage.postValue(null);
         });
@@ -679,7 +746,8 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.mergeBranch(branchName)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
-          if (result.isSuccess()) refreshAll();
+          invalidateGitCaches();
+          if (result.isSuccess()) refreshAllNow();
           else if (result.getMessage().contains("conflict")) refreshConflictFiles();
           _progressMessage.postValue(null);
         });
@@ -696,7 +764,8 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.rebaseBranch(branchName)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
-          if (result.isSuccess()) refreshAll();
+          invalidateGitCaches();
+          if (result.isSuccess()) refreshAllNow();
           else refreshChangedFiles();
           _progressMessage.postValue(null);
         });
@@ -711,7 +780,8 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.abortRebase()
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
-          if (result.isSuccess()) refreshAll();
+          invalidateGitCaches();
+          if (result.isSuccess()) refreshAllNow();
           _progressMessage.postValue(null);
         });
   }
@@ -736,6 +806,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshConflictFiles();
           }
@@ -751,6 +822,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshConflictFiles();
           }
@@ -766,6 +838,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           if (result.isSuccess()) {
+            invalidateGitCaches();
             refreshChangedFiles();
             refreshConflictFiles();
           }
@@ -796,7 +869,8 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.reset(mode, stepsBack)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
-          if (result.isSuccess()) refreshAll();
+          invalidateGitCaches();
+          if (result.isSuccess()) refreshAllNow();
           _progressMessage.postValue(null);
         });
   }
@@ -820,6 +894,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.createTag(name, message)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshTags();
           _progressMessage.postValue(null);
         });
@@ -833,6 +908,7 @@ public class GitViewModel extends ViewModel {
                   ? gitManager.deleteTag(name)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
+          invalidateGitCaches();
           if (result.isSuccess()) refreshTags();
         });
   }

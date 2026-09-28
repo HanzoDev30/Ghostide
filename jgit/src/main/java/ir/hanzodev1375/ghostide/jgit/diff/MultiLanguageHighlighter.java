@@ -25,6 +25,8 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
     Pattern comments;
   }
 
+  private static final Pattern IDENTIFIER = Pattern.compile("\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b");
+
   private static final Map<String, Grammar> GRAMMARS = new HashMap<>();
 
   static {
@@ -195,6 +197,7 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
     List<SyntaxHighlighter.HighlightSpan> ignoreRanges = new ArrayList<>();
     addIgnoreRanges(ignoreRanges, text, grammar.comments);
     addIgnoreRanges(ignoreRanges, text, grammar.strings);
+    sortRanges(ignoreRanges);
 
     List<SyntaxHighlighter.HighlightSpan> spans = new ArrayList<>();
 
@@ -224,8 +227,7 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
       List<SyntaxHighlighter.HighlightSpan> spans,
       String text,
       List<SyntaxHighlighter.HighlightSpan> ignoreRanges) {
-    Pattern varPattern = Pattern.compile("\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b");
-    Matcher m = varPattern.matcher(text);
+    Matcher m = IDENTIFIER.matcher(text);
     while (m.find()) {
       int start = m.start(1);
       int end = m.end(1);
@@ -234,7 +236,9 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
       if (isOverlappingAnyRange(start, end, ignoreRanges)) continue;
 
       boolean already = false;
-      for (SyntaxHighlighter.HighlightSpan span : spans) {
+      for (int i = 0; i < spans.size(); i++) {
+        SyntaxHighlighter.HighlightSpan span = spans.get(i);
+        if (span.start > start) break;
         if (start >= span.start && end <= span.end) {
           already = true;
           break;
@@ -246,12 +250,19 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
     }
   }
 
-  private boolean isOverlappingAnyRange(
+  private static boolean isOverlappingAnyRange(
       int start, int end, List<SyntaxHighlighter.HighlightSpan> ranges) {
-    for (SyntaxHighlighter.HighlightSpan range : ranges) {
+    for (int i = 0; i < ranges.size(); i++) {
+      SyntaxHighlighter.HighlightSpan range = ranges.get(i);
+      if (range.start > end) break;
       if (start < range.end && end > range.start) return true;
     }
     return false;
+  }
+
+  /** ignore range ها بر اساس شروع مرتب می‌شوند تا جست‌وجوی خطی روی همه‌ی توکن‌ها حذف شود. */
+  private static void sortRanges(List<SyntaxHighlighter.HighlightSpan> ranges) {
+    ranges.sort(Comparator.comparingInt(r -> r.start));
   }
 
   private List<SyntaxHighlighter.HighlightSpan> deduplicateSpans(

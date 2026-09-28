@@ -85,6 +85,7 @@ public class RainbowBracketHighlighter {
     private static boolean isInIgnoreRange(int pos, List<SyntaxHighlighter.HighlightSpan> ignoreRanges) {
         if (ignoreRanges == null) return false;
         for (SyntaxHighlighter.HighlightSpan span : ignoreRanges) {
+            if (span.start > pos) return false;
             if (pos >= span.start && pos < span.end) return true;
         }
         return false;

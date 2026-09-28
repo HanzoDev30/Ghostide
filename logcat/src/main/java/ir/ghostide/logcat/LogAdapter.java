@@ -86,12 +86,15 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.ViewHolder> impl
   }
 
   private SpannableString highlightText(String text, String query, Context context) {
-    if (query == null || query.isEmpty() || !text.toLowerCase().contains(query.toLowerCase())) {
+    if (query == null || query.isEmpty()) {
+      return new SpannableString(text);
+    }
+    String lowerText = text.toLowerCase();
+    String lowerQuery = query.toLowerCase();
+    if (!lowerText.contains(lowerQuery)) {
       return new SpannableString(text);
     }
     SpannableString spannable = new SpannableString(text);
-    String lowerText = text.toLowerCase();
-    String lowerQuery = query.toLowerCase();
     int start = 0;
     while ((start = lowerText.indexOf(lowerQuery, start)) != -1) {
       int end = start + query.length();

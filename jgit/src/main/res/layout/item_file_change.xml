@@ -3,27 +3,47 @@
      xmlns:android="http://schemas.android.com/apk/res/android"
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
-     android:padding="8dp"
-     android:orientation="horizontal">
+     android:orientation="vertical">
 
-    <TextView
+    <LinearLayout
          android:layout_height="wrap_content"
-         android:layout_width="0dp"
-         android:textAppearance="?attr/textAppearanceBodyMedium"
-         android:layout_weight="1"
-         android:id="@+id/tvFileName" />
+         android:layout_width="match_parent"
+         android:baselineAligned="false"
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:paddingStart="14dp"
+         android:paddingTop="10dp"
+         android:paddingEnd="8dp"
+         android:paddingBottom="10dp">
 
-    <TextView
-         android:layout_height="wrap_content"
-         android:layout_width="wrap_content"
-         android:paddingStart="8dp"
-         android:id="@+id/tvChangeType" />
+        <TextView
+             android:id="@+id/tvFileName"
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             android:layout_weight="1"
+             android:ellipsize="middle"
+             android:maxLines="2"
+             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-    <CheckBox
+        <TextView
+             android:id="@+id/tvChangeType"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginStart="10dp"
+             android:textAppearance="?attr/textAppearanceLabelMedium" />
+
+        <CheckBox
+             android:id="@+id/chkStage"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginStart="6dp"
+             android:clickable="false"
+             android:focusable="false" />
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
          android:layout_height="wrap_content"
-         android:layout_width="wrap_content"
-         android:clickable="false"
-         android:focusable="false"
-         android:id="@+id/chkStage" />
+         android:layout_width="match_parent" />
 
 </LinearLayout>

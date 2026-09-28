@@ -22,14 +22,17 @@ public class GitDiffViewer extends View {
   private SparseArray<List<SyntaxHighlighter.HighlightSpan>> highlightCache;
   private ExecutorService executor;
   private Handler mainHandler;
-  private SparseArray<String> lineLanguageMap = new SparseArray<>();
+  private String[] lineLanguages = new String[0];
+  private boolean[] highlightQueued = new boolean[0];
+  private int contentGeneration = 0;
+  private boolean released = false;
+  private TextPaint measurePaint;
 
   private TextPaint textPaint;
   private TextPaint lineNumberPaint;
   private Paint bgPaint, lineNumberBgPaint, selectionPaint;
   private float lineHeight = 60f, textSize = 32f, lineNumberWidth = 80f, scaleFactor = 1f;
   private float scrollX = 0f, scrollY = 0f;
-  private float[] baseLineWidths;
   private float baseMaxWidth = 0f;
   private float baseTextSize = 32f;
 
@@ -66,6 +69,12 @@ public class GitDiffViewer extends View {
     textPaint.setTextSize(textSize);
     baseTextSize = textSize;
 
+    // Paint جدا برای اندازه‌گیری در بک‌ترد؛ چون measureText روی همان نمونه‌ی main thread
+    // امن نیست (setTextSize همزمان).
+    measurePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    measurePaint.setTypeface(Typeface.MONOSPACE);
+    measurePaint.setTextSize(textSize);
+
     lineNumberPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     lineNumberPaint.setTypeface(Typeface.MONOSPACE);
     lineNumberPaint.setTextAlign(Paint.Align.CENTER);
@@ -78,7 +87,6 @@ public class GitDiffViewer extends View {
     scaleDetector = new ScaleGestureDetector(context, new ScaleListener());
     scroller = new OverScroller(context);
     setFocusable(true);
-    setLayerType(LAYER_TYPE_HARDWARE, null);
 
     highlighter = new MultiLanguageHighlighter();
     highlightCache = new SparseArray<>();
@@ -106,14 +114,62 @@ public class GitDiffViewer extends View {
     return path;
   }
 
-  public void parseDiffOutput(String diff) {
-    List<DiffLine> lines = new ArrayList<>();
+  /**
+   * ورودی اصلی نمایش diff. تجزیه و اندازه‌گیری عرض خطوط قبلاً روی main thread و برای تمام
+   * خطوط (ده‌ها هزار خط) انجام می‌شد؛ حالا در بک‌ترد انجام می‌شود و فقط نتیجه به main برمی‌گردد.
+   */
+  public void setDiffText(String diff) {
+    final int generation = ++contentGeneration;
+    final String source = diff == null ? "" : diff;
+    executor.execute(
+        () -> {
+          List<DiffLine> lines = new ArrayList<>();
+          String[] languages = parse(source, lines);
+          float maxWidth = measureWidths(lines);
+          mainHandler.post(
+              () -> {
+                if (generation != contentGeneration || released) return;
+                applyParsed(lines, languages, maxWidth);
+              });
+        });
+  }
+
+  public void setDiffLines(List<DiffLine> lines) {
+    final int generation = ++contentGeneration;
+    final List<DiffLine> source = lines != null ? lines : new ArrayList<>();
+    executor.execute(
+        () -> {
+          String[] languages = new String[source.size()];
+          Arrays.fill(languages, "java");
+          float maxWidth = measureWidths(source);
+          mainHandler.post(
+              () -> {
+                if (generation != contentGeneration || released) return;
+                applyParsed(source, languages, maxWidth);
+              });
+        });
+  }
+
+  private void applyParsed(List<DiffLine> lines, String[] languages, float maxWidth) {
+    this.diffLines = lines;
+    this.lineLanguages = languages;
+    this.highlightQueued = new boolean[lines.size()];
+    this.highlightCache.clear();
+    baseMaxWidth = maxWidth;
+    scrollX = 0f;
+    scrollY = 0f;
+    textPaint.setTextSize(textSize * scaleFactor);
+    invalidate();
+  }
+
+  private String[] parse(String diff, List<DiffLine> lines) {
     String[] split = diff.split("\n");
     int oldNum = 0, newNum = 0;
-    lineLanguageMap.clear();
     String currentLanguageForFile = "java";
+    String[] languages = new String[split.length];
 
-    for (String line : split) {
+    for (int i = 0; i < split.length; i++) {
+      String line = split[i];
       if (line.trim().isEmpty()) continue;
       if (line.startsWith("diff --git") || line.startsWith("--- ") || line.startsWith("+++ ")) {
         String fileName = extractFileNameFromHeader(line);
@@ -124,27 +180,37 @@ public class GitDiffViewer extends View {
           }
         }
         lines.add(new DiffLine(line, DiffLine.LineType.HEADER, 0));
-        lineLanguageMap.put(lines.size() - 1, currentLanguageForFile);
       } else if (line.startsWith("@@")) {
         lines.add(new DiffLine(line, DiffLine.LineType.HEADER, 0));
-        lineLanguageMap.put(lines.size() - 1, currentLanguageForFile);
         int[] nums = extractNums(line);
         oldNum = nums[0] - 1;
         newNum = nums[1] - 1;
       } else if (line.startsWith("+")) {
         lines.add(new DiffLine(line, DiffLine.LineType.ADDED, ++newNum));
-        lineLanguageMap.put(lines.size() - 1, currentLanguageForFile);
       } else if (line.startsWith("-")) {
         lines.add(new DiffLine(line, DiffLine.LineType.REMOVED, ++oldNum));
-        lineLanguageMap.put(lines.size() - 1, currentLanguageForFile);
       } else if (line.startsWith(" ")) {
         lines.add(new DiffLine(line, DiffLine.LineType.NORMAL, ++newNum));
-        lineLanguageMap.put(lines.size() - 1, currentLanguageForFile);
         oldNum++;
+      } else {
+        continue;
       }
+      if (languages.length <= lines.size()) {
+        languages = Arrays.copyOf(languages, Math.max(16, lines.size() * 2));
+      }
+      languages[lines.size() - 1] = currentLanguageForFile;
     }
+    return Arrays.copyOf(languages, lines.size());
+  }
 
-    setDiffLines(lines);
+  private float measureWidths(List<DiffLine> lines) {
+    measurePaint.setTextSize(baseTextSize);
+    float max = 0f;
+    for (int i = 0; i < lines.size(); i++) {
+      float w = measurePaint.measureText(lines.get(i).getText());
+      if (w > max) max = w;
+    }
+    return max;
   }
 
   private int[] extractNums(String h) {
@@ -159,54 +225,74 @@ public class GitDiffViewer extends View {
     }
   }
 
-  public void setDiffLines(List<DiffLine> lines) {
-    this.diffLines = lines != null ? lines : new ArrayList<>();
-    baseLineWidths = null;
-    highlightCache.clear();
-    scrollX = 0;
-    scrollY = 0;
-    ensureBaseWidths();
-    invalidate();
-  }
-
-  private void ensureBaseWidths() {
-    if (diffLines.isEmpty()) return;
-    if (baseLineWidths != null && baseLineWidths.length == diffLines.size()) return;
-    baseLineWidths = new float[diffLines.size()];
-    textPaint.setTextSize(baseTextSize);
-    float max = 0f;
-    for (int i = 0; i < diffLines.size(); i++) {
-      float w = textPaint.measureText(diffLines.get(i).getText());
-      baseLineWidths[i] = w;
-      if (w > max) max = w;
-    }
-    baseMaxWidth = max;
-    textPaint.setTextSize(textSize * scaleFactor);
-  }
-
   private float getScaledMaxTextWidth() {
     return baseMaxWidth * scaleFactor;
   }
 
-  private void requestHighlight(final int lineIndex, String text, DiffLine.LineType type) {
-    if (highlightCache.get(lineIndex) != null) return;
-    final String lang = lineLanguageMap.get(lineIndex, "java");
+  /**
+   * قبلاً برای هر خطِ کش‌نشده در هر فریم یک Task صف می‌شد و هر نتیجه یک invalidate جدا پست می‌کرد.
+   * حالا خطوط قابل‌مشاهده در یک دسته جمع و با یک invalidate اعمال می‌شوند.
+   */
+  private void requestHighlights(int start, int end) {
+    if (released || diffLines.isEmpty()) return;
+    int[] pending = null;
+    int count = 0;
+    for (int i = start; i < end; i++) {
+      if (highlightCache.get(i) != null || highlightQueued[i]) continue;
+      if (pending == null) pending = new int[16];
+      if (count == pending.length) pending = Arrays.copyOf(pending, count * 2);
+      highlightQueued[i] = true;
+      pending[count++] = i;
+    }
+    if (count == 0) return;
+
+    final int[] indices = pending;
+    final int size = count;
+    final List<DiffLine> snapshot = diffLines;
+    final String[] languages = lineLanguages;
     executor.execute(
         () -> {
-          highlighter.highlight(
-              text,
-              type,
-              lang,
-              spans -> {
-                mainHandler.post(
-                    () -> {
-                      highlightCache.put(lineIndex, spans);
-                      float lh = lineHeight * scaleFactor;
-                      float top = lineIndex * lh - scrollY;
-                      if (top + lh > 0 && top < getHeight()) invalidate();
-                    });
+          List<List<SyntaxHighlighter.HighlightSpan>> results = new ArrayList<>(size);
+          for (int k = 0; k < size; k++) {
+            int i = indices[k];
+            DiffLine line = snapshot.get(i);
+            String lang = i < languages.length ? languages[i] : "java";
+            List<SyntaxHighlighter.HighlightSpan>[] holder = newResultHolder();
+            highlighter.highlight(line.getText(), line.getType(), lang, spans -> holder[0] = spans);
+            results.add(holder[0]);
+          }
+          mainHandler.post(
+              () -> {
+                if (released) return;
+                for (int k = 0; k < size; k++) {
+                  int i = indices[k];
+                  if (i < highlightQueued.length) highlightQueued[i] = false;
+                  highlightCache.put(i, results.get(k));
+                }
+                invalidate();
               });
         });
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<SyntaxHighlighter.HighlightSpan>[] newResultHolder() {
+    return new List[1];
+  }
+
+  @Override
+  protected void onDetachedFromWindow() {
+    released = true;
+    executor.shutdownNow();
+    super.onDetachedFromWindow();
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    released = false;
+    if (executor.isShutdown()) {
+      executor = Executors.newSingleThreadExecutor();
+    }
   }
 
   @Override
@@ -227,6 +313,7 @@ public class GitDiffViewer extends View {
     if (end > diffLines.size()) end = diffLines.size();
 
     canvas.drawColor(theme.getNormalLineBg());
+    requestHighlights(start, end);
 
     for (int i = start; i < end; i++) {
       DiffLine line = diffLines.get(i);
@@ -258,7 +345,6 @@ public class GitDiffViewer extends View {
       if (spans == null) {
         textPaint.setColor(getEffectiveTextColor(line));
         canvas.drawText(text, textX, textY, textPaint);
-        requestHighlight(i, text, line.getType());
       } else {
         float x = textX;
         int last = 0;

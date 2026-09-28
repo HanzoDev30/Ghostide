@@ -19,6 +19,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import ir.hanzodev1375.components.views.GhostToast;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.ViewCompat;
@@ -248,6 +250,22 @@ public class EditorActivity extends BaseCompat
     try {
       applyThemeInternal(true);
     } catch (Throwable ignored) {
+    }
+  }
+
+  @Override
+  protected void onThemeReapplied() {
+    super.onThemeReapplied();
+    if (binding == null) {
+      return;
+    }
+    stepToolbar();
+    ViewGroup toolbar = binding.rvtoolbar;
+    for (int i = 0; i < toolbar.getChildCount(); i++) {
+      View child = toolbar.getChildAt(i);
+      if (child instanceof ImageView) {
+        M3Theme.image((ImageView) child);
+      }
     }
   }
 
@@ -615,9 +633,6 @@ public class EditorActivity extends BaseCompat
   void stepToolbar() {
     toolbarModel.clear();
     toolbarModel.add(new ToolbarModel(R.drawable.ic_git, "git", gitStatus.isGit()));
-    toolbarModel.add(new ToolbarModel(R.drawable.ic_split_column, "Item Spilt!"));
-    toolbarModel.add(new ToolbarModel(R.drawable.round_account_tree, "file tree"));
-    toolbarModel.add(new ToolbarModel(R.drawable.outline_search, "search"));
     toolbarModel.add(new ToolbarModel(R.drawable.outline_undo, "undo"));
     toolbarModel.add(new ToolbarModel(R.drawable.outline_redo, "redo"));
     toolbarModel.add(new ToolbarModel(R.drawable.more_vert, "more"));
@@ -631,17 +646,14 @@ public class EditorActivity extends BaseCompat
               (view, m, pos) -> {
                 switch (pos) {
                   case 0 -> showGitBottomSheet();
-                  case 1 -> toggleOrShowSplitPopup(view);
-                  case 2 -> stepFileTree();
-                  case 3 -> stepSearch();
-                  case 4 -> {
+                  case 1 -> {
                     if (getEditor().canUndo()) getEditor().undo();
                   }
-                  case 5 -> {
+                  case 2 -> {
                     if (getEditor().canRedo()) getEditor().redo();
                   }
-                  case 6 -> setupMenuCalltoAction(view);
-                  case 7 -> pluginPopupController.show(view);
+                  case 3 -> setupMenuCalltoAction(view);
+                  case 4 -> pluginPopupController.show(view);
                 }
               },
               EditorActivity.this);
@@ -658,17 +670,6 @@ public class EditorActivity extends BaseCompat
           if (listAdapter != null) listAdapter.notifyDataSetChanged();
           binding.rvtoolbar.requestLayout();
         });
-  }
-
-  private void openPluginPanelAt(int pos) {
-    if (pluginPanelHost == null) {
-      return;
-    }
-    int panelIndex = pos - 7;
-    List<EditorPanel> panels = pluginPanelHost.getPanels();
-    if (panelIndex >= 0 && panelIndex < panels.size()) {
-      pluginPanelHost.showPanel(panels.get(panelIndex));
-    }
   }
 
   public void stepSearch() {
@@ -739,6 +740,15 @@ public class EditorActivity extends BaseCompat
 
   void setupMenuCalltoAction(View v) {
     List<EditorGlassMenu.GlassMenuItem> items = new ArrayList<>();
+    items.add(
+        new EditorGlassMenu.GlassMenuItem(
+            getString(R.string.split_layout_title), R.drawable.ic_split_column));
+    items.add(
+        new EditorGlassMenu.GlassMenuItem(
+            getString(R.string.editor_file_tree), R.drawable.round_account_tree));
+    items.add(
+        new EditorGlassMenu.GlassMenuItem(
+            getString(R.string.editor_search), R.drawable.outline_search));
     items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.saveitemthis), R.drawable.save));
     items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.saveitemall), R.drawable.save));
     items.add(new EditorGlassMenu.GlassMenuItem(getString(R.string.command_palette_title), R.drawable.outline_search));
@@ -753,12 +763,15 @@ public class EditorActivity extends BaseCompat
         items,
         (pos, title) -> {
           switch (pos) {
-            case 0 -> saveCurrentTab();
-            case 1 -> saveAllTabs();
-            case 2 -> showCommandPaletteSheet();
-            case 3 -> showOutlineSheet();
-            case 4 -> showSnippetManagerSheet();
-            case 5 -> {
+            case 0 -> toggleOrShowSplitPopup(v);
+            case 1 -> stepFileTree();
+            case 2 -> stepSearch();
+            case 3 -> saveCurrentTab();
+            case 4 -> saveAllTabs();
+            case 5 -> showCommandPaletteSheet();
+            case 6 -> showOutlineSheet();
+            case 7 -> showSnippetManagerSheet();
+            case 8 -> {
               var colors = new ColorPickerBottomSheet();
               colors.show(getSupportFragmentManager(), "");
             }

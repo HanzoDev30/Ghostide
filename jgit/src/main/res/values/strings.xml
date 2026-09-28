@@ -116,6 +116,13 @@
 
     <string name="git_empty_changes_title">No changes</string>
     <string name="git_empty_changes_desc">Your working tree is clean. Edited or new files will show up here.</string>
+    <string name="git_stage_all">Stage All</string>
+    <string name="git_commit">Commit</string>
+    <string name="git_changes_clean">Working tree is clean</string>
+    <plurals name="git_changes_count">
+        <item quantity="one">%d changed file</item>
+        <item quantity="other">%d changed files</item>
+    </plurals>
     <string name="git_empty_history_title">No commits yet</string>
     <string name="git_empty_history_desc">Make your first commit and its history will appear here.</string>
     <string name="git_empty_branches_title">No branches</string>
@@ -135,4 +142,8 @@
     <string name="git_init_start">شروع</string>
     <string name="git_init_working">در حال ساخت مخزن و آپلود… لطفاً صبر کنید</string>
     <string name="git_init_url_required">لطفاً آدرس مخزن را وارد کنید (https://github.com/user/repo.git)</string>
+
+    <!-- GitHub profile header -->
+    <string name="github_stat_issues">Issues: %1$s</string>
+    <string name="github_stat_stars">Stars: %1$s</string>
 </resources>

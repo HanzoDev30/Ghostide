@@ -7,24 +7,41 @@ import java.util.List;
 
 public class LogcatReader {
 
+  public static final int MAX_LINES = 3000;
+
   public static List<LogEntry> getCurrentAppLogs() {
-    List<LogEntry> logs = new ArrayList<>();
+    return getCurrentAppLogs(MAX_LINES);
+  }
+
+  public static List<LogEntry> getCurrentAppLogs(int maxLines) {
+    int limit = Math.max(1, maxLines);
     int pid = android.os.Process.myPid();
+    List<LogEntry> logs = new ArrayList<>(Math.min(limit, 1024));
+    Process process = null;
 
     try {
-      Process process = Runtime.getRuntime().exec("logcat -d --pid=" + pid + " -v threadtime");
-      BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      String line;
-      while ((line = reader.readLine()) != null) {
-        LogEntry entry = parseLogLine(line);
-        if (entry != null) {
-          logs.add(entry);
+      process =
+          Runtime.getRuntime()
+              .exec(new String[] {"logcat", "-d", "-v", "threadtime", "-t", String.valueOf(limit), "--pid=" + pid});
+      try (BufferedReader reader =
+          new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          LogEntry entry = parseLogLine(line);
+          if (entry != null) {
+            if (logs.size() == limit) {
+              logs.remove(0);
+            }
+            logs.add(entry);
+          }
         }
       }
-      reader.close();
-      process.destroy();
     } catch (Exception e) {
       e.printStackTrace();
+    } finally {
+      if (process != null) {
+        process.destroy();
+      }
     }
     return logs;
   }

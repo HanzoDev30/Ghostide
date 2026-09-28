@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.diff.GitDiffViewer;
-import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitManager;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
 import ir.theme.M3Theme;
 
@@ -22,6 +21,7 @@ public class DiffViewerFragment extends Fragment {
   private ProgressBar progressBar;
   private TextView emptyText;
   private GitViewModel viewModel;
+  private String loadedDiff;
 
   @Nullable
   @Override
@@ -40,54 +40,32 @@ public class DiffViewerFragment extends Fragment {
     emptyText = view.findViewById(R.id.emptyText);
     viewModel = new ViewModelProvider(requireActivity()).get(GitViewModel.class);
     M3Theme.apply(view);
+
+    viewModel.fullDiff.observe(getViewLifecycleOwner(), this::showDiff);
   }
 
   @Override
   public void onResume() {
     super.onResume();
-    loadFullDiff();
-  }
-
-  private void loadFullDiff() {
-    String repoPath = viewModel.currentRepoPath.getValue();
-    if (repoPath == null || repoPath.isEmpty()) {
+    if (viewModel.currentRepoPath.getValue() == null) {
       showEmptyState("Repository path not found");
       return;
     }
-
     progressBar.setVisibility(View.VISIBLE);
-    emptyText.setVisibility(View.GONE);
     diffViewer.setVisibility(View.GONE);
+    viewModel.loadFullDiff();
+  }
 
-    new Thread(
-            () -> {
-              GitManager gitManager = new GitManager(repoPath);
-              if (gitManager.openRepository()) {
-                String diff = gitManager.getFullDiff();
-                if (getActivity() != null) {
-                  getActivity()
-                      .runOnUiThread(
-                          () -> {
-                            progressBar.setVisibility(View.GONE);
-                            if (diff != null
-                                && !diff.isEmpty()
-                                && !diff.equals("No changes detected.")) {
-                              diffViewer.setVisibility(View.VISIBLE);
-                              diffViewer.parseDiffOutput(diff);
-                              diffViewer.applyMaterial3();
-                            } else {
-                              showEmptyState("No changes to display");
-                            }
-                          });
-                }
-                gitManager.close();
-              } else {
-                if (getActivity() != null) {
-                  getActivity().runOnUiThread(() -> showEmptyState("Cannot open repository"));
-                }
-              }
-            })
-        .start();
+  private void showDiff(String diff) {
+    progressBar.setVisibility(View.GONE);
+    if (diff == null || diff.isEmpty() || "No changes detected.".equals(diff)) {
+      showEmptyState("No changes to display");
+      return;
+    }
+    emptyText.setVisibility(View.GONE);
+    diffViewer.setVisibility(View.VISIBLE);
+    diffViewer.applyMaterial3();
+    diffViewer.setDiffText(diff);
   }
 
   private void showEmptyState(String message) {

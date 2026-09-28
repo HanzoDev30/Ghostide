@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import ir.hanzodev1375.components.views.GhostToast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,10 +20,14 @@ import ir.hanzodev1375.ghostide.jgit.jgitandroid.datamanager.GitViewModel;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.FileChange;
 import ir.theme.M3Theme;
 import java.io.File;
+import java.util.List;
 
 public class ChangedFilesFragment extends Fragment {
   private GitViewModel viewModel;
   private FileChangeAdapter adapter;
+  private TextView summary;
+  private View stageAll;
+  private View commit;
 
   @Override
   public View onCreateView(
@@ -30,7 +36,8 @@ public class ChangedFilesFragment extends Fragment {
   }
 
   @Override
-  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
     viewModel = new ViewModelProvider(requireActivity()).get(GitViewModel.class);
 
     RecyclerView recyclerView = view.findViewById(R.id.recyclerViewChanges);
@@ -38,8 +45,12 @@ public class ChangedFilesFragment extends Fragment {
     adapter = new FileChangeAdapter();
     recyclerView.setAdapter(adapter);
     ((EmptyView) view.findViewById(R.id.emptyView)).bindTo(recyclerView);
+    summary = view.findViewById(R.id.tvChangesSummary);
+    stageAll = view.findViewById(R.id.btnStageAll);
+    commit = view.findViewById(R.id.btnCommit);
     M3Theme.apply(view);
-    viewModel.changedFiles.observe(getViewLifecycleOwner(), adapter::submitList);
+
+    viewModel.changedFiles.observe(getViewLifecycleOwner(), this::bindChanges);
 
     adapter.setOnItemClickListener(
         new FileChangeAdapter.OnItemClickListener() {
@@ -79,5 +90,17 @@ public class ChangedFilesFragment extends Fragment {
     CommitDialog dialog = new CommitDialog();
     dialog.setOnCommitListener((msg, author, email) -> viewModel.commit(msg, author, email));
     dialog.show(getChildFragmentManager(), "commit");
+  }
+
+  private void bindChanges(List<FileChange> changes) {
+    adapter.submitList(changes);
+    int count = changes != null ? changes.size() : 0;
+    summary.setText(
+        count == 0
+            ? getString(R.string.git_changes_clean)
+            : getResources().getQuantityString(R.plurals.git_changes_count, count, count));
+    boolean hasChanges = count > 0;
+    stageAll.setEnabled(hasChanges);
+    commit.setEnabled(hasChanges);
   }
 }

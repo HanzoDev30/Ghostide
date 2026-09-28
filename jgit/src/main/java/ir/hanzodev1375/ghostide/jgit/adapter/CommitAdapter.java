@@ -5,18 +5,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import ir.hanzodev1375.ghostide.jgit.R;
 import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.CommitInfo;
 import ir.theme.M3Theme;
 
-public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.ViewHolder> {
-  private List<CommitInfo> commits = new ArrayList<>();
+public class CommitAdapter extends ListAdapter<CommitInfo, CommitAdapter.ViewHolder> {
+
+  private static final DiffUtil.ItemCallback<CommitInfo> DIFF =
+      new DiffUtil.ItemCallback<CommitInfo>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull CommitInfo a, @NonNull CommitInfo b) {
+          return a.getHash().equals(b.getHash());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull CommitInfo a, @NonNull CommitInfo b) {
+          return a.equals(b);
+        }
+      };
+
   private final SimpleDateFormat sdf =
       new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
   private OnCommitClickListener listener;
@@ -25,13 +38,12 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.ViewHolder
     void onClick(CommitInfo commit);
   }
 
-  public void setOnCommitClickListener(OnCommitClickListener listener) {
-    this.listener = listener;
+  public CommitAdapter() {
+    super(DIFF);
   }
 
-  public void submitList(List<CommitInfo> list) {
-    commits = list != null ? list : new ArrayList<>();
-    notifyDataSetChanged();
+  public void setOnCommitClickListener(OnCommitClickListener listener) {
+    this.listener = listener;
   }
 
   @NonNull
@@ -44,7 +56,7 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.ViewHolder
 
   @Override
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-    CommitInfo commit = commits.get(position);
+    CommitInfo commit = getItem(position);
     holder.tvHash.setText(commit.getShortHash());
     holder.tvMessage.setText(commit.getMessage());
     String date = sdf.format(new Date(commit.getTimestamp()));
@@ -54,11 +66,6 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.ViewHolder
           if (listener != null) listener.onClick(commit);
         });
     M3Theme.listCard(holder.itemView);
-  }
-
-  @Override
-  public int getItemCount() {
-    return commits.size();
   }
 
   static class ViewHolder extends RecyclerView.ViewHolder {

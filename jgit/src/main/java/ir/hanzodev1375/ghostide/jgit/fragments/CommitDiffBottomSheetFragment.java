@@ -82,7 +82,7 @@ public class CommitDiffBottomSheetFragment extends BaseBlurBottomSheet {
     } else {
       emptyText.setVisibility(View.GONE);
       diffViewer.setVisibility(View.VISIBLE);
-      diffViewer.parseDiffOutput(diff);
+      diffViewer.setDiffText(diff);
       diffViewer.applyMaterial3();
     }
   }

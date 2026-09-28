@@ -16,16 +16,21 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import ir.hanzodev1375.components.sheet.BaseBlurBottomSheet;
+import ir.hanzodev1375.components.glass.ChipCompat;
+import ir.hanzodev1375.components.glass.ChipGroupCompat;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.theme.M3Theme;
 import ir.hanzodev1375.ghostide.jgit.adapter.EventAdapter;
 import ir.hanzodev1375.ghostide.jgit.adapter.RepoAdapter;
 import ir.hanzodev1375.ghostide.jgit.model.GitHubEvent;
 import ir.hanzodev1375.ghostide.jgit.model.GitHubRepo;
+import ir.hanzodev1375.ghostide.jgit.model.UserStats;
 import java.lang.reflect.Type;
 import java.util.List;
 
 public class GitHubProfileSheet extends BaseBlurBottomSheet {
+
+  private static final String PENDING_STAT = "—";
 
   private GitHubClient gitHub;
   private RecyclerView recyclerView;
@@ -35,6 +40,8 @@ public class GitHubProfileSheet extends BaseBlurBottomSheet {
   private ImageView ivAvatar;
   private PreferencesUtils app;
   private TextView tvName, tvUsername;
+  private ChipGroupCompat chipGroupStats;
+  private ChipCompat chipIssues, chipStars;
   private final Gson gson = new Gson();
 
   public static GitHubProfileSheet newInstance() {
@@ -57,6 +64,7 @@ public class GitHubProfileSheet extends BaseBlurBottomSheet {
     ivAvatar = root.findViewById(R.id.ivAvatar);
     tvName = root.findViewById(R.id.tvName);
     tvUsername = root.findViewById(R.id.tvUsername);
+    chipGroupStats = root.findViewById(R.id.chipGroupStats);
     tabLayout = root.findViewById(R.id.tabLayout);
     progressBar = root.findViewById(R.id.progressBar);
     layoutEmpty = root.findViewById(R.id.layoutEmpty);
@@ -71,6 +79,9 @@ public class GitHubProfileSheet extends BaseBlurBottomSheet {
         .circleCrop()
         .placeholder(R.drawable.person_24px)
         .into(ivAvatar);
+
+    setupStatChips();
+    loadUserStats();
 
     tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.deployed_code_24px).setText("Repos"));
     tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.star_24px).setText("Starred"));
@@ -100,6 +111,45 @@ public class GitHubProfileSheet extends BaseBlurBottomSheet {
           public void onTabReselected(TabLayout.Tab tab) {}
         });
     M3Theme.applyTopLevel(root);
+  }
+
+  private void setupStatChips() {
+    // Placeholder until the counters land, so the header never claims a zero it has not measured.
+    chipIssues = chipGroupStats.addChip(PENDING_STAT);
+    chipIssues.setIconResource(R.drawable.issue_24px);
+    chipStars = chipGroupStats.addChip(PENDING_STAT);
+    chipStars.setIconResource(R.drawable.star_24px);
+  }
+
+  private void loadUserStats() {
+    gitHub.loadUserStats(
+        gitHub.getUsername(),
+        new GitHubClient.UserStatsCallback() {
+          @Override
+          public void onSuccess(UserStats stats) {
+            if (!isAdded()) return;
+            requireActivity()
+                .runOnUiThread(
+                    () -> {
+                      chipIssues.setStat(R.drawable.issue_24px, stats.getIssues());
+                      chipStars.setStat(R.drawable.star_24px, stats.getStars());
+                      chipIssues.setContentDescription(
+                          getString(R.string.github_stat_issues, ChipCompat.formatStat(stats.getIssues())));
+                      chipStars.setContentDescription(
+                          getString(R.string.github_stat_stars, ChipCompat.formatStat(stats.getStars())));
+                    });
+          }
+
+          @Override
+          public void onFailure(String errorMessage) {
+            if (!isAdded()) return;
+            requireActivity()
+                .runOnUiThread(
+                    () -> {
+                      chipGroupStats.setVisibility(View.GONE);
+                    });
+          }
+        });
   }
 
   private void loadRepos() {

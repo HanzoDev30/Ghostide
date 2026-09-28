@@ -34,4 +34,11 @@
         <!-- Secondary empty-state text -->
         <attr name="emptyDescription" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="TabBarCompat">
+        <!-- Corner radius of the bar; 999dp (default) renders a full pill -->
+        <attr name="glassBarCornerRadius" format="dimension" />
+        <!-- Distance the outer tabs keep from the ends; 0 means half the corner radius -->
+        <attr name="glassBarEndPadding" format="dimension" />
+    </declare-styleable>
 </resources>

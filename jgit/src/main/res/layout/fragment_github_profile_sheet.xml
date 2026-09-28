@@ -44,6 +44,8 @@
                 android:layout_width="wrap_content"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:id="@+id/tvName"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textStyle="bold" />
 
             <TextView
@@ -51,7 +53,17 @@
                 android:layout_width="wrap_content"
                 android:alpha="0.6"
                 android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:id="@+id/tvUsername" />
+                android:id="@+id/tvUsername"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <ir.hanzodev1375.components.glass.ChipGroupCompat
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="8dp"
+                android:id="@+id/chipGroupStats"
+                app:glassSingleLine="true"
+                app:glassChipSpacingHorizontal="6dp" />
 
         </LinearLayout>
 

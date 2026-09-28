@@ -25,6 +25,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.eclipse.jgit.ignore.IgnoreNode;
 import org.eclipse.jgit.attributes.AttributesNode;
 
@@ -39,14 +40,34 @@ import java.util.List;
 
 public class GitManager {
 
+  private static final long STATUS_CACHE_NANOS = 1_500_000_000L;
+  private static final long HISTORY_CACHE_NANOS = 3_000_000_000L;
+  private static final long DIFF_CACHE_NANOS = 1_000_000_000L;
+
   private final String projectPath;
   private Git git = null;
   private Repository repository = null;
   private IgnoreNode ignoreNode = null;
   private AttributesNode attributesNode = null;
 
+  private Status cachedStatus;
+  private long statusCachedAt;
+  private List<CommitInfo> cachedHistory;
+  private long historyCachedAt;
+  private String cachedFullDiff;
+  private long fullDiffCachedAt;
+
   public GitManager(String projectPath) {
     this.projectPath = projectPath;
+  }
+
+  public String getProjectPath() {
+    return projectPath;
+  }
+
+  /** آیا مخزن همین حالا باز است (نه فقط اینکه روی دیسک وجود دارد). */
+  public boolean isOpen() {
+    return git != null && repository != null;
   }
 
   public boolean initRepository(String initialBranchName) {
@@ -67,7 +88,6 @@ public class GitManager {
       loadGitAttributes();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -83,15 +103,47 @@ public class GitManager {
 
       repository =
           new FileRepositoryBuilder().setGitDir(gitDir).readEnvironment().findGitDir().build();
+      tunePackedGitCache();
 
       git = new Git(repository);
+      invalidateCaches();
       loadGitIgnore();
       loadGitAttributes();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
+  }
+
+  /**
+   * JGit پیش‌فرض فقط ۱۰ مگابایت pack را در حافظه نگه می‌دارد و برای هر status/log/diff مجبور
+   * می‌شود از دیسک دوباره بخواند. این تنظیم یک‌بار در .git/config ثبت و ذخیره می‌شود.
+   */
+  private void tunePackedGitCache() {
+    try {
+      org.eclipse.jgit.lib.StoredConfig config = repository.getConfig();
+      boolean dirty = false;
+      if (config.getInt("core", null, "packedGitWindowSize", 0) < 32 * 1024 * 1024) {
+        config.setInt("core", null, "packedGitWindowSize", 32 * 1024 * 1024);
+        dirty = true;
+      }
+      if (config.getInt("core", null, "packedGitLimit", 0) < 128 * 1024 * 1024) {
+        config.setInt("core", null, "packedGitLimit", 128 * 1024 * 1024);
+        dirty = true;
+      }
+      if (dirty) config.save();
+    } catch (Exception e) {
+    }
+  }
+
+  /** پس از هر عملیاتی که روی مخزن می‌نویسد باید صدا زده شود. */
+  public void invalidateCaches() {
+    cachedStatus = null;
+    statusCachedAt = 0;
+    cachedHistory = null;
+    historyCachedAt = 0;
+    cachedFullDiff = null;
+    fullDiffCachedAt = 0;
   }
 
   private void loadGitIgnore() {
@@ -104,7 +156,6 @@ public class GitManager {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
@@ -118,31 +169,44 @@ public class GitManager {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
+  /**
+   * تنها برای stage کردن یک فایل مشخص استفاده می‌شود (نه برای هر فایل لیست status) چون هر
+   * فراخوانی یک syscall برای isDirectory دارد. فیلتر کردن لیست‌ها به JGit واگذار شده است: status
+   * به‌صورت پیش‌فرض فایل‌های ignore‌شده را در getUntracked() برنمی‌گرداند.
+   */
   private boolean isIgnored(String path) {
     try {
-      if (repository == null) return false;
+      if (ignoreNode == null) return false;
       File workTree = repository.getWorkTree();
       File file = new File(workTree, path);
       String relativePath =
           workTree.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '/');
-
-      return ignoreNode != null
-          && ignoreNode.isIgnored(relativePath, file.isDirectory())
-              == IgnoreNode.MatchResult.IGNORED;
+      return ignoreNode.isIgnored(relativePath, file.isDirectory())
+          == IgnoreNode.MatchResult.IGNORED;
     } catch (Exception e) {
       return false;
     }
   }
 
-  public Status getStatus() {
+  /**
+   * تنها نقطه‌ی تماس با git.status(). خروجی برای مدت کوتاهی کش می‌شود تا refresh‌های پشت‌سرهم
+   * (که همه از یک ترد اجرا می‌شوند) کل worktree را چند بار اسکن نکنند.
+   */
+  private Status getStatus() {
+    if (git == null) return null;
+    long now = System.nanoTime();
+    if (cachedStatus != null && now - statusCachedAt < STATUS_CACHE_NANOS) return cachedStatus;
     try {
-      return git != null ? git.status().call() : null;
+      Status status =
+          git.status().setIgnoreSubmodules(SubmoduleWalk.IgnoreSubmoduleMode.ALL).call();
+      cachedStatus = status;
+      statusCachedAt = now;
+      return status;
     } catch (Exception e) {
-      e.printStackTrace();
+      cachedStatus = null;
       return null;
     }
   }
@@ -156,7 +220,6 @@ public class GitManager {
       config.save();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -171,56 +234,52 @@ public class GitManager {
       if (email == null) email = "user@example.com";
       return new String[] {name, email};
     } catch (Exception e) {
-      e.printStackTrace();
       return null;
     }
   }
 
+  /**
+   * JGit خودش فایل‌های ignore‌شده را در getUntracked() برنمی‌گرداند و این لیست‌ها طبق تعریف
+   * git فقط شامل فایل‌های tracked هستند، پس دیگر نیازی به فراخوانی isIgnored() برای تک‌تک
+   * فایل‌ها نیست (که برای هر کدام یک stat syscall می‌زد).
+   */
   public List<FileChange> getChangedFiles() {
     List<FileChange> changes = new ArrayList<>();
     Status status = getStatus();
     if (status == null) return changes;
 
     for (String path : status.getAdded()) {
-      if (!isIgnored(path)) {
-        changes.add(new FileChange(path, ChangeType.ADDED, true));
-      }
+      changes.add(new FileChange(path, ChangeType.ADDED, true));
     }
 
     for (String path : status.getChanged()) {
-      if (!isIgnored(path)) {
-        changes.add(new FileChange(path, ChangeType.MODIFIED, true));
-      }
+      changes.add(new FileChange(path, ChangeType.MODIFIED, true));
     }
 
     for (String path : status.getRemoved()) {
-      if (!isIgnored(path)) {
-        changes.add(new FileChange(path, ChangeType.DELETED, true));
-      }
+      changes.add(new FileChange(path, ChangeType.DELETED, true));
     }
 
+    Collection<String> changed = status.getChanged();
     for (String path : status.getModified()) {
-      if (!status.getChanged().contains(path) && !isIgnored(path)) {
+      if (!changed.contains(path)) {
         changes.add(new FileChange(path, ChangeType.MODIFIED, false));
       }
     }
 
+    Collection<String> removed = status.getRemoved();
     for (String path : status.getMissing()) {
-      if (!status.getRemoved().contains(path) && !isIgnored(path)) {
+      if (!removed.contains(path)) {
         changes.add(new FileChange(path, ChangeType.DELETED, false));
       }
     }
 
     for (String path : status.getUntracked()) {
-      if (!isIgnored(path)) {
-        changes.add(new FileChange(path, ChangeType.UNTRACKED, false));
-      }
+      changes.add(new FileChange(path, ChangeType.UNTRACKED, false));
     }
 
     for (String path : status.getConflicting()) {
-      if (!isIgnored(path)) {
-        changes.add(new FileChange(path, ChangeType.CONFLICTING, false));
-      }
+      changes.add(new FileChange(path, ChangeType.CONFLICTING, false));
     }
 
     return changes;
@@ -253,7 +312,6 @@ public class GitManager {
       }
       return new OperationResult(true, "File staged");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, describe(e));
     }
   }
@@ -266,7 +324,6 @@ public class GitManager {
       git.add().addFilepattern(".").setUpdate(true).call();
       return new OperationResult(true, "All files staged");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, describe(e));
     }
   }
@@ -277,7 +334,6 @@ public class GitManager {
       git.reset().addPath(filePath).call();
       return new OperationResult(true, "File unstaged");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, describe(e));
     }
   }
@@ -301,7 +357,6 @@ public class GitManager {
       git.commit().setMessage(message).setAuthor(ident).setCommitter(ident).call();
       return new OperationResult(true, "Changes committed");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, describe(e));
     }
   }
@@ -311,21 +366,25 @@ public class GitManager {
   }
 
   public List<CommitInfo> getCommitHistory(int maxCount) {
+    long now = System.nanoTime();
+    if (cachedHistory != null && now - historyCachedAt < HISTORY_CACHE_NANOS) return cachedHistory;
     List<CommitInfo> commits = new ArrayList<>();
     try {
       Iterable<org.eclipse.jgit.revwalk.RevCommit> logs = git.log().setMaxCount(maxCount).call();
       for (org.eclipse.jgit.revwalk.RevCommit commit : logs) {
+        PersonIdent authorIdent = commit.getAuthorIdent();
         commits.add(
             new CommitInfo(
                 commit.getName(),
                 commit.getName().substring(0, 7),
                 commit.getFullMessage(),
-                commit.getAuthorIdent().getName(),
-                commit.getAuthorIdent().getEmailAddress(),
+                authorIdent.getName(),
+                authorIdent.getEmailAddress(),
                 (long) commit.getCommitTime() * 1000));
       }
+      cachedHistory = commits;
+      historyCachedAt = now;
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return commits;
   }
@@ -338,7 +397,6 @@ public class GitManager {
     try {
       return repository != null ? repository.getBranch() : null;
     } catch (Exception e) {
-      e.printStackTrace();
       return null;
     }
   }
@@ -351,7 +409,6 @@ public class GitManager {
         branches.add(ref.getName().replaceFirst("^refs/heads/", ""));
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return branches;
   }
@@ -361,22 +418,21 @@ public class GitManager {
       git.branchCreate().setName(branchName).call();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
 
   public String getFullDiff() {
+    long now = System.nanoTime();
+    if (cachedFullDiff != null && now - fullDiffCachedAt < DIFF_CACHE_NANOS) return cachedFullDiff;
     try {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       git.diff().setOutputStream(out).call();
       String result = out.toString();
-      if (result.isEmpty()) {
-        return "No changes detected.";
-      }
-      return result;
+      cachedFullDiff = result.isEmpty() ? "No changes detected." : result;
+      fullDiffCachedAt = now;
+      return cachedFullDiff;
     } catch (Exception e) {
-      e.printStackTrace();
       return "Error getting diff: " + e.getMessage();
     }
   }
@@ -412,7 +468,6 @@ public class GitManager {
         return result.isEmpty() ? "No changes in this commit." : result;
       }
     } catch (Exception e) {
-      e.printStackTrace();
       return "Error getting commit diff: " + e.getMessage();
     }
   }
@@ -422,7 +477,6 @@ public class GitManager {
       git.checkout().setName(branchName).call();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -432,7 +486,6 @@ public class GitManager {
       git.branchDelete().setBranchNames(branchName).call();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -449,7 +502,6 @@ public class GitManager {
       git.branchRename().setOldName(current).setNewName(newName.trim()).call();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -466,7 +518,6 @@ public class GitManager {
       config.save();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -501,7 +552,6 @@ public class GitManager {
         return diffBuilder.toString();
       }
     } catch (Exception e) {
-      e.printStackTrace();
       return "";
     }
   }
@@ -512,7 +562,6 @@ public class GitManager {
       git.checkout().addPath(filePath).call();
       return new OperationResult(true, "Changes discarded");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, describe(e));
     }
   }
@@ -535,7 +584,6 @@ public class GitManager {
       if (stashCommit == null) return new OperationResult(false, "Nothing to stash");
       return new OperationResult(true, "Stash saved: " + stashCommit.getName().substring(0, 7));
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Stash failed");
     }
   }
@@ -555,7 +603,6 @@ public class GitManager {
                 (long) stash.getCommitTime() * 1000));
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return list;
   }
@@ -568,7 +615,6 @@ public class GitManager {
     } catch (org.eclipse.jgit.api.errors.StashApplyFailureException e) {
       return new OperationResult(false, "Stash apply conflict — resolve manually");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Apply failed");
     }
   }
@@ -579,7 +625,6 @@ public class GitManager {
       git.stashDrop().setStashRef(index).call();
       return new OperationResult(true, "Stash dropped");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Drop failed");
     }
   }
@@ -621,7 +666,6 @@ public class GitManager {
         return new OperationResult(false, "Merge failed: " + status.toString());
       }
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Merge failed");
     }
   }
@@ -650,7 +694,6 @@ public class GitManager {
         return new OperationResult(false, "Rebase failed: " + status.toString());
       }
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Rebase failed");
     }
   }
@@ -661,7 +704,6 @@ public class GitManager {
       git.rebase().setOperation(org.eclipse.jgit.api.RebaseCommand.Operation.ABORT).call();
       return new OperationResult(true, "Rebase aborted");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, "Abort failed: " + e.getMessage());
     }
   }
@@ -678,7 +720,6 @@ public class GitManager {
         if (cf != null) conflicts.add(cf);
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return conflicts;
   }
@@ -720,7 +761,6 @@ public class GitManager {
 
       return new ConflictFile(relativePath, ours.toString(), theirs.toString(), current.toString());
     } catch (Exception e) {
-      e.printStackTrace();
       return null;
     }
   }
@@ -771,7 +811,6 @@ public class GitManager {
       stageFile(relativePath);
       return new OperationResult(true, "Conflict resolved in: " + relativePath);
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, "Resolve failed: " + e.getMessage());
     }
   }
@@ -786,7 +825,6 @@ public class GitManager {
       stageFile(relativePath);
       return new OperationResult(true, "Conflict resolved with custom content");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, "Resolve failed: " + e.getMessage());
     }
   }
@@ -801,7 +839,6 @@ public class GitManager {
       git.remoteAdd().setName(name).setUri(new URIish(url)).call();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -811,7 +848,6 @@ public class GitManager {
       git.remoteRemove().setRemoteName(name).call();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -825,7 +861,6 @@ public class GitManager {
         remotes.add(new RemoteInfo(remote.getName(), url, url));
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return remotes;
   }
@@ -859,7 +894,6 @@ public class GitManager {
 
       return new PushResult(success, success ? "Push successful" : "Push failed");
     } catch (Exception e) {
-      e.printStackTrace();
       return new PushResult(false, e.getMessage() != null ? e.getMessage() : "Push failed");
     }
   }
@@ -907,7 +941,6 @@ public class GitManager {
               + "Commit or stash your changes first. Conflicting files: "
               + String.join(", ", e.getConflictingPaths()));
     } catch (Exception e) {
-      e.printStackTrace();
       String msg = e.getMessage() != null ? e.getMessage() : "Pull failed";
       return new PullResult(false, msg);
     }
@@ -935,7 +968,6 @@ public class GitManager {
               : "Already up to date with " + remoteName;
       return new FetchResult(true, msg);
     } catch (Exception e) {
-      e.printStackTrace();
       return new FetchResult(false, e.getMessage() != null ? e.getMessage() : "Fetch failed");
     }
   }
@@ -961,7 +993,6 @@ public class GitManager {
       loadGitAttributes();
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
       return false;
     }
   }
@@ -1007,7 +1038,6 @@ public class GitManager {
                 i + 1, line, hash, author, ts));
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return result;
   }
@@ -1036,7 +1066,6 @@ public class GitManager {
       git.reset().setMode(resetType).setRef(targetId.getName()).call();
       return new OperationResult(true, "Reset " + mode.name().toLowerCase() + " successful");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Reset failed");
     }
   }
@@ -1056,7 +1085,6 @@ public class GitManager {
       cmd.call();
       return new OperationResult(true, "Tag '" + name + "' created");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Tag failed");
     }
   }
@@ -1092,7 +1120,6 @@ public class GitManager {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return tags;
   }
@@ -1103,7 +1130,6 @@ public class GitManager {
       git.tagDelete().setTags(name).call();
       return new OperationResult(true, "Tag '" + name + "' deleted");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, e.getMessage() != null ? e.getMessage() : "Delete failed");
     }
   }
@@ -1123,7 +1149,6 @@ public class GitManager {
       }
       return sb.toString();
     } catch (Exception e) {
-      e.printStackTrace();
       return "";
     }
   }
@@ -1137,7 +1162,6 @@ public class GitManager {
       }
       return new OperationResult(true, "Gitignore saved");
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, "Failed to save gitignore: " + e.getMessage());
     }
   }
@@ -1155,7 +1179,6 @@ public class GitManager {
                   : current + "\n" + pattern + "\n");
       return saveGitIgnore(newContent);
     } catch (Exception e) {
-      e.printStackTrace();
       return new OperationResult(false, "Failed: " + e.getMessage());
     }
   }

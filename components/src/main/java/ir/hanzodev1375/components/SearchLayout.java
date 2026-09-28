@@ -1,7 +1,8 @@
 package ir.hanzodev1375.components;
 
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.GradientDrawable;
+import android.content.ContextWrapper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.TransitionManager;
@@ -17,9 +18,9 @@ import android.widget.ImageView;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.ColorUtils;
+import com.example.liquidglass.GlassMaterial;
 import com.google.android.material.transition.platform.MaterialSharedAxis;
+import ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat;
 import ir.hanzodev1375.components.utils.ComponentsPrefs;
 import ir.theme.M3Theme;
 
@@ -47,7 +48,6 @@ public class SearchLayout extends FrameLayout {
     setting = new ComponentsPrefs(context);
     LayoutInflater.from(context).inflate(R.layout.search_layout, this, true);
 
-    View rootView = findViewById(R.id.rootView);
     editText = findViewById(R.id.etSearch);
     clearButton = findViewById(R.id.btnClear);
     searchIcon = findViewById(R.id.ivSearchIcon);
@@ -56,30 +56,48 @@ public class SearchLayout extends FrameLayout {
 
     setVisibility(GONE);
     setupListeners();
+    applyGlassBackground();
+    M3Theme.apply(this);
+  }
 
-    GradientDrawable gd =
-        (GradientDrawable) ResourcesCompat.getDrawable(getResources(), R.drawable.bg_shape, null);
-    if (gd == null) return;
+  private void applyGlassBackground() {
+    Activity activity = resolveActivity(getContext());
+    if (activity == null) return;
+
+    GlassCompat glass = new GlassCompat(activity);
+    float density = getResources().getDisplayMetrics().density;
+    glass.setCornerRadius(26f * density);
+    glass.setRefractionHeight(48f);
+    glass.setBevelWidth(8f);
+    glass.setMaterial(GlassMaterial.REGULAR);
+    glass.setDispersionStrength(0.1f);
+    glass.setEnableDynamicBackground(true);
+    glass.setEnableSensorHighlight(true);
+    glass.setEnableAdaptiveTint(true);
+    addView(
+        glass,
+        0,
+        new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
     post(
         () -> {
-          gd.setColor(
-              setting.isShowBackground()
-                  ? ColorUtils.setAlphaComponent(
-                      fallback(M3Theme.surfaceContainerHigh(), 0),
-                      90)
-                  : fallback(M3Theme.surfaceContainerHigh(), 0));
-          gd.setStroke(
-              2,
-              setting.isShowBackground()
-                  ? ColorUtils.setAlphaComponent(
-                      fallback(M3Theme.outlineVariant(), 0),
-                      90)
-                  : fallback(M3Theme.outlineVariant(), 0));
-
-          rootView.setBackground(gd);
+          if (!isAttachedToWindow()) return;
+          View backdrop = activity.findViewById(android.R.id.content);
+          if (backdrop != null) {
+            glass.setBackdropSource(backdrop);
+          }
         });
-    M3Theme.apply(this);
+  }
+
+  private static Activity resolveActivity(Context context) {
+    while (context instanceof ContextWrapper) {
+      if (context instanceof Activity) {
+        return (Activity) context;
+      }
+      context = ((ContextWrapper) context).getBaseContext();
+    }
+    return null;
   }
 
   private void setupListeners() {
@@ -199,7 +217,4 @@ public class SearchLayout extends FrameLayout {
     setVisibility(GONE);
   }
 
-  private static int fallback(Integer value, int def) {
-    return value != null ? value : def;
-  }
 }

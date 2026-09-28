@@ -9,6 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -35,6 +37,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.termux.terminal.TerminalSession;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.DialogCompat;
+import ir.hanzodev1375.components.sheet.customitemsheet.ui.LiquidGlassDialogBuilderJava;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.activity.BaseCompat;
@@ -42,19 +45,25 @@ import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.hanzodev1375.ghostide.databinding.ActivityTerminalBinding;
 import ir.hanzodev1375.ghostide.terminal.DebianBootstrap;
 import ir.hanzodev1375.ghostide.terminal.DebianInstaller;
+import ir.hanzodev1375.ghostide.terminal.TerminalBackupManager;
 import ir.hanzodev1375.ghostide.terminal.TerminalInputDock;
 import ir.hanzodev1375.ghostide.terminal.TerminalSessionFragment;
 import ir.hanzodev1375.ghostide.terminal.TerminalTab;
 import ir.hanzodev1375.ghostide.terminal.TerminalViewModel;
 import ir.hanzodev1375.ghostide.utils.ObjectUtil;
+import ir.hanzodev1375.ghostide.utils.StorageUtils;
 import ir.theme.GhostTheme;
 import ir.theme.M3Theme;
 import ir.theme.ThemeManager;
 import ir.theme.ThemeUtils;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TerminalActivity extends BaseCompat implements TerminalViewModel.SessionListener {
 
@@ -75,6 +84,12 @@ public class TerminalActivity extends BaseCompat implements TerminalViewModel.Se
   private TextView installStatusText;
   private ProgressBar installProgressBar;
   private DebianInstaller.InstallListener installListener;
+
+  private AlertDialog transferDialog;
+  private TextView transferStatusText;
+  private TextView transferPathText;
+  private ProgressBar transferProgressBar;
+  private boolean transferIsBackup;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -411,20 +426,31 @@ public class TerminalActivity extends BaseCompat implements TerminalViewModel.Se
   }
 
   private void showMoreMenu(View anchor) {
-    List<String> items =
-        Collections.singletonList(
+    List<String> items = new ArrayList<>();
+    items.add(
+        getString(
             DebianBootstrap.isInstalled(this)
-                ? getString(R.string.terminal_remove_debian)
-                : getString(R.string.terminal_install_debian));
+                ? R.string.terminal_remove_debian
+                : R.string.terminal_install_debian));
+    items.add(getString(R.string.terminal_backup_menu));
+    items.add(getString(R.string.terminal_restore_menu));
     ObjectUtil.showGlassMenu(
         this,
         anchor,
         items,
         (index, title) -> {
-          if (DebianBootstrap.isInstalled(this)) {
-            confirmAndRemoveDebian();
-          } else {
-            startDebianInstall();
+          switch (index) {
+            case 0 -> {
+              if (DebianBootstrap.isInstalled(this)) {
+                confirmAndRemoveDebian();
+              } else {
+                startDebianInstall();
+              }
+            }
+            case 1 -> startTerminalBackup();
+            case 2 -> showRestorePicker();
+            default -> {
+            }
           }
         });
   }
@@ -830,6 +856,188 @@ public class TerminalActivity extends BaseCompat implements TerminalViewModel.Se
   private void attachToRunningInstall() {
     buildInstallDialogViews();
     DebianInstaller.attach(getOrCreateInstallListener());
+  }
+
+  private void startTerminalBackup() {
+    if (TerminalBackupManager.isRunning()) {
+      GhostToast.makeText(this, R.string.terminal_backup_busy, GhostToast.LENGTH_SHORT).show();
+      return;
+    }
+    showTransferProgress(true);
+    TerminalBackupManager.backup(this, createTransferListener());
+  }
+
+  private void showRestorePicker() {
+    if (TerminalBackupManager.isRunning()) {
+      GhostToast.makeText(this, R.string.terminal_backup_busy, GhostToast.LENGTH_SHORT).show();
+      return;
+    }
+    List<File> backups = TerminalBackupManager.listBackups(this);
+    if (backups.isEmpty()) {
+      GhostToast.makeText(this, R.string.terminal_backup_none, GhostToast.LENGTH_LONG).show();
+      return;
+    }
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+    List<String> labels = new ArrayList<>();
+    for (File file : backups) {
+      labels.add(
+          getString(
+              R.string.terminal_backup_item,
+              format.format(new Date(file.lastModified())),
+              StorageUtils.formatSize(file.length())));
+    }
+    new LiquidGlassDialogBuilderJava(this)
+        .setTitle(R.string.terminal_restore_pick)
+        .setItems(
+            labels.toArray(new String[0]),
+            (dialog, which) -> confirmRestore(backups.get(which)))
+        .setNegativeButton(R.string.terminal_action_cancel, null)
+        .show();
+  }
+
+  private void confirmRestore(File archive) {
+    new LiquidGlassDialogBuilderJava(this)
+        .setTitle(R.string.terminal_restore_menu)
+        .setMessage(getString(R.string.terminal_confirm_restore_message, archive.getName()))
+        .setNegativeButton(R.string.terminal_action_cancel, null)
+        .setPositiveButton(
+            R.string.terminal_restore_confirm,
+            (dialog, which) -> {
+              viewModel.unbindService();
+              showTransferProgress(false);
+              TerminalBackupManager.restore(TerminalActivity.this, archive, createTransferListener());
+            })
+        .show();
+  }
+
+  private void showTransferProgress(boolean backup) {
+    transferIsBackup = backup;
+    LinearLayout layout = new LinearLayout(this);
+    layout.setOrientation(LinearLayout.VERTICAL);
+    int pad = (int) (16 * getResources().getDisplayMetrics().density);
+    layout.setPadding(pad, pad, pad, pad);
+
+    transferStatusText = new TextView(this);
+    transferStatusText.setText(R.string.terminal_transfer_scanning);
+
+    transferProgressBar =
+        new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+    transferProgressBar.setMax(100);
+    transferProgressBar.setIndeterminate(true);
+
+    transferPathText = new TextView(this);
+    transferPathText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f);
+    transferPathText.setMaxLines(1);
+    transferPathText.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+
+    layout.addView(transferStatusText);
+    layout.addView(transferProgressBar);
+    layout.addView(transferPathText);
+
+    transferDialog =
+        new LiquidGlassDialogBuilderJava(this)
+            .setTitle(
+                backup ? R.string.terminal_backup_title : R.string.terminal_restore_title)
+            .setView(layout)
+            .setCancelable(false)
+            .setNegativeButton(
+                R.string.terminal_action_cancel,
+                (dialog, which) -> TerminalBackupManager.cancel())
+            .create();
+    transferDialog.show();
+  }
+
+  private TerminalBackupManager.ProgressListener createTransferListener() {
+    return new TerminalBackupManager.ProgressListener() {
+      @Override
+      public void onProgress(
+          long processedBytes, long totalBytes, int percent, String currentPath) {
+        if (transferStatusText == null) {
+          return;
+        }
+        if (percent < 0) {
+          transferStatusText.setText(R.string.terminal_transfer_scanning);
+          transferProgressBar.setIndeterminate(true);
+        } else {
+          transferProgressBar.setIndeterminate(false);
+          transferProgressBar.setProgress(percent);
+          transferStatusText.setText(
+              getString(
+                  transferIsBackup
+                      ? R.string.terminal_backup_working
+                      : R.string.terminal_restore_working,
+                  StorageUtils.formatSize(processedBytes),
+                  StorageUtils.formatSize(totalBytes),
+                  percent));
+        }
+        if (currentPath != null) {
+          transferPathText.setText(currentPath);
+        }
+      }
+
+      @Override
+      public void onSuccess(File archive, long sizeBytes) {
+        if (transferDialog != null) {
+          transferDialog.dismiss();
+        }
+        if (transferIsBackup) {
+          GhostToast.makeText(
+                  TerminalActivity.this,
+                  getString(
+                      R.string.terminal_backup_done,
+                      StorageUtils.formatSize(sizeBytes),
+                      archive.getAbsolutePath()),
+                  GhostToast.LENGTH_LONG)
+              .show();
+        } else {
+          viewModel.bindService();
+          viewModel.setServiceListener();
+          GhostToast.makeText(
+                  TerminalActivity.this,
+                  getString(R.string.terminal_restore_done, StorageUtils.formatSize(sizeBytes)),
+                  GhostToast.LENGTH_LONG)
+              .show();
+        }
+      }
+
+      @Override
+      public void onCancelled() {
+        if (transferDialog != null) {
+          transferDialog.dismiss();
+        }
+        if (!transferIsBackup) {
+          viewModel.bindService();
+          viewModel.setServiceListener();
+        }
+        GhostToast.makeText(
+                TerminalActivity.this,
+                transferIsBackup
+                    ? R.string.terminal_backup_cancelled
+                    : R.string.terminal_restore_cancelled,
+                GhostToast.LENGTH_SHORT)
+            .show();
+      }
+
+      @Override
+      public void onError(String message, Throwable error) {
+        if (transferDialog != null) {
+          transferDialog.dismiss();
+        }
+        if (!transferIsBackup) {
+          viewModel.bindService();
+          viewModel.setServiceListener();
+        }
+        GhostToast.makeText(
+                TerminalActivity.this,
+                getString(
+                    transferIsBackup
+                        ? R.string.terminal_backup_failed
+                        : R.string.terminal_restore_failed,
+                    message),
+                GhostToast.LENGTH_LONG)
+            .show();
+      }
+    };
   }
 
   // ─── Pager adapter ───────────────────────────────────────────────────

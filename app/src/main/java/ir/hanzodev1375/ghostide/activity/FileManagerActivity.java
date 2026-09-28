@@ -1037,6 +1037,14 @@ public class FileManagerActivity extends BaseCompat
     }
   }
 
+  @Override
+  protected void onThemeReapplied() {
+    super.onThemeReapplied();
+    if (adapter != null) {
+      adapter.notifyDataSetChanged();
+    }
+  }
+
   private void setOnBackPress() {
     getOnBackPressedDispatcher()
         .addCallback(
