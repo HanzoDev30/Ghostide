@@ -24,6 +24,7 @@ import com.google.android.material.button.MaterialButton;
 import ir.hanzodev1375.components.R;
 import ir.theme.M3Theme;
 import java.util.Locale;
+import android.view.*;
 
 /**
  * Install button whose body fills up as the download progresses.
@@ -84,13 +85,8 @@ public class PluginInstallButton extends FrameLayout {
 
     setClickable(true);
     setFocusable(true);
-    setOnClickListener(
-        v -> {
-          if (state == State.IDLE) {
-            OnInstallClickListener listener = installListener;
-            if (listener != null) listener.onInstallClick();
-          }
-        });
+    setOnClickListener(clickHandler);
+    button.setOnClickListener(clickHandler);
 
     applyTheme();
     setState(State.IDLE);
@@ -102,13 +98,26 @@ public class PluginInstallButton extends FrameLayout {
 
   private OnInstallClickListener installListener;
 
+  private final View.OnClickListener clickHandler = this::handleClick;
+
   public void setOnInstallClickListener(@Nullable OnInstallClickListener listener) {
     this.installListener = listener;
   }
 
+  private void handleClick(@NonNull View source) {
+    if (state != State.IDLE || !isEnabled()) {
+      return;
+    }
+    OnInstallClickListener listener = installListener;
+    if (listener != null) {
+      listener.onInstallClick();
+    }
+  }
+
   @Override
-  public void setOnClickListener(@Nullable OnClickListener listener) {
-    super.setOnClickListener(listener);
+  public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
+    button.setEnabled(enabled);
   }
 
   /** Re-reads the Material colors; call after a theme change. */
