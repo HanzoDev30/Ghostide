@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -22,7 +21,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.content.res.AppCompatResources;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.shape.ShapeAppearanceModel;
 import ir.hanzodev1375.components.R;
 import ir.theme.M3Theme;
 import java.util.Locale;
@@ -48,24 +46,15 @@ public class PluginInstallButton extends FrameLayout {
 
   private final MaterialButton button;
   private final RingDrawable ring;
-
-  private final Paint basePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  private final Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  private final Path shapePath = new Path();
-  private final RectF bounds = new RectF();
+  private final RoundedProgressFill fill;
 
   private final float density;
 
   private State state = State.IDLE;
   private boolean indeterminate = false;
   private float progress = 0f;
-  private float displayedProgress = 0f;
   private ValueAnimator progressAnimator;
   private ValueAnimator spinner;
-
-  @ColorInt private int baseColor = Color.GRAY;
-  @ColorInt private int fillColor = Color.DKGRAY;
-  @ColorInt private int contentColor = Color.WHITE;
 
   @StringRes private int idleTextRes = R.string.pluginstore_install;
   @StringRes private int installedTextRes = R.string.pluginstore_installed_button;
@@ -87,6 +76,10 @@ public class PluginInstallButton extends FrameLayout {
     button.setMinHeight(0);
     button.setAllCaps(false);
     button.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+
+    fill = new RoundedProgressFill(density);
+    fill.attach(button);
+
     addView(button, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
     setClickable(true);
@@ -120,10 +113,10 @@ public class PluginInstallButton extends FrameLayout {
 
   /** Re-reads the Material colors; call after a theme change. */
   public void applyTheme() {
-    baseColor = color(M3Theme.surfaceContainerHigh(), Color.DKGRAY);
-    fillColor = color(M3Theme.primaryContainer(), Color.GRAY);
-    contentColor = color(M3Theme.onSurface(), Color.WHITE);
-    ring.setColor(color(M3Theme.onSurfaceVariant(), Color.LTGRAY));
+    int contentColor = color(M3Theme.onPrimary(), Color.WHITE);
+    ring.setColor(contentColor);
+    fill.setColors(
+        color(M3Theme.primary(), Color.DKGRAY), color(M3Theme.onPrimary(), Color.LTGRAY));
     button.setTextColor(contentColor);
     button.setIconTint(ColorStateList.valueOf(contentColor));
     M3Theme.button(button);
@@ -212,13 +205,13 @@ public class PluginInstallButton extends FrameLayout {
       progressAnimator = null;
     }
     if (animate) {
-      progressAnimator =
-          ValueAnimator.ofFloat(displayedProgress, target)
-              .setDuration(PROGRESS_DURATION);
+      progressAnimator = ValueAnimator.ofFloat(fill.getProgress(), target);
+      progressAnimator.setDuration(PROGRESS_DURATION);
       progressAnimator.setInterpolator(new LinearInterpolator());
       progressAnimator.addUpdateListener(
           animation -> {
-            displayedProgress = (float) animation.getAnimatedValue();
+            float current = (float) animation.getAnimatedValue();
+            fill.setProgress(state == State.INSTALLING ? current : 0f);
             progress = target;
             if (state == State.INSTALLING) {
               button.setText(buildInstallingText());
@@ -228,7 +221,7 @@ public class PluginInstallButton extends FrameLayout {
       progressAnimator.start();
     } else {
       progress = target;
-      displayedProgress = target;
+      fill.setProgress(target);
       invalidate();
     }
     if (state == State.INSTALLING && !animate) {
@@ -257,47 +250,20 @@ public class PluginInstallButton extends FrameLayout {
     ring.setVisible(false, false);
   }
 
-  private void updateShape() {
-    bounds.set(0f, 0f, getWidth(), getHeight());
-    float radius = 14f * density;
-    ShapeAppearanceModel model = button.getShapeAppearanceModel();
-    if (model != null && getWidth() > 0 && getHeight() > 0) {
-      float size = model.getTopLeftCornerSize().getCornerSize(bounds);
-      if (size > 0f) {
-        radius = size;
-      }
-    }
-    shapePath.reset();
-    shapePath.addRoundRect(bounds, radius, radius, Path.Direction.CW);
-  }
-
   @Override
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
-    updateShape();
+    fill.updateShape();
     invalidate();
   }
 
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    if (shapePath.isEmpty()) {
-      updateShape();
+    if (!fill.hasShape()) {
+      fill.updateShape();
     }
-    if (shapePath.isEmpty()) return;
-
-    int save = canvas.save();
-    canvas.clipPath(shapePath);
-
-    basePaint.setColor(baseColor);
-    canvas.drawRect(0f, 0f, getWidth(), getHeight(), basePaint);
-
-    if (state == State.INSTALLING && displayedProgress > 0f) {
-      fillPaint.setColor(fillColor);
-      canvas.drawRect(0f, 0f, getWidth() * displayedProgress, getHeight(), fillPaint);
-    }
-
-    canvas.restoreToCount(save);
+    fill.draw(canvas);
   }
 
   public void setIcon(@DrawableRes int iconRes) {

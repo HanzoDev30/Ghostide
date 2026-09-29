@@ -112,7 +112,7 @@ public final class TextMateLanguages {
       Handler handler, String scope, int retriesLeft, Consumer<Language> callback) {
     if (GrammarRegistry.getInstance().findGrammar(scope) != null) {
       try {
-        callback.accept(TextMateLanguage.create(scope, true));
+          callback.accept(TextMateLanguage.create(scope, true));
       } catch (RuntimeException e) {
         callback.accept(null);
       }

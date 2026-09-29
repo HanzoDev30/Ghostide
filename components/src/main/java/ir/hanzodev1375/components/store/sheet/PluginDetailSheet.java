@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -255,6 +256,13 @@ public class PluginDetailSheet extends BaseBlurBottomSheet {
     } else {
       started = false;
       installButton.setState(PluginInstallButton.State.IDLE);
+      if (getContext() != null) {
+        Toast.makeText(
+                requireContext(),
+                getString(R.string.pluginstore_install_error, event.message),
+                Toast.LENGTH_LONG)
+            .show();
+      }
     }
   }
 

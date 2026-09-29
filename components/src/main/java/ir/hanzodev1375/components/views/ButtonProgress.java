@@ -2,11 +2,9 @@ package ir.hanzodev1375.components.views;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.Resources;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
@@ -16,26 +14,36 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import com.google.android.material.button.MaterialButton;
 import ir.theme.M3Theme;
+import java.util.Locale;
 
+/**
+ * Button that reports its download progress through its own label, the way Xed Editor does.
+ *
+ * <p>No spinner or ring is drawn: while loading the label becomes {@code <label> 42%} and the body
+ * fills up with {@code primaryContainer}. When the total size is unknown the label animates through
+ * a dot pattern instead and the body stays empty.
+ */
 public class ButtonProgress extends FrameLayout {
 
-  private static final long SPIN_DURATION = 900L;
-  private static final long FADE_DURATION = 260L;
+  private static final long PROGRESS_DURATION = 180L;
+  private static final long DOTS_DURATION = 1300L;
+  private static final String[] DOTS = {"", ".", "..", "..."};
+  private static final float COLOR_SWITCH_AT = 0.5f;
 
   private final MaterialButton button;
-  private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  private final Paint trackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  private final RectF oval = new RectF();
+  private final RoundedProgressFill fill;
+  private final float density;
 
-  private final float ringWidth;
+  private CharSequence idleText = "";
+  @Nullable private CharSequence loadingText;
+  private boolean loading;
+  private boolean indeterminate = true;
+  private float displayedProgress;
+  private String shownLabel = "";
+  private int appliedTextColor = Color.TRANSPARENT;
 
-  private float sweepAngle = 90f;
-  private float rotation = 0f;
-  private float ringAlpha = 0f;
-  private boolean loading = false;
-
-  private ValueAnimator spinner;
-  private ValueAnimator fadeAnimator;
+  private ValueAnimator progressAnimator;
+  private ValueAnimator dotsAnimator;
 
   public ButtonProgress(@NonNull Context context) {
     this(context, null);
@@ -45,34 +53,31 @@ public class ButtonProgress extends FrameLayout {
     this(context, attrs, 0);
   }
 
-  private static int color(Integer value, int fallback) {
-    return value != null ? value : fallback;
-  }
-
   public ButtonProgress(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-
-    Resources res = getResources();
-    ringWidth = 2.5f * res.getDisplayMetrics().density;
-
-    @ColorInt int ringColor = color(M3Theme.primary(), Color.GRAY);
-
-    ringPaint.setStyle(Paint.Style.STROKE);
-    ringPaint.setStrokeWidth(ringWidth);
-    ringPaint.setStrokeCap(Paint.Cap.ROUND);
-    ringPaint.setColor(ringColor);
-
-    trackPaint.setStyle(Paint.Style.STROKE);
-    trackPaint.setStrokeWidth(ringWidth);
-    trackPaint.setStrokeCap(Paint.Cap.ROUND);
-    trackPaint.setColor(ringColor);
+    density = getResources().getDisplayMetrics().density;
+    setWillNotDraw(false);
 
     button = new MaterialButton(context);
     button.setMinHeight(0);
     button.setMinWidth(0);
     button.setAllCaps(false);
-    M3Theme.button(button);
+
+    fill = new RoundedProgressFill(density);
+    fill.attach(button);
+
     addView(button, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+    applyTheme();
+  }
+
+  /** Re-reads the Material colors; call after a theme change. */
+  public void applyTheme() {
+    M3Theme.button(button);
+    button.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+    fill.setColors(
+        color(M3Theme.primary(), Color.DKGRAY), color(M3Theme.primaryContainer(), Color.LTGRAY));
+    applyTextColor(true);
+    invalidate();
   }
 
   public MaterialButton getButton() {
@@ -80,15 +85,30 @@ public class ButtonProgress extends FrameLayout {
   }
 
   public void setText(CharSequence text) {
-    button.setText(text);
+    idleText = text == null ? "" : text;
+    if (loading) {
+      updateLabel();
+    } else {
+      shownLabel = idleText.toString();
+      button.setText(idleText);
+    }
   }
 
   public void setText(@StringRes int resId) {
-    button.setText(resId);
+    setText(getContext().getString(resId));
   }
 
+  /** Overrides the label prefix used while loading, e.g. "Downloading". */
+  public void setLoadingText(@Nullable CharSequence text) {
+    loadingText = text;
+    if (loading) {
+      updateLabel();
+    }
+  }
+
+  /** Returns the label the button falls back to once loading ends. */
   public CharSequence getText() {
-    return button.getText();
+    return idleText;
   }
 
   @Override
@@ -106,98 +126,176 @@ public class ButtonProgress extends FrameLayout {
     return loading;
   }
 
-  public void setSweepAngle(float sweepAngle) {
-    this.sweepAngle = sweepAngle;
+  public float getProgress() {
+    return displayedProgress;
   }
 
-  public void setRingColor(@ColorInt int color) {
-    ringPaint.setColor(color);
-    trackPaint.setColor(color);
+  public void setFillColor(@ColorInt int color) {
+    fill.setColors(color(M3Theme.primary(), Color.DKGRAY), color);
     invalidate();
   }
 
   public void startLoading() {
     if (loading) return;
+    if (button.getText() != null) {
+      idleText = button.getText();
+    }
     loading = true;
+    indeterminate = true;
     setEnabled(false);
-    animateRingTo(1f);
-    startSpinner();
+    startDots();
+    applyTextColor();
+    updateLabel();
+    invalidate();
   }
 
   public void stopLoading() {
     if (!loading) return;
     loading = false;
-    stopSpinner();
-    animateRingTo(0f);
+    indeterminate = true;
+    displayedProgress = 0f;
+    stopDots();
+    stopProgressAnimator();
+    fill.setProgress(0f);
     setEnabled(true);
+    applyTextColor();
+    shownLabel = idleText.toString();
+    button.setText(idleText);
+    invalidate();
   }
 
   public void finishLoading(@Nullable final Runnable onFinished) {
     stopLoading();
-    if (onFinished != null) postDelayed(onFinished, FADE_DURATION);
+    if (onFinished != null) postDelayed(onFinished, PROGRESS_DURATION);
   }
 
-  private void startSpinner() {
-    if (spinner != null) spinner.cancel();
-    spinner = ValueAnimator.ofFloat(0f, 360f);
-    spinner.setDuration(SPIN_DURATION);
-    spinner.setRepeatCount(ValueAnimator.INFINITE);
-    spinner.setInterpolator(new LinearInterpolator());
-    spinner.addUpdateListener(
-        animation -> {
-          rotation = (float) animation.getAnimatedValue();
-          invalidate();
-        });
-    spinner.start();
-  }
-
-  private void stopSpinner() {
-    if (spinner != null) {
-      spinner.cancel();
-      spinner = null;
+  /**
+   * Sets the download progress. Pass a negative value when the total size is unknown to get the
+   * animated dot label without any fill.
+   */
+  public void setProgress(float value) {
+    if (!loading) return;
+    if (value < 0f) {
+      if (!indeterminate) {
+        indeterminate = true;
+        stopProgressAnimator();
+        displayedProgress = 0f;
+        fill.setProgress(0f);
+        applyTextColor();
+        startDots();
+        invalidate();
+      }
+      return;
     }
+    indeterminate = false;
+    stopDots();
+    animateTo(Math.max(0f, Math.min(1f, value)));
   }
 
-  private void animateRingTo(float target) {
-    if (fadeAnimator != null) fadeAnimator.cancel();
-    fadeAnimator = ValueAnimator.ofFloat(ringAlpha, target);
-    fadeAnimator.setDuration(FADE_DURATION);
-    fadeAnimator.setInterpolator(new LinearInterpolator());
-    fadeAnimator.addUpdateListener(
+  private void animateTo(float target) {
+    stopProgressAnimator();
+    progressAnimator = ValueAnimator.ofFloat(displayedProgress, target);
+    progressAnimator.setDuration(PROGRESS_DURATION);
+    progressAnimator.setInterpolator(new LinearInterpolator());
+    progressAnimator.addUpdateListener(
         animation -> {
-          ringAlpha = (float) animation.getAnimatedValue();
+          displayedProgress = (float) animation.getAnimatedValue();
+          fill.setProgress(displayedProgress);
+          applyTextColor();
+          updateLabel();
           invalidate();
         });
-    fadeAnimator.start();
+    progressAnimator.start();
+  }
+
+  private void startDots() {
+    if (dotsAnimator != null) return;
+    dotsAnimator = ValueAnimator.ofFloat(0f, 1f);
+    dotsAnimator.setDuration(DOTS_DURATION);
+    dotsAnimator.setRepeatCount(ValueAnimator.INFINITE);
+    dotsAnimator.setInterpolator(new LinearInterpolator());
+    dotsAnimator.addUpdateListener(
+        animation -> {
+          float phase = (float) animation.getAnimatedValue();
+          updateLabel(phase);
+        });
+    dotsAnimator.start();
+  }
+
+  private void stopDots() {
+    if (dotsAnimator == null) return;
+    dotsAnimator.cancel();
+    dotsAnimator = null;
+  }
+
+  private void stopProgressAnimator() {
+    if (progressAnimator == null) return;
+    progressAnimator.cancel();
+    progressAnimator = null;
+  }
+
+  private void updateLabel() {
+    updateLabel(0f);
+  }
+
+  private void updateLabel(float dotsPhase) {
+    if (!loading) return;
+    CharSequence base = baseLabel();
+    String label;
+    if (indeterminate) {
+      String dots = DOTS[((int) (dotsPhase * DOTS.length)) % DOTS.length];
+      label = dots.isEmpty() ? base.toString() : base + " " + dots;
+    } else {
+      int percent = Math.round(displayedProgress * 100f);
+      label = String.format(Locale.getDefault(), "%s %d%%", base, percent);
+    }
+    if (label.equals(shownLabel)) return;
+    shownLabel = label;
+    button.setText(label);
+  }
+
+  private CharSequence baseLabel() {
+    return loadingText != null ? loadingText : idleText;
+  }
+
+  private void applyTextColor() {
+    applyTextColor(false);
+  }
+
+  private void applyTextColor(boolean force) {
+    int next =
+        indeterminate || displayedProgress < COLOR_SWITCH_AT
+            ? color(M3Theme.onPrimary(), Color.WHITE)
+            : color(M3Theme.onPrimaryContainer(), Color.BLACK);
+    if (!force && next == appliedTextColor) return;
+    appliedTextColor = next;
+    button.setTextColor(next);
   }
 
   @Override
-  protected void dispatchDraw(Canvas canvas) {
-    super.dispatchDraw(canvas);
-    if (ringAlpha <= 0.001f) return;
+  protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    super.onSizeChanged(w, h, oldw, oldh);
+    fill.updateShape();
+    invalidate();
+  }
 
-    int left = button.getLeft();
-    int top = button.getTop();
-    int right = button.getRight();
-    int bottom = button.getBottom();
-
-    float inset = ringWidth / 2f;
-    oval.set(left + inset, top + inset, right - inset, bottom - inset);
-
-    trackPaint.setAlpha((int) (ringAlpha * 60f));
-    canvas.drawArc(oval, 0f, 360f, false, trackPaint);
-
-    ringPaint.setAlpha(Math.min(255, (int) (ringAlpha * 255f)));
-    canvas.drawArc(oval, rotation - 90f, sweepAngle, false, ringPaint);
+  @Override
+  protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    if (!fill.hasShape()) {
+      fill.updateShape();
+    }
+    fill.draw(canvas);
   }
 
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
-    stopSpinner();
-    if (fadeAnimator != null) {
-      fadeAnimator.cancel();
-      fadeAnimator = null;
-    }
+    stopDots();
+    stopProgressAnimator();
+  }
+
+  private static int color(@Nullable Integer value, int fallback) {
+    return value != null ? value : fallback;
   }
 }

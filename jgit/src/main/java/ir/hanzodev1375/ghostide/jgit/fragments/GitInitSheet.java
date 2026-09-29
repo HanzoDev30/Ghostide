@@ -75,6 +75,7 @@ public class GitInitSheet extends BaseBlurBottomSheet {
     M3Theme.input((TextInputLayout) view.findViewById(R.id.tilRepoUrl));
     M3Theme.input((TextInputLayout) view.findViewById(R.id.tilCommitMessage));
     M3Theme.apply(view);
+    bpStart.applyTheme();
 
     bpStart.setText(R.string.git_init_start);
     bpStart.setOnClickListener(v -> startInit());
