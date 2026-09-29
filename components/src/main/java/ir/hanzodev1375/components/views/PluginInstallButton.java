@@ -57,6 +57,7 @@ public class PluginInstallButton extends FrameLayout {
   private final float density;
 
   private State state = State.IDLE;
+  private boolean indeterminate = false;
   private float progress = 0f;
   private float displayedProgress = 0f;
   private ValueAnimator progressAnimator;
@@ -77,6 +78,7 @@ public class PluginInstallButton extends FrameLayout {
   public PluginInstallButton(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
     density = getResources().getDisplayMetrics().density;
+    setWillNotDraw(false);
 
     ring = new RingDrawable(density);
 
@@ -131,6 +133,7 @@ public class PluginInstallButton extends FrameLayout {
 
   public void setState(State next) {
     this.state = next;
+    indeterminate = false;
     switch (next) {
       case INSTALLING:
         button.setEnabled(false);
@@ -152,7 +155,8 @@ public class PluginInstallButton extends FrameLayout {
         button.setEnabled(true);
         button.setText(idleTextRes);
         setIcon(R.drawable.ic_download);
-        setProgressInternal(0f, false);        break;
+        setProgressInternal(0f, false);
+        break;
     }
     invalidate();
   }
@@ -166,7 +170,8 @@ public class PluginInstallButton extends FrameLayout {
    * indeterminate fill.
    */
   public void setProgress(float value) {
-    if (value < 0f) {
+    indeterminate = value < 0f;
+    if (indeterminate) {
       setProgressInternal(0.35f, false);
       return;
     }
@@ -192,7 +197,7 @@ public class PluginInstallButton extends FrameLayout {
   }
 
   private String buildInstallingText() {
-    if (progress < 0f) {
+    if (indeterminate) {
       return getContext().getString(installingTextRes);
     }
     int percent = (int) (progress * 100f);
@@ -224,6 +229,7 @@ public class PluginInstallButton extends FrameLayout {
     } else {
       progress = target;
       displayedProgress = target;
+      invalidate();
     }
     if (state == State.INSTALLING && !animate) {
       button.setText(buildInstallingText());
@@ -269,6 +275,7 @@ public class PluginInstallButton extends FrameLayout {
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
     updateShape();
+    invalidate();
   }
 
   @Override

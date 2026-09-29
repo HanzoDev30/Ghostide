@@ -77,18 +77,22 @@ public class SegmentedAvatarView extends ImageViewAnimator {
 
   // ---- Loading progress (indeterminate, driven by setLoading) ---------------
 
-  private static final long LOADING_SWEEP_DURATION = 1500L;
-  private static final long LOADING_SETTLE_DURATION = 480L;
-  private static final float LOADING_SPIN_DEGREES = 220f;
+  private static final long LOADING_SPIN_DURATION = 1200L;
+  private static final long LOADING_FADE_IN_DURATION = 220L;
+  private static final long LOADING_FADE_OUT_DURATION = 320L;
+  private static final float LOADING_ARC_SWEEP_DEG = 100f;
+  private static final float LOADING_TRACK_ALPHA_RATIO = 0.3f;
 
   private boolean loading;
-  private float loadingT;
-  private float loadingBaseRotation;
-  private ValueAnimator loadingAnimator;
+  private float loadingAmount;
+  private float loadingRotation;
+  private ValueAnimator loadingFadeAnimator;
+  private ValueAnimator loadingSpinAnimator;
 
   // ---- Cached drawing state (avoid allocations inside onDraw) ------------
 
   private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+  private final Paint loadingArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final Paint avatarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final RectF ringRect = new RectF();
   private final Matrix gradientMatrix = new Matrix();
@@ -219,6 +223,10 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     ringPaint.setStrokeCap(Paint.Cap.ROUND);
     ringPaint.setStrokeWidth(ringWidth);
     ringPaint.setAlpha(ringAlpha);
+
+    loadingArcPaint.setStyle(Paint.Style.STROKE);
+    loadingArcPaint.setStrokeCap(Paint.Cap.ROUND);
+    loadingArcPaint.setStrokeWidth(ringWidth);
 
     avatarPaint.setStyle(Paint.Style.FILL);
     avatarPaint.setFilterBitmap(true);
@@ -452,13 +460,15 @@ public class SegmentedAvatarView extends ImageViewAnimator {
 
   @Override
   protected void onDraw(Canvas canvas) {
-    // Avatar is drawn first; the ring is always drawn after and stays
-    // outside the avatar radius, so it can never overlap the image.
     drawAvatar(canvas);
 
     if (ringVisible) {
       rebuildRingShaderIfNeeded();
       drawSegmentedRing(canvas);
+    }
+
+    if (loadingAmount > 0.01f) {
+      drawLoadingArc(canvas);
     }
 
     drawLoginFx(canvas);
@@ -586,8 +596,8 @@ public class SegmentedAvatarView extends ImageViewAnimator {
         && loginFxAnimator.isRunning()) {
       starParticles.setPaused(false);
     }
-    if (loading && loadingAnimator == null) {
-      startLoadingSweep();
+    if (loading && loadingSpinAnimator == null) {
+      startLoadingSpin();
     }
   }
 
@@ -597,11 +607,12 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     if (starParticles != null) {
       starParticles.setPaused(true);
     }
-    cancelLoadingAnimator();
+    stopLoadingSpin();
   }
 
   private void drawSegmentedRing(Canvas canvas) {
-    ringPaint.setAlpha(ringAlpha);
+    float trackRatio = 1f - loadingAmount * (1f - LOADING_TRACK_ALPHA_RATIO);
+    ringPaint.setAlpha((int) (ringAlpha * trackRatio));
 
     float anglePerSegment = 360f / segmentCount;
     float sweepAngle = anglePerSegment - gapAngle;
@@ -629,12 +640,24 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     }
   }
 
+  private void drawLoadingArc(Canvas canvas) {
+    loadingArcPaint.setColor(endColor);
+    loadingArcPaint.setAlpha((int) (ringAlpha * loadingAmount));
+    canvas.drawArc(
+        ringRect,
+        RING_START_ANGLE_DEG + loadingRotation,
+        LOADING_ARC_SWEEP_DEG,
+        false,
+        loadingArcPaint);
+  }
+
   // ---- Public API: setters / getters ---------------------------------------
 
   /** Sets the ring's stroke width, in pixels. */
   public void setRingWidth(float ringWidthPx) {
     this.ringWidth = ringWidthPx;
     ringPaint.setStrokeWidth(ringWidthPx);
+    loadingArcPaint.setStrokeWidth(ringWidthPx);
     recalculateGeometry(getWidth(), getHeight());
     avatarGeometryDirty = true;
     invalidate();
@@ -760,12 +783,10 @@ public class SegmentedAvatarView extends ImageViewAnimator {
   // ---- Loading progress -----------------------------------------------------
 
   /**
-   * Spins the ring to mark an indeterminate operation, without changing its state.
-   *
-   * <p>Loading does not repurpose the ring: it stays in whatever state the caller left it in — full
-   * by default — for the whole animation, and only the sweep gradient turns, so the view never
-   * appears to empty out and refill while a git operation runs. There is no error state: when
-   * loading ends the gradient rotation animates back to the angle it started at.
+   * Replaces the ring with an indeterminate spinner while an operation runs: the ring fades back to a
+   * dim track and a bright arc orbits it. The arc is drawn regardless of {@link #ringVisible} so a
+   * hidden ring can never hide the progress, and when loading ends the ring animates back to its
+   * full, steady state.
    *
    * <p>Safe to call repeatedly and from any thread; the animation is always restarted from the
    * value currently on screen, and it is cancelled when the view leaves the window.
@@ -776,11 +797,12 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     }
     this.loading = loading;
 
-    cancelLoadingAnimator();
     if (loading) {
-      startLoadingSweep();
+      startLoadingSpin();
+      animateLoadingAmount(1f, LOADING_FADE_IN_DURATION);
     } else {
-      settleLoading();
+      stopLoadingSpin();
+      animateLoadingAmount(0f, LOADING_FADE_OUT_DURATION);
     }
   }
 
@@ -788,60 +810,42 @@ public class SegmentedAvatarView extends ImageViewAnimator {
     return loading;
   }
 
-  private void startLoadingSweep() {
-    loadingBaseRotation = gradientRotation;
-    loadingT = 0f;
-
-    loadingAnimator = ValueAnimator.ofFloat(0f, 1f);
-    loadingAnimator.setDuration(LOADING_SWEEP_DURATION);
-    loadingAnimator.setInterpolator(new LinearInterpolator());
-    loadingAnimator.setRepeatCount(ValueAnimator.INFINITE);
-    loadingAnimator.addUpdateListener(
-        animation -> {
-          loadingT = (float) animation.getAnimatedValue();
-          applyLoadingFrame();
-        });
-    loadingAnimator.start();
-    invalidate();
-  }
-
-  private void settleLoading() {
-    final float fromRotation = loadingBaseRotation + LOADING_SPIN_DEGREES * loadingT;
-
-    loadingAnimator = ValueAnimator.ofFloat(0f, 1f);
-    loadingAnimator.setDuration(LOADING_SETTLE_DURATION);
-    loadingAnimator.setInterpolator(new DecelerateInterpolator(1.6f));
-    loadingAnimator.addUpdateListener(
-        animation -> {
-          float t = (float) animation.getAnimatedValue();
-          loadingT = 1f - t;
-          gradientRotation = fromRotation + (loadingBaseRotation - fromRotation) * t;
-          applyLoadingFrame();
-        });
-    loadingAnimator.addListener(
-        new AnimatorListenerAdapter() {
-          @Override
-          public void onAnimationEnd(Animator animation) {
-            loadingT = 0f;
-            gradientRotation = loadingBaseRotation;
-            applyLoadingFrame();
-          }
-        });
-    loadingAnimator.start();
-    invalidate();
-  }
-
-  /** Single place that pushes an in-flight loading frame to the drawing state. */
-  private void applyLoadingFrame() {
-    applyGradientRotation();
-    invalidate();
-  }
-
-  private void cancelLoadingAnimator() {
-    if (loadingAnimator != null) {
-      loadingAnimator.cancel();
-      loadingAnimator = null;
+  private void startLoadingSpin() {
+    if (loadingSpinAnimator != null) {
+      return;
     }
+    loadingSpinAnimator = ValueAnimator.ofFloat(0f, 360f);
+    loadingSpinAnimator.setDuration(LOADING_SPIN_DURATION);
+    loadingSpinAnimator.setInterpolator(new LinearInterpolator());
+    loadingSpinAnimator.setRepeatCount(ValueAnimator.INFINITE);
+    loadingSpinAnimator.addUpdateListener(
+        animation -> {
+          loadingRotation = (float) animation.getAnimatedValue();
+          invalidate();
+        });
+    loadingSpinAnimator.start();
+  }
+
+  private void stopLoadingSpin() {
+    if (loadingSpinAnimator != null) {
+      loadingSpinAnimator.cancel();
+      loadingSpinAnimator = null;
+    }
+  }
+
+  private void animateLoadingAmount(float target, long duration) {
+    if (loadingFadeAnimator != null) {
+      loadingFadeAnimator.cancel();
+    }
+    loadingFadeAnimator = ValueAnimator.ofFloat(loadingAmount, target);
+    loadingFadeAnimator.setDuration(duration);
+    loadingFadeAnimator.setInterpolator(new DecelerateInterpolator(1.4f));
+    loadingFadeAnimator.addUpdateListener(
+        animation -> {
+          loadingAmount = (float) animation.getAnimatedValue();
+          invalidate();
+        });
+    loadingFadeAnimator.start();
   }
 
   /**
