@@ -26,6 +26,47 @@ Ghost IDE is an advanced mobile development environment built for Android develo
 > Android versions below Android 11 are **not supported**.
 
 
+<table border="0" cellspacing="5" cellpadding="5">
+  <tr>
+    <td align="center" width="130">
+      <img src="assets/bestfilemanager.jpg" width="100" height="130"><br>
+      <b>File Manager</b><br>
+      <small>Storage folders.</small>
+    </td>
+    <td align="center" width="130">
+      <img src="assets/Installed plugins.jpg" width="100" height="130"><br>
+      <b>Installed Plugins</b><br>
+      <small>Active extensions.</small>
+    </td>
+    <td align="center" width="130">
+      <img src="assets/reallsp.jpg" width="100" height="130"><br>
+      <b>Code Editor</b><br>
+      <small>Python env.</small>
+    </td>
+    <td align="center" width="130">
+      <img src="assets/store.jpg" width="100" height="130"><br>
+      <b>Plugin Store</b><br>
+      <small>Extensions.</small>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <img src="assets/terminal debian.jpg" width="100" height="130"><br>
+      <b>Terminal 1</b><br>
+      <small>Debian OS info.</small>
+    </td>
+    <td align="center" width="130">
+      <img src="assets/terminalcoderun.jpg" width="100" height="130"><br>
+      <b>Terminal 2</b><br>
+      <small>Code output.</small>
+    </td>
+    <td align="center" width="130">
+      <img src="assets/theme editor.jpg" width="100" height="130"><br>
+      <b>Theme Editor</b><br>
+      <small>UI colors.</small>
+    </td>
+  </tr>
+</table>
 
 **Core Focus Areas:**
 - ⚡ High-performance editing
@@ -158,15 +199,39 @@ The editor supports deep UI customization, including:
 - [x] Lightweight and fast
 - [x] Built natively for Android
 - [x] Real compiler integrations
-- [ ] Plugin-ready architecture(hard mod)
+- [x] Plugin-ready architecture
 - [x] Material Design interface
 - [x] Fully open source
 - [x] Optimized typing experience
 - [x] Powerful customization system
 
 ---
-
 ## Code Runer🔥🔥🔥
+
+- [x] Clang Family (c, cpp, h, hpp, cc)
+- [x] Python (package-aware, runs via `python3 -m`)
+- [x] PHP (php)
+- [x] Go (go run)
+- [x] Node.js (js)
+- [x] TypeScript (ts-node)
+- [x] Lua (lua5.4)
+- [x] Java (javac + main detection)
+- [x] Java + Gradle Wrapper (gradlew build)
+- [x] Java + Maven (mvn package)
+- [x] Java + Gradle (gradle build)
+- [x] Java + Android classpath (android.jar + libs + gradle cache)
+- [x] Kotlin (.kt → kotlinc -include-runtime → jar)
+- [x] Kotlin Script (.kts → kotlinc -script)
+- [x] Sass / SCSS (sass → css output)
+- [x] Custom Runners (`ext:command` with `{file}`, `{dir}`, `{file_name}`, `{base}`)
+- [x] Auto-install missing toolchains (apt)
+- [x] ANDROID_HOME / ANDROID_SDK_ROOT export
+- [x] Preference-gated runners (master switch + per-language keys)
+- [x] Terminal Activity mode
+- [x] Terminal Bottom Sheet mode (fresh tab every run)
+- [x] Raw shell command support (`runShell`)
+- [x] `isSupported(path)` extension check
+- [x] `bindof(path, asBottomSheet)` entry point
 
 ### Note
 
