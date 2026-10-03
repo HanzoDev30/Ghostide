@@ -88,6 +88,17 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
           }
         });
 
+    // تنها جایی که نتیجه‌ی عملیات toast می‌شود. قبلاً هشت فرگمنت جدا observe می‌کردند: با هر ساخته
+    // شدن یک تب، آخرین نتیجه‌ی قدیمی دوباره toast می‌شد و چند تب زنده یعنی چند toast همزمان.
+    final ir.hanzodev1375.ghostide.jgit.jgitandroid.model.OperationResult staleResult =
+        viewModel.operationResult.getValue();
+    viewModel.operationResult.observe(
+        getViewLifecycleOwner(),
+        result -> {
+          if (result == null || result == staleResult) return;
+          GhostToast.makeText(getContext(), result.getMessage(), GhostToast.LENGTH_SHORT).show();
+        });
+
     viewModel.repositoryStatus.observe(
         getViewLifecycleOwner(),
         status -> {
@@ -349,7 +360,8 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
 
     ViewPager2 pager = root.findViewById(R.id.viewPager);
     viewPager = pager;
-    ViewPagerAdapter adapter = new ViewPagerAdapter(requireActivity(), tabs);
+    // میزبان خودِ شیت است تا با بسته شدنش فرگمنت‌های تب‌ها هم نابود شوند
+    ViewPagerAdapter adapter = new ViewPagerAdapter(this, tabs);
     pager.setAdapter(adapter);
 
     TabLayout tabLayout = root.findViewById(R.id.tabLayout);

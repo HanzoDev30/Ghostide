@@ -15,6 +15,15 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     this.tabs = tabs;
   }
 
+  /**
+   * با میزبانِ Activity فرگمنت‌های تب بعد از بسته شدن شیت در FragmentManager اکتیویتی می‌مانند و
+   * observer هایشان زنده می‌ماند؛ با هر بار باز کردن شیت تعدادشان بیشتر می‌شد.
+   */
+  public ViewPagerAdapter(@NonNull Fragment host, List<GitTab> tabs) {
+    super(host);
+    this.tabs = tabs;
+  }
+
   @NonNull
   @Override
   public Fragment createFragment(int position) {

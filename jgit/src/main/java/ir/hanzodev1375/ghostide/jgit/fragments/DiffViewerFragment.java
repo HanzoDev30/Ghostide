@@ -21,7 +21,10 @@ public class DiffViewerFragment extends Fragment {
   private ProgressBar progressBar;
   private TextView emptyText;
   private GitViewModel viewModel;
-  private String loadedDiff;
+  /** متنی که همین الان روی diffViewer نشسته؛ برای جلوگیری از parse دوباره‌ی همان متن. */
+  private String shownDiff;
+  /** true یعنی لیست تغییرات عوض شده و diff قبلی کهنه است. */
+  private boolean diffStale = true;
 
   @Nullable
   @Override
@@ -41,6 +44,9 @@ public class DiffViewerFragment extends Fragment {
     viewModel = new ViewModelProvider(requireActivity()).get(GitViewModel.class);
     M3Theme.apply(view);
 
+    shownDiff = null;
+    diffStale = true;
+    viewModel.changedFiles.observe(getViewLifecycleOwner(), changes -> diffStale = true);
     viewModel.fullDiff.observe(getViewLifecycleOwner(), this::showDiff);
   }
 
@@ -51,17 +57,35 @@ public class DiffViewerFragment extends Fragment {
       showEmptyState("Repository path not found");
       return;
     }
-    progressBar.setVisibility(View.VISIBLE);
-    diffViewer.setVisibility(View.GONE);
+    // قبلاً با هر بار رسیدن به این تب کل diff دوباره ساخته، parse و هایلایت می‌شد حتی اگر هیچ
+    // چیز عوض نشده بود. حالا فقط وقتی لیست تغییرات عوض شده یا هنوز چیزی نشان نداده‌ایم.
+    if (!diffStale && shownDiff != null) return;
+    diffStale = false;
+    if (shownDiff == null) {
+      progressBar.setVisibility(View.VISIBLE);
+      diffViewer.setVisibility(View.GONE);
+    }
     viewModel.loadFullDiff();
+  }
+
+  @Override
+  public void onDestroyView() {
+    shownDiff = null;
+    super.onDestroyView();
   }
 
   private void showDiff(String diff) {
     progressBar.setVisibility(View.GONE);
     if (diff == null || diff.isEmpty() || "No changes detected.".equals(diff)) {
+      shownDiff = null;
       showEmptyState("No changes to display");
       return;
     }
+    if (diff.equals(shownDiff)) {
+      diffViewer.setVisibility(View.VISIBLE);
+      return;
+    }
+    shownDiff = diff;
     emptyText.setVisibility(View.GONE);
     diffViewer.setVisibility(View.VISIBLE);
     diffViewer.applyMaterial3();

@@ -403,15 +403,50 @@ public final class M3Theme {
     return color(m3() != null ? m3().getOnPrimaryFixedVariant() : null);
   }
 
+  /**
+   * Theme resolved once for the duration of one apply()/applyTopLevel()/listCard() pass. Every
+   * per-view method below calls m3()/widget() several times, and each of those used to go through
+   * ThemeManager.getDefault(...).getTheme(); a screen with a few dozen views meant hundreds of
+   * lookups per pass. Main thread only, always cleared in a finally block.
+   */
+  private static volatile GhostTheme passTheme;
+
+  private static int passDepth;
+
+  private static boolean beginPass() {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      return false;
+    }
+    if (passDepth++ == 0) {
+      passTheme = theme();
+    }
+    return true;
+  }
+
+  private static void endPass(boolean started) {
+    if (started && --passDepth == 0) {
+      passTheme = null;
+    }
+  }
+
   public static void apply(View root) {
     if (root == null) {
       return;
     }
+    boolean pass = beginPass();
+    try {
+      applyTree(root);
+    } finally {
+      endPass(pass);
+    }
+  }
+
+  private static void applyTree(View root) {
     applyShallow(root);
     if (root instanceof ViewGroup) {
       ViewGroup group = (ViewGroup) root;
       for (int i = 0; i < group.getChildCount(); i++) {
-        apply(group.getChildAt(i));
+        applyTree(group.getChildAt(i));
       }
     }
   }
@@ -427,17 +462,22 @@ public final class M3Theme {
     if (item == null) {
       return;
     }
-    java.util.ArrayDeque<View> stack = new java.util.ArrayDeque<>();
-    stack.push(item);
-    while (!stack.isEmpty()) {
-      View v = stack.pop();
-      applyShallow(v);
-      if (v instanceof ViewGroup) {
-        ViewGroup group = (ViewGroup) v;
-        for (int i = group.getChildCount() - 1; i >= 0; i--) {
-          stack.push(group.getChildAt(i));
+    boolean pass = beginPass();
+    try {
+      java.util.ArrayDeque<View> stack = new java.util.ArrayDeque<>();
+      stack.push(item);
+      while (!stack.isEmpty()) {
+        View v = stack.pop();
+        applyShallow(v);
+        if (v instanceof ViewGroup) {
+          ViewGroup group = (ViewGroup) v;
+          for (int i = group.getChildCount() - 1; i >= 0; i--) {
+            stack.push(group.getChildAt(i));
+          }
         }
       }
+    } finally {
+      endPass(pass);
     }
   }
 
@@ -451,19 +491,24 @@ public final class M3Theme {
     if (root == null) {
       return;
     }
-    applyShallow(root);
-    if (root instanceof ViewGroup) {
-      ViewGroup group = (ViewGroup) root;
-      for (int i = 0; i < group.getChildCount(); i++) {
-        View child = group.getChildAt(i);
-        applyShallow(child);
-        if (child instanceof ViewGroup) {
-          ViewGroup g2 = (ViewGroup) child;
-          for (int j = 0; j < g2.getChildCount(); j++) {
-            applyShallow(g2.getChildAt(j));
+    boolean pass = beginPass();
+    try {
+      applyShallow(root);
+      if (root instanceof ViewGroup) {
+        ViewGroup group = (ViewGroup) root;
+        for (int i = 0; i < group.getChildCount(); i++) {
+          View child = group.getChildAt(i);
+          applyShallow(child);
+          if (child instanceof ViewGroup) {
+            ViewGroup g2 = (ViewGroup) child;
+            for (int j = 0; j < g2.getChildCount(); j++) {
+              applyShallow(g2.getChildAt(j));
+            }
           }
         }
       }
+    } finally {
+      endPass(pass);
     }
   }
 
@@ -1181,12 +1226,19 @@ public final class M3Theme {
   }
 
   public static void textView(TextView tv) {
-    Integer onSurface = fallback(color(m3().getOnSurface()), color(widgetNullableText()));
+    MaterialTheme m = m3();
+    Integer onSurface = color(m.getOnSurface());
+    if (onSurface == null) {
+      onSurface = color(widgetNullableText());
+    }
     if (onSurface != null) {
       tv.setTextColor(onSurface);
     }
     if (tv.getHint() != null) {
-      Integer hint = fallback(color(m3().getOnSurfaceVariant()), color(hintString()));
+      Integer hint = color(m.getOnSurfaceVariant());
+      if (hint == null) {
+        hint = color(hintString());
+      }
       if (hint != null) {
         tv.setHintTextColor(hint);
       }
@@ -1194,8 +1246,15 @@ public final class M3Theme {
   }
 
   public static void editText(EditText et) {
-    Integer text = fallback(color(m3().getOnSurface()), color(widgetNullableText()));
-    Integer hint = fallback(color(m3().getOnSurfaceVariant()), color(hintString()));
+    MaterialTheme m = m3();
+    Integer text = color(m.getOnSurface());
+    if (text == null) {
+      text = color(widgetNullableText());
+    }
+    Integer hint = color(m.getOnSurfaceVariant());
+    if (hint == null) {
+      hint = color(hintString());
+    }
     if (text != null) {
       et.setTextColor(text);
     }
@@ -1349,6 +1408,10 @@ public final class M3Theme {
 
 
   public static GhostTheme theme() {
+    GhostTheme snapshot = passTheme;
+    if (snapshot != null) {
+      return snapshot;
+    }
     GhostTheme preview = previewTheme;
     if (preview != null) {
       return preview;

@@ -62,11 +62,5 @@ public class GitignoreFragment extends Fragment {
           viewModel.saveGitIgnore(content);
         });
 
-    viewModel.operationResult.observe(
-        getViewLifecycleOwner(),
-        result -> {
-          if (result != null)
-            GhostToast.makeText(getContext(), result.getMessage(), GhostToast.LENGTH_SHORT).show();
-        });
   }
 }

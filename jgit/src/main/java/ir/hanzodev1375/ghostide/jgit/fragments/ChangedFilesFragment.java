@@ -80,12 +80,6 @@ public class ChangedFilesFragment extends Fragment {
     view.findViewById(R.id.btnStageAll).setOnClickListener(v -> viewModel.stageAllFiles());
     view.findViewById(R.id.btnCommit).setOnClickListener(v -> showCommitDialog());
 
-    viewModel.operationResult.observe(
-        getViewLifecycleOwner(),
-        result -> {
-          if (result != null)
-            GhostToast.makeText(getContext(), result.getMessage(), GhostToast.LENGTH_SHORT).show();
-        });
   }
 
   private void showCommitDialog() {

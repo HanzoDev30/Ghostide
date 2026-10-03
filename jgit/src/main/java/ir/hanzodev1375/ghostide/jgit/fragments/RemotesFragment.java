@@ -74,12 +74,6 @@ public class RemotesFragment extends Fragment {
 
     view.findViewById(R.id.btnAddRemote).setOnClickListener(v -> showAddRemoteDialog());
 
-    viewModel.operationResult.observe(
-        getViewLifecycleOwner(),
-        result -> {
-          if (result != null)
-            GhostToast.makeText(getContext(), result.getMessage(), GhostToast.LENGTH_SHORT).show();
-        });
 
     viewModel.pushPullResult.observe(
         getViewLifecycleOwner(),

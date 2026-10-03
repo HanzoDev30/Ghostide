@@ -765,8 +765,16 @@ public class GitManager {
     List<ConflictFile> conflicts = new ArrayList<>();
     try {
       if (repository == null) return conflicts;
-      org.eclipse.jgit.api.Status status = git.status().call();
-      for (String path : status.getConflicting()) {
+      // مسیرهای conflict همان ورودی‌های index با stage > 0 هستند؛ خواندن index به‌جای status کل
+      // worktree را اسکن نمی‌کند (این تب با هر ساخته شدن یک اسکن کامل روی ترد مشترک می‌زد)
+      org.eclipse.jgit.dircache.DirCache cache = repository.readDirCache();
+      String last = null;
+      for (int i = 0; i < cache.getEntryCount(); i++) {
+        org.eclipse.jgit.dircache.DirCacheEntry entry = cache.getEntry(i);
+        if (entry.getStage() == 0) continue;
+        String path = entry.getPathString();
+        if (path.equals(last)) continue;
+        last = path;
         ConflictFile cf = readConflictFile(path);
         if (cf != null) conflicts.add(cf);
       }
