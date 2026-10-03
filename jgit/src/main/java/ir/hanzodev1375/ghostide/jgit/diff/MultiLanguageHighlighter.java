@@ -189,94 +189,79 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
     return "java";
   }
 
+  /** خط‌های خیلی بلند (minified و ...) هایلایت نمی‌شوند؛ هزینه‌ی regex روی آن‌ها به فریم‌ها می‌رسید. */
+  private static final int MAX_HIGHLIGHT_LENGTH = 800;
+
+  private static final List<SyntaxHighlighter.HighlightSpan> NO_SPANS = Collections.emptyList();
+
+  private static final Comparator<SyntaxHighlighter.HighlightSpan> BY_START =
+      (a, b) -> Integer.compare(a.start, b.start);
+
   @Override
   public void highlight(String text, DiffLine.LineType type, String language, Callback callback) {
-    String lang = GRAMMARS.containsKey(language) ? language : "java";
-    Grammar grammar = GRAMMARS.get(lang);
+    // هدر diff (diff --git / @@ ...) کد نیست؛ با رنگ هدر کشیده می‌شود
+    if (type == DiffLine.LineType.HEADER || text.length() > MAX_HIGHLIGHT_LENGTH) {
+      callback.onResult(NO_SPANS);
+      return;
+    }
 
-    List<SyntaxHighlighter.HighlightSpan> ignoreRanges = new ArrayList<>();
+    Grammar grammar = GRAMMARS.get(language);
+    if (grammar == null) grammar = GRAMMARS.get("java");
+
+    // used[i] == true یعنی کاراکتر i قبلاً به یک span (یا داخل کامنت/استرینگ) تعلق دارد. با این
+    // آرایه هر بررسی هم‌پوشانی O(طول توکن) است و دیگر نه لیست ignoreRange پیمایش می‌شود، نه
+    // HashSet با کلید String برای حذف تکراری‌ها ساخته می‌شود.
+    boolean[] used = new boolean[text.length()];
+
+    List<SyntaxHighlighter.HighlightSpan> ignoreRanges = new ArrayList<>(4);
     addIgnoreRanges(ignoreRanges, text, grammar.comments);
     addIgnoreRanges(ignoreRanges, text, grammar.strings);
     sortRanges(ignoreRanges);
-
-    List<SyntaxHighlighter.HighlightSpan> spans = new ArrayList<>();
-
-    addMatchesSafe(spans, text, grammar.keywords, COLOR_KEYWORD, ignoreRanges);
-    addMatchesSafeForFunctions(
-        spans, text, grammar.functions, COLOR_FUNCTION, ignoreRanges, grammar.keywords);
-    if (grammar.annotations != null) {
-      addMatchesSafe(spans, text, grammar.annotations, COLOR_ANNOTATION, ignoreRanges);
+    for (int i = 0; i < ignoreRanges.size(); i++) {
+      SyntaxHighlighter.HighlightSpan r = ignoreRanges.get(i);
+      markUsed(used, r.start, r.end);
     }
-    if (grammar.operators != null) {
-      addMatchesSafe(spans, text, grammar.operators, COLOR_OPERATOR, ignoreRanges);
-    }
-    addMatchesSafe(spans, text, grammar.numbers, COLOR_NUMBER, ignoreRanges);
 
-    addVariableMatches(spans, text, ignoreRanges);
+    List<SyntaxHighlighter.HighlightSpan> spans = new ArrayList<>(16);
+
+    // ترتیب همان اولویت قبلی است: اولین دسته‌ای که یک کاراکتر را بگیرد برنده است
+    addMatches(spans, used, text, grammar.keywords, COLOR_KEYWORD, 0);
+    addMatches(spans, used, text, grammar.functions, COLOR_FUNCTION, 1);
+    addMatches(spans, used, text, grammar.annotations, COLOR_ANNOTATION, 0);
+    addMatches(spans, used, text, grammar.operators, COLOR_OPERATOR, 0);
+    addMatches(spans, used, text, grammar.numbers, COLOR_NUMBER, 0);
+    addMatches(spans, used, text, IDENTIFIER, COLOR_VARIABLE, 1);
 
     List<SyntaxHighlighter.HighlightSpan> bracketSpans =
         RainbowBracketHighlighter.findBrackets(text, ignoreRanges);
-    spans.addAll(bracketSpans);
+    for (int i = 0; i < bracketSpans.size(); i++) {
+      SyntaxHighlighter.HighlightSpan b = bracketSpans.get(i);
+      if (isFree(used, b.start, b.end)) {
+        markUsed(used, b.start, b.end);
+        spans.add(b);
+      }
+    }
 
-    spans = deduplicateSpans(spans);
-    spans.sort(Comparator.comparingInt(s -> s.start));
+    // span ها هم‌پوشانی ندارند، پس مرتب‌سازی روی start کافی است
+    spans.sort(BY_START);
     callback.onResult(spans);
   }
 
-  private void addVariableMatches(
-      List<SyntaxHighlighter.HighlightSpan> spans,
-      String text,
-      List<SyntaxHighlighter.HighlightSpan> ignoreRanges) {
-    Matcher m = IDENTIFIER.matcher(text);
-    while (m.find()) {
-      int start = m.start(1);
-      int end = m.end(1);
-      if (start == -1 || end == -1) continue;
-
-      if (isOverlappingAnyRange(start, end, ignoreRanges)) continue;
-
-      boolean already = false;
-      for (int i = 0; i < spans.size(); i++) {
-        SyntaxHighlighter.HighlightSpan span = spans.get(i);
-        if (span.start > start) break;
-        if (start >= span.start && end <= span.end) {
-          already = true;
-          break;
-        }
-      }
-      if (!already) {
-        spans.add(new SyntaxHighlighter.HighlightSpan(start, end, COLOR_VARIABLE));
-      }
-    }
-  }
-
-  private static boolean isOverlappingAnyRange(
-      int start, int end, List<SyntaxHighlighter.HighlightSpan> ranges) {
-    for (int i = 0; i < ranges.size(); i++) {
-      SyntaxHighlighter.HighlightSpan range = ranges.get(i);
-      if (range.start > end) break;
-      if (start < range.end && end > range.start) return true;
-    }
-    return false;
-  }
-
-  /** ignore range ها بر اساس شروع مرتب می‌شوند تا جست‌وجوی خطی روی همه‌ی توکن‌ها حذف شود. */
+  /** ignore range ها بر اساس شروع مرتب می‌شوند (RainbowBracketHighlighter به این ترتیب تکیه دارد). */
   private static void sortRanges(List<SyntaxHighlighter.HighlightSpan> ranges) {
-    ranges.sort(Comparator.comparingInt(r -> r.start));
+    ranges.sort(BY_START);
   }
 
-  private List<SyntaxHighlighter.HighlightSpan> deduplicateSpans(
-      List<SyntaxHighlighter.HighlightSpan> spans) {
-    Set<String> seen = new HashSet<>();
-    List<SyntaxHighlighter.HighlightSpan> unique = new ArrayList<>();
-    for (SyntaxHighlighter.HighlightSpan span : spans) {
-      String key = span.start + "|" + span.end;
-      if (!seen.contains(key)) {
-        seen.add(key);
-        unique.add(span);
-      }
+  private static boolean isFree(boolean[] used, int start, int end) {
+    for (int i = start; i < end; i++) {
+      if (used[i]) return false;
     }
-    return unique;
+    return true;
+  }
+
+  private static void markUsed(boolean[] used, int start, int end) {
+    int to = Math.min(end, used.length);
+    for (int i = Math.max(start, 0); i < to; i++) used[i] = true;
   }
 
   private void addIgnoreRanges(
@@ -288,21 +273,13 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
     }
   }
 
-  private void addMatchesSafe(
+  /** group == 0 یعنی کل match، در غیر این صورت گروه مشخص‌شده (مثلاً اسم تابع بدون پرانتز). */
+  private static void addMatches(
       List<SyntaxHighlighter.HighlightSpan> spans,
+      boolean[] used,
       String text,
       Pattern pattern,
       int color,
-      List<SyntaxHighlighter.HighlightSpan> ignoreRanges) {
-    addMatchesSafe(spans, text, pattern, color, ignoreRanges, 0);
-  }
-
-  private void addMatchesSafe(
-      List<SyntaxHighlighter.HighlightSpan> spans,
-      String text,
-      Pattern pattern,
-      int color,
-      List<SyntaxHighlighter.HighlightSpan> ignoreRanges,
       int group) {
     if (pattern == null) return;
     Matcher m = pattern.matcher(text);
@@ -313,30 +290,9 @@ public class MultiLanguageHighlighter implements SyntaxHighlighter {
         start = m.start(group);
         end = m.end(group);
       }
-      if (start == -1 || end == -1) continue;
-      if (isOverlappingAnyRange(start, end, ignoreRanges)) continue;
-      spans.add(new SyntaxHighlighter.HighlightSpan(start, end, color));
-    }
-  }
-
-  private void addMatchesSafeForFunctions(
-      List<SyntaxHighlighter.HighlightSpan> spans,
-      String text,
-      Pattern pattern,
-      int color,
-      List<SyntaxHighlighter.HighlightSpan> ignoreRanges,
-      Pattern keywordPattern) {
-    if (pattern == null) return;
-    Matcher m = pattern.matcher(text);
-    while (m.find()) {
-      int start = m.start(1);
-      int end = m.end(1);
-      if (start == -1 || end == -1) continue;
-      if (isOverlappingAnyRange(start, end, ignoreRanges)) continue;
-      String functionName = text.substring(start, end);
-      if (keywordPattern != null && keywordPattern.matcher(functionName).matches()) {
-        continue;
-      }
+      if (start < 0 || end < 0) continue;
+      if (!isFree(used, start, end)) continue;
+      markUsed(used, start, end);
       spans.add(new SyntaxHighlighter.HighlightSpan(start, end, color));
     }
   }

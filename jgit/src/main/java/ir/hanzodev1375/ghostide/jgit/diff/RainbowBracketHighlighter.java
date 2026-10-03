@@ -35,13 +35,13 @@ public class RainbowBracketHighlighter {
         
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            
-            if (isInIgnoreRange(i, ignoreRanges)) {
-                continue;
-            }
-            
+
+            // اول بررسی ارزان (آیا اصلاً براکت است)، بعد جست‌وجوی ignoreRange
             int bracketType = getBracketType(c);
-            if (bracketType != -1 && isOpenBracket(c)) {
+            if (bracketType == -1) continue;
+            if (isInIgnoreRange(i, ignoreRanges)) continue;
+
+            if (isOpenBracket(c)) {
                 
                 int level = stack.size();
                 int color = RAINBOW_COLORS[level % RAINBOW_COLORS.length];

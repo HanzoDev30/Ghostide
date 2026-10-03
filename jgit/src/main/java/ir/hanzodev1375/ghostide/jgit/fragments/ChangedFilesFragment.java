@@ -42,6 +42,8 @@ public class ChangedFilesFragment extends Fragment {
 
     RecyclerView recyclerView = view.findViewById(R.id.recyclerViewChanges);
     recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    // اندازه‌ی RecyclerView به محتوا وابسته نیست (match_parent)؛ با این فلگ هر submitList یک measure کمتر دارد
+    recyclerView.setHasFixedSize(true);
     adapter = new FileChangeAdapter();
     recyclerView.setAdapter(adapter);
     ((EmptyView) view.findViewById(R.id.emptyView)).bindTo(recyclerView);

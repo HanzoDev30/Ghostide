@@ -51,6 +51,7 @@ public class CommitAdapter extends ListAdapter<CommitInfo, CommitAdapter.ViewHol
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view =
         LayoutInflater.from(parent.getContext()).inflate(R.layout.item_commit, parent, false);
+    M3Theme.listCard(view);
     return new ViewHolder(view);
   }
 
@@ -65,7 +66,6 @@ public class CommitAdapter extends ListAdapter<CommitInfo, CommitAdapter.ViewHol
         v -> {
           if (listener != null) listener.onClick(commit);
         });
-    M3Theme.listCard(holder.itemView);
   }
 
   static class ViewHolder extends RecyclerView.ViewHolder {

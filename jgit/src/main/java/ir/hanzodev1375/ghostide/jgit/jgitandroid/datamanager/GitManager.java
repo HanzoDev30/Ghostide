@@ -36,7 +36,9 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GitManager {
 
@@ -244,30 +246,51 @@ public class GitManager {
    * فایل‌ها نیست (که برای هر کدام یک stat syscall می‌زد).
    */
   public List<FileChange> getChangedFiles() {
-    List<FileChange> changes = new ArrayList<>();
     Status status = getStatus();
-    if (status == null) return changes;
+    if (status == null) return new ArrayList<>();
+    return collectChanges(status);
+  }
+
+  /**
+   * status فقط برای همین مسیرها؛ هزینه‌اش به تعداد مسیرها بستگی دارد نه به اندازه‌ی کل پروژه.
+   * بعد از stage/unstage/discard یک فایل لازم نیست کل worktree دوباره اسکن شود.
+   * اگر چیزی خراب شد null برمی‌گرداند تا صدا‌زننده به اسکن کامل برگردد.
+   */
+  public List<FileChange> getChangedFilesFor(Collection<String> paths) {
+    if (git == null || paths == null || paths.isEmpty()) return null;
+    try {
+      org.eclipse.jgit.api.StatusCommand cmd =
+          git.status().setIgnoreSubmodules(SubmoduleWalk.IgnoreSubmoduleMode.ALL);
+      for (String path : paths) cmd.addPath(path);
+      return collectChanges(cmd.call());
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private static List<FileChange> collectChanges(Status status) {
+    List<FileChange> changes = new ArrayList<>();
 
     for (String path : status.getAdded()) {
       changes.add(new FileChange(path, ChangeType.ADDED, true));
     }
 
-    for (String path : status.getChanged()) {
+    Collection<String> changed = status.getChanged();
+    for (String path : changed) {
       changes.add(new FileChange(path, ChangeType.MODIFIED, true));
     }
 
-    for (String path : status.getRemoved()) {
+    Collection<String> removed = status.getRemoved();
+    for (String path : removed) {
       changes.add(new FileChange(path, ChangeType.DELETED, true));
     }
 
-    Collection<String> changed = status.getChanged();
     for (String path : status.getModified()) {
       if (!changed.contains(path)) {
         changes.add(new FileChange(path, ChangeType.MODIFIED, false));
       }
     }
 
-    Collection<String> removed = status.getRemoved();
     for (String path : status.getMissing()) {
       if (!removed.contains(path)) {
         changes.add(new FileChange(path, ChangeType.DELETED, false));
@@ -304,12 +327,7 @@ public class GitManager {
         return new OperationResult(true, "Deletion staged");
       }
 
-      if (isIgnored(filePath)) {
-        // Force add ignored files if explicitly staged
-        git.add().addFilepattern(filePath).setUpdate(false).call();
-      } else {
-        git.add().addFilepattern(filePath).call();
-      }
+      git.add().addFilepattern(filePath).call();
       return new OperationResult(true, "File staged");
     } catch (Exception e) {
       return new OperationResult(false, describe(e));
@@ -317,11 +335,44 @@ public class GitManager {
   }
 
   public OperationResult stageAllFiles() {
+    return stageAllFiles(null);
+  }
+
+  /**
+   * معادل git add -A. قبلاً دو بار کل worktree را (add . و بعد add . -u) پیمایش می‌کرد؛ حالا یک
+   * status می‌گیرد و فقط مسیرهایی را که واقعاً تغییر کرده‌اند stage می‌کند. [touchedOut] اگر null
+   * نباشد، مسیرهای دست‌خورده را می‌گیرد تا لیست تغییرات بدون اسکن کامل به‌روز شود.
+   */
+  public OperationResult stageAllFiles(Collection<String> touchedOut) {
     try {
       if (git == null) return notOpen();
-      git.add().addFilepattern(".").call();
-      // Equivalent of git add -A: picks up deletions of tracked files
-      git.add().addFilepattern(".").setUpdate(true).call();
+
+      Status status =
+          git.status().setIgnoreSubmodules(SubmoduleWalk.IgnoreSubmoduleMode.ALL).call();
+
+      Set<String> files = new LinkedHashSet<>();
+      files.addAll(status.getUntracked());
+      files.addAll(status.getModified());
+      files.addAll(status.getConflicting());
+      Set<String> missing = new LinkedHashSet<>(status.getMissing());
+
+      if (!files.isEmpty()) {
+        org.eclipse.jgit.api.AddCommand add = git.add();
+        for (String path : files) add.addFilepattern(path);
+        // پوشه‌های کاملاً untracked هم اضافه می‌شوند تا اگر JGit فایل‌هایشان را جدا لیست نکند چیزی جا نماند
+        for (String folder : status.getUntrackedFolders()) add.addFilepattern(folder);
+        add.call();
+      }
+      if (!missing.isEmpty()) {
+        org.eclipse.jgit.api.RmCommand rm = git.rm().setCached(true);
+        for (String path : missing) rm.addFilepattern(path);
+        rm.call();
+      }
+
+      if (touchedOut != null) {
+        touchedOut.addAll(files);
+        touchedOut.addAll(missing);
+      }
       return new OperationResult(true, "All files staged");
     } catch (Exception e) {
       return new OperationResult(false, describe(e));

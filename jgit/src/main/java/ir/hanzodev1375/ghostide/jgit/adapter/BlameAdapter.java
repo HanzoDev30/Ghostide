@@ -32,8 +32,10 @@ public class BlameAdapter extends RecyclerView.Adapter<BlameAdapter.VH> {
   @NonNull
   @Override
   public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    return new VH(
-        LayoutInflater.from(parent.getContext()).inflate(R.layout.item_blame, parent, false));
+    View view =
+        LayoutInflater.from(parent.getContext()).inflate(R.layout.item_blame, parent, false);
+    M3Theme.listCard(view);
+    return new VH(view);
   }
 
   @Override
@@ -47,7 +49,6 @@ public class BlameAdapter extends RecyclerView.Adapter<BlameAdapter.VH> {
         v -> {
           if (listener != null) listener.onClick(b);
         });
-    M3Theme.listCard(h.itemView);
   }
 
   @Override

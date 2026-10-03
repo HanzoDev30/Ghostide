@@ -20,8 +20,12 @@ import ir.hanzodev1375.ghostide.jgit.jgitandroid.model.BlameInfo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -369,7 +373,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           invalidateGitCaches();
-          if (result.isSuccess()) refreshChangedFiles();
+          if (result.isSuccess()) refreshChangedFilesNow(Collections.singleton(filePath));
           _progressMessage.postValue(null);
         });
   }
@@ -378,13 +382,14 @@ public class GitViewModel extends ViewModel {
     _progressMessage.postValue("Staging all files...");
     executor.execute(
         () -> {
+          Set<String> touched = new HashSet<>();
           OperationResult result =
               gitManager != null
-                  ? gitManager.stageAllFiles()
+                  ? gitManager.stageAllFiles(touched)
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           invalidateGitCaches();
-          if (result.isSuccess()) refreshChangedFiles();
+          if (result.isSuccess()) refreshChangedFilesNow(touched);
           _progressMessage.postValue(null);
         });
   }
@@ -399,7 +404,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           invalidateGitCaches();
-          if (result.isSuccess()) refreshChangedFiles();
+          if (result.isSuccess()) refreshChangedFilesNow(Collections.singleton(filePath));
           _progressMessage.postValue(null);
         });
   }
@@ -414,7 +419,7 @@ public class GitViewModel extends ViewModel {
                   : new OperationResult(false, "Git manager not initialized");
           _operationResult.postValue(result);
           invalidateGitCaches();
-          if (result.isSuccess()) refreshChangedFiles();
+          if (result.isSuccess()) refreshChangedFilesNow(Collections.singleton(filePath));
           _progressMessage.postValue(null);
         });
   }
@@ -423,6 +428,7 @@ public class GitViewModel extends ViewModel {
     _progressMessage.postValue("Committing changes...");
     executor.execute(
         () -> {
+          Set<String> staged = stagedPaths();
           OperationResult result =
               gitManager != null
                   ? gitManager.commit(message, author, email)
@@ -430,7 +436,7 @@ public class GitViewModel extends ViewModel {
           _operationResult.postValue(result);
           if (result.isSuccess()) {
             invalidateGitCaches();
-            refreshChangedFiles();
+            refreshChangedFilesNow(staged);
             refreshCommitHistory();
             _commitCompleted.postValue(true);
           }
@@ -441,6 +447,7 @@ public class GitViewModel extends ViewModel {
   public void commit(String message) {
     executor.execute(
         () -> {
+          Set<String> staged = stagedPaths();
           OperationResult result =
               gitManager != null
                   ? gitManager.commit(message)
@@ -448,7 +455,7 @@ public class GitViewModel extends ViewModel {
           _operationResult.postValue(result);
           if (result.isSuccess()) {
             invalidateGitCaches();
-            refreshChangedFiles();
+            refreshChangedFilesNow(staged);
             refreshCommitHistory();
             _commitCompleted.postValue(true);
           }
@@ -598,7 +605,7 @@ public class GitViewModel extends ViewModel {
     if (manager == null) return;
     if (!manager.isOpen()) return;
 
-    _changedFiles.postValue(manager.getChangedFiles());
+    publishChanges(manager.getChangedFiles());
     _commitHistory.postValue(manager.getCommitHistory());
     postBranchState(manager);
     _remotes.postValue(manager.getRemotes());
@@ -615,8 +622,94 @@ public class GitViewModel extends ViewModel {
         () -> {
           List<FileChange> changes =
               gitManager != null ? gitManager.getChangedFiles() : Collections.emptyList();
-          _changedFiles.postValue(changes);
+          publishChanges(changes);
         });
+  }
+
+  // ───────────── به‌روزرسانی جزئی لیست تغییرات (بدون اسکن کل worktree) ─────────────
+
+  /** بالاتر از این تعداد مسیر، یک اسکن کامل از status جزئی ارزان‌تر است. */
+  private static final int PARTIAL_REFRESH_LIMIT = 300;
+
+  /** آخرین لیستی که منتشر شد؛ null یعنی هنوز هیچ اسکن کاملی انجام نشده. */
+  private volatile List<FileChange> lastChanges = null;
+
+  private void publishChanges(List<FileChange> list) {
+    lastChanges = list;
+    _changedFiles.postValue(list);
+  }
+
+  private Set<String> stagedPaths() {
+    Set<String> out = new HashSet<>();
+    List<FileChange> base = lastChanges;
+    if (base != null) {
+      for (FileChange c : base) {
+        if (c.isStaged()) out.add(c.getPath());
+      }
+    }
+    return out;
+  }
+
+  /**
+   * فقط وضعیت [paths] را از JGit می‌خواند و در لیست قبلی جایگزین می‌کند. باید روی ترد executor
+   * صدا زده شود. اگر لیست پایه نداریم، مسیرها زیادند یا JGit خطا داد، اسکن کامل انجام می‌شود.
+   */
+  private void refreshChangedFilesNow(Collection<String> paths) {
+    GitManager manager = gitManager;
+    if (manager == null) {
+      publishChanges(Collections.emptyList());
+      return;
+    }
+    List<FileChange> base = lastChanges;
+    List<FileChange> fresh = null;
+    if (base != null && paths != null && !paths.isEmpty() && paths.size() <= PARTIAL_REFRESH_LIMIT) {
+      fresh = manager.getChangedFilesFor(paths);
+    }
+    if (fresh == null) {
+      publishChanges(manager.getChangedFiles());
+      return;
+    }
+    publishChanges(mergeChanges(base, paths, fresh));
+  }
+
+  private static List<FileChange> mergeChanges(
+      List<FileChange> base, Collection<String> paths, List<FileChange> fresh) {
+    Set<String> touched = paths instanceof Set ? (Set<String>) paths : new HashSet<>(paths);
+    List<FileChange> merged = new ArrayList<>(base.size() + fresh.size());
+    for (FileChange c : base) {
+      if (!touched.contains(c.getPath())) merged.add(c);
+    }
+    // همان گروه‌بندی GitManager.getChangedFiles() حفظ می‌شود تا ردیف‌ها بی‌جهت جابه‌جا نشوند
+    for (FileChange f : fresh) {
+      int rank = rankOf(f);
+      int at = merged.size();
+      while (at > 0 && rankOf(merged.get(at - 1)) > rank) at--;
+      merged.add(at, f);
+    }
+    return merged;
+  }
+
+  private static int rankOf(FileChange c) {
+    if (c.isStaged()) {
+      switch (c.getChangeType()) {
+        case ADDED:
+          return 0;
+        case MODIFIED:
+          return 1;
+        default:
+          return 2;
+      }
+    }
+    switch (c.getChangeType()) {
+      case MODIFIED:
+        return 3;
+      case DELETED:
+        return 4;
+      case UNTRACKED:
+        return 5;
+      default:
+        return 6;
+    }
   }
 
   public void refreshCommitHistory() {

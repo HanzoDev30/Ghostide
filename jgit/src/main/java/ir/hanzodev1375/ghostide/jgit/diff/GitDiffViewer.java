@@ -29,6 +29,17 @@ public class GitDiffViewer extends View {
   private boolean released = false;
   private TextPaint measurePaint;
 
+  // کش اندازه‌ی متن: عرض یک کاراکتر mono و آخرین اندازه‌ای که روی paint نشسته
+  private static final int HIGHLIGHT_MARGIN = 40;
+  private float charWidth = 0f;
+  private float lastTextSize = -1f;
+  private float lastNumberTextSize = -1f;
+  // پنجره‌ی خطوط قابل‌مشاهده؛ بک‌ترد با آن تشخیص می‌دهد کاری که در صف است هنوز لازم است یا نه
+  private volatile int visStart = 0;
+  private volatile int visEnd = 0;
+  // با هر applyParsed زیاد می‌شود تا نتیجه‌ی هایلایتِ محتوای قدیمی روی محتوای جدید ننشیند
+  private int appliedGeneration = 0;
+
   private TextPaint textPaint;
   private TextPaint lineNumberPaint;
   private Paint bgPaint, lineNumberBgPaint, selectionPaint;
@@ -156,10 +167,11 @@ public class GitDiffViewer extends View {
     this.lineLanguages = languages;
     this.highlightQueued = new boolean[lines.size()];
     this.highlightCache.clear();
+    appliedGeneration++;
     baseMaxWidth = maxWidth;
     scrollX = 0f;
     scrollY = 0f;
-    textPaint.setTextSize(textSize * scaleFactor);
+    applyTextSize(textSize * scaleFactor);
     invalidate();
   }
 
@@ -226,6 +238,14 @@ public class GitDiffViewer extends View {
     }
   }
 
+  /** setTextSize فقط وقتی اندازه واقعاً عوض شده صدا زده می‌شود و عرض کاراکتر mono دوباره کش می‌شود. */
+  private void applyTextSize(float size) {
+    if (size == lastTextSize) return;
+    lastTextSize = size;
+    textPaint.setTextSize(size);
+    charWidth = textPaint.measureText("M");
+  }
+
   private float getScaledMaxTextWidth() {
     return baseMaxWidth * scaleFactor;
   }
@@ -251,11 +271,17 @@ public class GitDiffViewer extends View {
     final int size = count;
     final List<DiffLine> snapshot = diffLines;
     final String[] languages = lineLanguages;
+    final int generation = appliedGeneration;
     executor.execute(
         () -> {
           List<List<SyntaxHighlighter.HighlightSpan>> results = new ArrayList<>(size);
           for (int k = 0; k < size; k++) {
             int i = indices[k];
+            // کاربر در فلینگ از این خط رد شده؛ اگر دوباره دیده شود دوباره درخواست می‌شود
+            if (i < visStart - HIGHLIGHT_MARGIN || i > visEnd + HIGHLIGHT_MARGIN) {
+              results.add(null);
+              continue;
+            }
             DiffLine line = snapshot.get(i);
             String lang = i < languages.length ? languages[i] : "java";
             List<SyntaxHighlighter.HighlightSpan>[] holder = newResultHolder();
@@ -264,11 +290,12 @@ public class GitDiffViewer extends View {
           }
           mainHandler.post(
               () -> {
-                if (released) return;
+                if (released || generation != appliedGeneration) return;
                 for (int k = 0; k < size; k++) {
                   int i = indices[k];
                   if (i < highlightQueued.length) highlightQueued[i] = false;
-                  highlightCache.put(i, results.get(k));
+                  List<SyntaxHighlighter.HighlightSpan> spans = results.get(k);
+                  if (spans != null) highlightCache.put(i, spans);
                 }
                 invalidate();
               });
@@ -305,14 +332,20 @@ public class GitDiffViewer extends View {
     float ts = textSize * scaleFactor;
     float lnw = lineNumberWidth * scaleFactor;
 
-    textPaint.setTextSize(ts);
-    lineNumberPaint.setTextSize(ts * 0.85f);
+    applyTextSize(ts);
+    float numberSize = ts * 0.85f;
+    if (numberSize != lastNumberTextSize) {
+      lastNumberTextSize = numberSize;
+      lineNumberPaint.setTextSize(numberSize);
+    }
 
     int start = (int) (scrollY / lh);
     if (start < 0) start = 0;
     int end = start + (int) (getHeight() / lh) + 2;
     if (end > diffLines.size()) end = diffLines.size();
 
+    visStart = start;
+    visEnd = end;
     canvas.drawColor(theme.getNormalLineBg());
     requestHighlights(start, end);
 
@@ -321,8 +354,14 @@ public class GitDiffViewer extends View {
       float top = i * lh - scrollY;
       float bottom = top + lh;
 
-      bgPaint.setColor(getBgColor(line));
-      canvas.drawRect(0, top, getWidth(), bottom, bgPaint);
+      // پس‌زمینه‌ی خط‌های عادی همان رنگی است که drawColor بالا زده؛ دوباره کشیدنش هزینه‌ی بی‌فایده است
+      DiffLine.LineType lineType = line.getType();
+      if (lineType == DiffLine.LineType.ADDED
+          || lineType == DiffLine.LineType.REMOVED
+          || lineType == DiffLine.LineType.HEADER) {
+        bgPaint.setColor(getBgColor(line));
+        canvas.drawRect(0, top, getWidth(), bottom, bgPaint);
+      }
 
       float numRight = lnw - scrollX;
       if (numRight > 0) {
@@ -331,7 +370,7 @@ public class GitDiffViewer extends View {
         if (line.getLineNumber() > 0 && line.getType() != DiffLine.LineType.HEADER) {
           lineNumberPaint.setColor(theme.getLineNumberTextColor());
           canvas.drawText(
-              String.valueOf(line.getLineNumber()),
+              line.getLineNumberText(),
               numRight / 2,
               bottom - lh * 0.2f,
               lineNumberPaint);
@@ -342,24 +381,25 @@ public class GitDiffViewer extends View {
       float textY = bottom - lh * 0.2f;
       String text = line.getText();
 
+      int baseColor = getEffectiveTextColor(line);
       List<SyntaxHighlighter.HighlightSpan> spans = highlightCache.get(i);
-      if (spans == null) {
-        textPaint.setColor(getEffectiveTextColor(line));
+      if (spans == null || spans.isEmpty()) {
+        textPaint.setColor(baseColor);
         canvas.drawText(text, textX, textY, textPaint);
       } else {
+        boolean ascii = line.isPlainAscii();
         float x = textX;
         int last = 0;
-        for (SyntaxHighlighter.HighlightSpan span : spans) {
+        for (int s = 0; s < spans.size(); s++) {
+          SyntaxHighlighter.HighlightSpan span = spans.get(s);
           if (span.start > last) {
-            x =
-                drawTextChunk(
-                    canvas, text, last, span.start, getEffectiveTextColor(line), x, textY);
+            x = drawTextChunk(canvas, text, last, span.start, baseColor, x, textY, ascii);
           }
-          x = drawTextChunk(canvas, text, span.start, span.end, span.color, x, textY);
+          x = drawTextChunk(canvas, text, span.start, span.end, span.color, x, textY, ascii);
           last = span.end;
         }
         if (last < text.length()) {
-          drawTextChunk(canvas, text, last, text.length(), getEffectiveTextColor(line), x, textY);
+          drawTextChunk(canvas, text, last, text.length(), baseColor, x, textY, ascii);
         }
       }
 
@@ -370,9 +410,18 @@ public class GitDiffViewer extends View {
   }
 
   private float drawTextChunk(
-      Canvas canvas, String text, int start, int end, int color, float x, float y) {
+      Canvas canvas,
+      String text,
+      int start,
+      int end,
+      int color,
+      float x,
+      float y,
+      boolean plainAscii) {
     textPaint.setColor(color);
     canvas.drawText(text, start, end, x, y, textPaint);
+    // خط ASCII با فونت mono: عرض = تعداد کاراکتر × عرض یک کاراکتر (بدون JNI در هر فریم)
+    if (plainAscii) return x + (end - start) * charWidth;
     return x + textPaint.measureText(text, start, end);
   }
 

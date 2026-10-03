@@ -52,17 +52,18 @@ public class FileChangeAdapter extends ListAdapter<FileChange, FileChangeAdapter
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view =
         LayoutInflater.from(parent.getContext()).inflate(R.layout.item_file_change, parent, false);
+    // استایل کارت فقط یک‌بار برای هر ViewHolder؛ قبلاً در هر bind (یعنی هر اسکرول) تکرار می‌شد
+    M3Theme.listCard(view);
     return new ViewHolder(view);
   }
 
   @Override
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     FileChange change = getItem(position);
-    M3Theme.listCard(holder.itemView);
     holder.tvFileName.setText(change.getPath());
     holder.tvChangeType.setText(labelOf(change.getChangeType()));
     holder.chkStage.setChecked(change.isStaged());
-    // باید بعد از listCard اعمال شود چون listCard رنگ متن همه TextView ها را ریست می‌کند
+    // listCard در onCreateViewHolder اجرا شده و رنگ متن‌ها را ریست کرده؛ رنگ نوع تغییر بعد از آن می‌نشیند
     Integer accent = accentOf(change.getChangeType());
     if (accent != null) holder.tvChangeType.setTextColor(accent);
 

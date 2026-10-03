@@ -86,9 +86,6 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
           if (avatar != null) {
             avatar.setLoading(msg != null);
           }
-          if (msg != null) {
-            GhostToast.makeText(getContext(), msg, GhostToast.LENGTH_SHORT).show();
-          }
         });
 
     viewModel.repositoryStatus.observe(
@@ -169,31 +166,65 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
     loadRepoStars();
   }
 
+  private static final java.util.concurrent.ConcurrentHashMap<String, long[]> SIZE_CACHE =
+      new java.util.concurrent.ConcurrentHashMap<>();
+  private static final long SIZE_CACHE_TTL_MS = 60_000L;
+  private static final long SIZE_WALK_DELAY_MS = 1_000L;
+  private static final int SIZE_WALK_MAX_DEPTH = 64;
+
+  /**
+   * اندازه‌ی کل پوشه (همراه .git و build) با پیمایش بازگشتی محاسبه می‌شود؛ روی پروژه‌های بزرگ
+   * ده‌ها هزار stat روی دیسک است و قبلاً همزمان با status اولیه‌ی git اجرا می‌شد و I/O را از آن
+   * می‌گرفت. حالا: نتیجه کش می‌شود، با تأخیر و با اولویت پس‌زمینه اجرا می‌شود.
+   */
   private void loadRepoSize() {
     if (repoPath == null || repoPath.isEmpty()) {
       return;
     }
-    ChipGroupCompat chipGroup = getView() == null ? null : getView().findViewById(R.id.chipGroupRepoStats);
-    if (chipGroup == null) {
+    View root = getView();
+    ChipGroupCompat chipGroup = root == null ? null : root.findViewById(R.id.chipGroupRepoStats);
+    if (chipGroup == null || chipGroup.getChildCount() < 2) {
       return;
     }
     ChipCompat chip = (ChipCompat) chipGroup.getChildAt(1);
-    new Thread(
-            () -> {
-              long bytes = directorySize(new File(repoPath));
-              String text = formatSize(bytes);
-              if (getActivity() == null) {
-                return;
-              }
-              requireActivity()
-                  .runOnUiThread(
-                      () -> {
-                        if (isAdded() && chipGroup.getChildCount() > 1) {
-                          chip.setText(text);
-                        }
-                      });
-            })
-        .start();
+    final String path = repoPath;
+
+    long[] cached = SIZE_CACHE.get(path);
+    if (cached != null) {
+      chip.setText(formatSize(cached[0]));
+      if (System.currentTimeMillis() - cached[1] < SIZE_CACHE_TTL_MS) {
+        return;
+      }
+    }
+
+    root.postDelayed(
+        () -> {
+          if (!isAdded()) {
+            return;
+          }
+          Thread worker =
+              new Thread(
+                  () -> {
+                    android.os.Process.setThreadPriority(
+                        android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                    long bytes = directorySize(new File(path), 0);
+                    SIZE_CACHE.put(path, new long[] {bytes, System.currentTimeMillis()});
+                    String text = formatSize(bytes);
+                    android.app.Activity activity = getActivity();
+                    if (activity == null) {
+                      return;
+                    }
+                    activity.runOnUiThread(
+                        () -> {
+                          if (isAdded() && chipGroup.getChildCount() > 1) {
+                            chip.setText(text);
+                          }
+                        });
+                  },
+                  "git-repo-size");
+          worker.start();
+        },
+        SIZE_WALK_DELAY_MS);
   }
 
   private void loadRepoStars() {
@@ -271,20 +302,18 @@ public class GitBottomSheetFragment extends BaseBlurBottomSheet {
     return parts.length == 2 && !parts[0].isEmpty() && !parts[1].isEmpty() ? parts[0] + "/" + parts[1] : null;
   }
 
-  private static long directorySize(File dir) {
-    if (dir == null || !dir.exists()) {
+  private static long directorySize(File dir, int depth) {
+    if (dir == null || depth > SIZE_WALK_MAX_DEPTH) {
       return 0L;
     }
-    if (dir.isFile()) {
-      return dir.length();
-    }
-    long total = 0L;
     File[] children = dir.listFiles();
     if (children == null) {
-      return 0L;
+      // فایل معمولی (یا پوشه‌ی غیرقابل‌خواندن)
+      return dir.isFile() ? dir.length() : 0L;
     }
+    long total = 0L;
     for (File child : children) {
-      total += directorySize(child);
+      total += child.isDirectory() ? directorySize(child, depth + 1) : child.length();
     }
     return total;
   }
