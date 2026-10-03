@@ -38,7 +38,7 @@
 - برای همین بیلد را فقط با این دستور بگیرید
 
 ```sh
-  sh gradlew :app:assembleRelease --console=plain
+  sh gradlew :app:assembleRelease 
 ```
 
 - پوشه `build` را دستکاری نکنید

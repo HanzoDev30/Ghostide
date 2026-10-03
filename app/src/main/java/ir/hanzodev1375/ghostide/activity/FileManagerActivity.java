@@ -77,6 +77,7 @@ import ir.hanzodev1375.ghostide.history.HistoryViewModel;
 import ir.hanzodev1375.ghostide.mvvm.viewmodel.FileViewModel;
 import ir.hanzodev1375.ghostide.adapters.FileManagerHostAdapter;
 import ir.hanzodev1375.ghostide.ide.ui.api.IdeHostServices;
+import ir.hanzodev1375.ghostide.plugin.PluginHostRouter;
 import ir.hanzodev1375.ghostide.plugin.PluginManager;
 import ir.hanzodev1375.ghostide.pulse.PulseBridge;
 import ir.hanzodev1375.ghostide.pulse.PulseListener;
@@ -582,11 +583,11 @@ public class FileManagerActivity extends BaseCompat
 
   public void setupClick(String path, String name, View sourceItemView) {
     String extension = FileExtensionUtils.getExtension(name);
+    if (PluginHostRouter.route(this, path, extension)) {
+      return;
+    }
     if (FileExtensionUtils.isCodeFile(extension)) {
-      Intent intent = new Intent(FileManagerActivity.this, EditorActivity.class);
-      intent.putExtra("file_path", path);
-      intent.putExtra("file_name", name);
-      startActivity(intent);
+      PluginHostRouter.openInEditor(this, new File(path));
     } else if (path.endsWith(".gth")) {
       var sheets = new CustomItemSheet(FileManagerActivity.this);
       sheets.add(getString(R.string.theme_edit), R.drawable.ic_edit);

@@ -11,6 +11,7 @@ import ir.hanzodev1375.components.sheet.PluginSetupSheet;
 import ir.hanzodev1375.components.store.model.PluginSetupActionData;
 import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.R;
+import ir.hanzodev1375.ghostide.activity.EditorActivity;
 import ir.hanzodev1375.ghostide.activity.PluginScreenActivity;
 import ir.hanzodev1375.ghostide.adapters.PluginPopupAdapter;
 import ir.hanzodev1375.ghostide.ide.ui.api.EditorPanel;
@@ -23,13 +24,15 @@ import ir.hanzodev1375.ghostide.plugin.gpl.LoadedGplPlugin;
 import ir.hanzodev1375.ghostide.terminal.activity.TerminalActivity;
 
 /**
- * Runs the right thing when an installed plugin is tapped in the plugin popup:
+ * Runs the right thing when an installed plugin is tapped in the plugin popup, decided by the host
+ * the popup was opened from ({@link PluginHostRouter#isEditorHost}):
  *
  * <ul>
- *   <li>editor plugins ({@code EDITOR_PANEL}) → open the editor panel;</li>
- *   <li>whole-screen / file-manager plugins ({@code PLUGIN_SCREEN}) → open the plugin screen;</li>
- *   <li>LSP plugins ({@code LSP_SERVER_PROVIDER}) → run their setup actions in the terminal;</li>
- *   <li>anything else → show the setup bottom sheet.</li>
+ *   <li>editor plugins ({@code EDITOR_PANEL}) → open the editor panel on the editor host, otherwise
+ *       hand over to {@link EditorActivity};
+ *   <li>whole-screen / file-manager plugins ({@code PLUGIN_SCREEN}) → open the plugin screen;
+ *   <li>LSP plugins ({@code LSP_SERVER_PROVIDER}) → run their setup actions in the terminal;
+ *   <li>anything else → show the setup bottom sheet.
  * </ul>
  */
 public final class PluginPopupDispatcher {
@@ -44,9 +47,10 @@ public final class PluginPopupDispatcher {
       return;
     }
     String ownerId = item.manifest() != null ? item.manifest().id() : item.id();
+    boolean editorHost = PluginHostRouter.isEditorHost(activity) && panelHost != null;
 
     List<EditorPanel> ownerPanels = PluginPopupAdapter.panelsOf(ownerId);
-    if (!ownerPanels.isEmpty() && panelHost != null) {
+    if (!ownerPanels.isEmpty() && editorHost) {
       panelHost.showPanel(ownerPanels.get(0));
       return;
     }
@@ -63,7 +67,7 @@ public final class PluginPopupDispatcher {
       return;
     }
 
-    if (PluginPopupAdapter.isEditor(ownerId) && panelHost != null) {
+    if (editorHost) {
       EditorPanel panel = findPanel(item, ownerId);
       if (panel != null) {
         panelHost.showPanel(panel);
@@ -74,6 +78,11 @@ public final class PluginPopupDispatcher {
     PluginScreen screen = findScreen(item, ownerId);
     if (screen != null) {
       activity.startActivity(PluginScreenActivity.createIntent(activity, screen.getId()));
+      return;
+    }
+
+    if (!ownerPanels.isEmpty() || PluginPopupAdapter.isEditor(ownerId)) {
+      activity.startActivity(new Intent(activity, EditorActivity.class));
       return;
     }
 
