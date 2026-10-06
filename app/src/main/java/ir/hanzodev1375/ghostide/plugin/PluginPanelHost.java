@@ -2,6 +2,7 @@ package ir.hanzodev1375.ghostide.plugin;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
@@ -20,6 +22,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.sidesheet.SideSheetDialog;
+import com.google.android.material.snackbar.Snackbar;
 import ir.hanzodev1375.components.sheet.BaseBlurBottomSheet;
 import ir.hanzodev1375.components.sheet.BaseSheet;
 
@@ -54,6 +57,8 @@ public final class PluginPanelHost {
   private final Map<String, View> views = new HashMap<>();
   /** پنجره های شناور باز به ازای هر پنل (فقط داخل همین Activity). */
   private final Map<String, FloatingPanelWindow> floatingWindows = new HashMap<>();
+  /** پاپ آپ های باز به ازای هر پنل. */
+  private final Map<String, PopupWindow> popupWindows = new HashMap<>();
 
   public PluginPanelHost(Activity activity) {
     this(activity, null);
@@ -147,10 +152,29 @@ public final class PluginPanelHost {
       return;
     }
 
-    // اگه قبلاً یه پنجره ی شناور از همین پنل بازه، ببندش (حالت ها جایگزین هم می شن).
+    PluginStateMod state = panel.getState() == null ? PluginStateMod.NONE : panel.getState();
+    if (state == PluginStateMod.NONE) {
+      return;
+    }
+
     FloatingPanelWindow previousFloat = floatingWindows.remove(panel.getId());
     if (previousFloat != null) {
       previousFloat.dismiss();
+    }
+
+    PopupWindow previousPopup = popupWindows.remove(panel.getId());
+    if (previousPopup != null) {
+      previousPopup.dismiss();
+    }
+
+    if (state == PluginStateMod.HEADLESS) {
+      runHeadless(panel);
+      return;
+    }
+
+    if (state == PluginStateMod.SNACKBAR) {
+      showSnackbar(panel);
+      return;
     }
 
     View content = views.get(panel.getId());
@@ -163,7 +187,7 @@ public final class PluginPanelHost {
 
     ViewGroup wrapper = buildWrapper(panel, content);
 
-    switch (panel.getState()) {
+    switch (state) {
       case DIALOG:
         showDialog(wrapper);
         break;
@@ -182,6 +206,12 @@ public final class PluginPanelHost {
       case FLOATINGWINDOWS:
         showFloatingWindow(panel, content);
         break;
+      case POPUP_WINDOW:
+        showPopupWindow(panel, wrapper);
+        break;
+      case ACTIVITY:
+        showActivity(panel, wrapper);
+        break;
       case SIDESHEET:
       default:
         showSideSheet(wrapper);
@@ -199,12 +229,55 @@ public final class PluginPanelHost {
     win.show();
   }
 
+  private void showPopupWindow(EditorPanel panel, ViewGroup wrapper) {
+    PopupWindow popup = new PopupWindow(activity);
+    popup.setContentView(wrapper);
+    popup.setWidth(dp(280));
+    popup.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+    popup.setFocusable(true);
+    popup.setOutsideTouchable(true);
+    popup.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+      popup.setElevation(dp(8));
+    }
+    View anchor = activity.findViewById(android.R.id.content);
+    popup.showAtLocation(anchor, Gravity.CENTER, 0, 0);
+    popupWindows.put(panel.getId(), popup);
+  }
+
+  private void showActivity(EditorPanel panel, ViewGroup wrapper) {
+    new Dialog(activity) {
+      {
+        setContentView(wrapper);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        styleDialogWindow(getWindow());
+      }
+    }.show();
+  }
+
+  private void showSnackbar(EditorPanel panel) {
+    View root = activity.findViewById(android.R.id.content);
+    if (root == null) return;
+    Snackbar.make(root, panel.getTitle(), Snackbar.LENGTH_LONG).show();
+  }
+
+  private void runHeadless(EditorPanel panel) {
+    try {
+      panel.createView();
+    } catch (Exception ignored) {
+    }
+  }
+
   /** برای بستن همه ی پنجره های شناور (مثلاً در onPause یا onDestroy اکتویتی). */
   public void dismissAllFloatingWindows() {
     for (FloatingPanelWindow win : floatingWindows.values()) {
       win.dismiss();
     }
     floatingWindows.clear();
+    for (PopupWindow popup : popupWindows.values()) {
+      popup.dismiss();
+    }
+    popupWindows.clear();
   }
 
   private void showSideSheet(ViewGroup wrapper) {
@@ -238,7 +311,7 @@ public final class PluginPanelHost {
     String tag = "plugin_panel_dialog_" + panel.getId();
     Fragment previous = fm.findFragmentByTag(tag);
     if (previous != null) {
-      fm.beginTransaction().remove(previous).commitNow();
+      fm.beginTransaction().remove(previous).commitNowAllowingStateLoss();
     }
     new PanelDialogFragment(wrapper).show(fm, tag);
   }
@@ -252,7 +325,7 @@ public final class PluginPanelHost {
     String tag = "plugin_panel_sheet_" + panel.getId();
     Fragment previous = fm.findFragmentByTag(tag);
     if (previous != null) {
-      fm.beginTransaction().remove(previous).commitNow();
+      fm.beginTransaction().remove(previous).commitNowAllowingStateLoss();
     }
     new PanelBottomSheetFragment(wrapper).show(fm, tag);
   }
@@ -266,11 +339,14 @@ public final class PluginPanelHost {
     String tag = "plugin_panel_fragment_" + panel.getId();
     Fragment previous = fm.findFragmentByTag(tag);
     if (previous != null) {
-      fm.beginTransaction().remove(previous).commitNow();
+      fm.beginTransaction().remove(previous).commitNowAllowingStateLoss();
     }
     FragmentTransaction tx = fm.beginTransaction();
+    tx.setCustomAnimations(
+        android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in,
+        android.R.anim.fade_out);
     tx.add(android.R.id.content, new PanelHostFragment(wrapper), tag);
-    tx.commit();
+    tx.commitAllowingStateLoss();
   }
 
   private FragmentManager fragmentManager() {
@@ -294,7 +370,10 @@ public final class PluginPanelHost {
     header.setTextSize(15);
     header.setGravity(Gravity.CENTER_VERTICAL);
     header.setTypeface(header.getTypeface(), Typeface.BOLD);
-    headerBox.addView(header, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    headerBox.addView(
+        header,
+        new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
     String lastPath = panel.getLastPath();
     if (lastPath != null && !lastPath.isEmpty()) {
@@ -302,17 +381,26 @@ public final class PluginPanelHost {
       path.setText(lastPath);
       path.setTextSize(12);
       path.setGravity(Gravity.CENTER_VERTICAL);
-      headerBox.addView(path, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+      headerBox.addView(
+          path,
+          new LinearLayout.LayoutParams(
+              ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
     styleHeader(headerBox);
-    wrapper.addView(headerBox, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    wrapper.addView(
+        headerBox,
+        new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
     View divider = new View(activity);
     divider.setBackgroundColor(0x223E4452);
-    wrapper.addView(divider, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+    wrapper.addView(
+        divider,
+        new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
 
-    wrapper.addView(content, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+    wrapper.addView(
+        content, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
     return wrapper;
   }
 
@@ -371,13 +459,14 @@ public final class PluginPanelHost {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       return attach(content);
     }
   }
 
   /** Dialog-hosted panel. */
-  private static final class PanelDialogFragment extends DialogFragment{
+  private static final class PanelDialogFragment extends DialogFragment {
     private View content;
 
     public PanelDialogFragment() {
@@ -389,7 +478,8 @@ public final class PluginPanelHost {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       return attach(content);
     }
   }
