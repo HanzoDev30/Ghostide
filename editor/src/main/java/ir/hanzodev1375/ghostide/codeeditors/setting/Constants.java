@@ -28,6 +28,8 @@ public class Constants {
         "pref_code_editor_animate_auto_complt_window";
     public static final String KEY_CODE_EDITOR_HIGHLIGHT_BRACKET =
         "pref_code_editor_highlight_brckt";
+    public static final String KEY_CODE_EDITOR_RAINBOW_BRACKETS =
+        "pref_code_editor_rainbow_brackets";
     public static final String KEY_CODE_EDITOR_AUTO_COMPLETE = "pref_code_editor_auto_complete";
     public static final String KEY_CODE_EDITOR_GHOST_TEXT =
         "pref_code_editor_ghost_text_completion";

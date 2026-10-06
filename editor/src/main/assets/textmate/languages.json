@@ -131,7 +131,8 @@
       "scopeName": "text.html.basic",
       "languageConfiguration": "textmate/html/language-configuration.json",
       "embeddedLanguages": {
-        "source.js": "javascript"
+        "source.js": "javascript",
+        "source.css": "css"
       }
     },
     {

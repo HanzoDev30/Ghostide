@@ -58,6 +58,7 @@ public abstract class DependencyCheckerIde {
   private long lastProcessTime = 0;
   private String lastCoordinates = "";
   private EditorPopupWindow activePopup;
+  private java.util.function.Consumer<HighlightTextContainer> extraHighlights;
 
   protected DependencyCheckerIde(CodeEditor editor) {
     this.editor = editor;
@@ -92,6 +93,16 @@ public abstract class DependencyCheckerIde {
 
   /** Returns true when the current editor language is handled by this checker. */
   protected abstract boolean isMyLanguage();
+
+  /** آیا فایل فعلی را این چکر در اختیار دارد (برای هماهنگی overlay با براکت های رنگین کمانی). */
+  public final boolean isActive() {
+    return isMyLanguage();
+  }
+
+  /** هایلایت های اضافه (مثل براکت رنگین کمانی) که همراه هایلایت های چکر در یک container ثبت می شوند. */
+  public final void setExtraHighlights(java.util.function.Consumer<HighlightTextContainer> extra) {
+    this.extraHighlights = extra;
+  }
 
   /**
    * Parses the dependency under the cursor. Returns null when the caret is not on a checkable
@@ -158,7 +169,6 @@ public abstract class DependencyCheckerIde {
    */
   public void refreshHighlights() {
     if (!isMyLanguage()) {
-      editor.setHighlightTexts(null);
       return;
     }
 
@@ -196,6 +206,9 @@ public abstract class DependencyCheckerIde {
       }
     }
 
+    if (extraHighlights != null) {
+      extraHighlights.accept(container);
+    }
     editor.setHighlightTexts(container.isEmpty() ? null : container);
   }
 

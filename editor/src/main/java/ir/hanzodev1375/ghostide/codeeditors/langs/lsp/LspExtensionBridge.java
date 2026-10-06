@@ -125,6 +125,10 @@ public class LspExtensionBridge {
             () -> {
               try {
                 LspEditor lspEditor = project.createEditor(filePath);
+                if (editor instanceof ir.hanzodev1375.ghostide.codeeditors.IdeEditor) {
+                  ((ir.hanzodev1375.ghostide.codeeditors.IdeEditor) editor)
+                      .setRainbowGrammarScope(grammarScope, filePath);
+                }
                 lspEditor.setWrapperLanguage(
                     EditorLanguageFactory.create(context, filePath, grammarScope));
                 // گرامرها ممکن است هنوز آماده نباشند؛ وقتی آماده شد زبان واقعی را جایگزین می کنیم.

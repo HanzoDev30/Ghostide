@@ -35,6 +35,8 @@ public class GhostColorScheme extends TextMateColorScheme {
   public static final int BRACKET6 = ++endColor;
   public static final int DEPENDENCY_UPDATE_AVAILABLE = ++endColor;
   public static final int DEPENDENCY_UPDATE_AVAILABLE_BG = ++endColor;
+  /** پس زمینه ی شفاف برای overlay براکت های رنگین کمانی (فقط رنگ متن عوض می شود). */
+  public static final int RAINBOW_NO_BG = ++endColor;
 
   private final ThemeModel themeModel;
 
@@ -99,6 +101,7 @@ public class GhostColorScheme extends TextMateColorScheme {
     setColor(BRACKET6, Color.parseColor("#64FFD0"));
     setColor(DEPENDENCY_UPDATE_AVAILABLE, Color.parseColor("#FFC107"));
     setColor(DEPENDENCY_UPDATE_AVAILABLE_BG, Color.parseColor("#33FFC107"));
+    setColor(RAINBOW_NO_BG, Color.TRANSPARENT);
     setColor(WHOLE_BACKGROUND, Color.TRANSPARENT);
     setColor(BLOCK_LINE, Color.parseColor("#26FFFFFF"));
     setColor(BLOCK_LINE_CURRENT, Color.parseColor("#33FFFFFF"));

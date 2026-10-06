@@ -33,6 +33,7 @@ import ir.hanzodev1375.ghostide.codeeditors.preview.url.OnLinkClickEventListener
 import ir.hanzodev1375.ghostide.codeeditors.dependencychecker.GradleDependencyCheckerIde;
 import ir.hanzodev1375.ghostide.codeeditors.dependencychecker.TomlDependencyCheckerIde;
 import ir.hanzodev1375.ghostide.codeeditors.preview.url.UrlPreviewIde;
+import ir.hanzodev1375.ghostide.codeeditors.rainbow.RainbowBracketHighlighter;
 import ir.hanzodev1375.ghostide.codeeditors.preview.xmlattr.XmlAttrPreviewIde;
 import ir.hanzodev1375.ghostide.codeeditors.setting.Constants;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
@@ -73,6 +74,7 @@ public class IdeEditor extends CodeEditor
   private XmlAttrPreviewIde xmlAttrPreviewIde;
   private GradleDependencyCheckerIde gradleDependencyCheckerIde;
   private TomlDependencyCheckerIde tomlDependencyCheckerIde;
+  private RainbowBracketHighlighter rainbowBrackets;
   private String currentFilePath;
   @Nullable private UserSnippetProvider userSnippetProvider;
   private static volatile UserSnippetProvider defaultUserSnippetProvider;
@@ -184,6 +186,10 @@ public class IdeEditor extends CodeEditor
     gradleDependencyCheckerIde.attach();
     tomlDependencyCheckerIde = new TomlDependencyCheckerIde(this);
     tomlDependencyCheckerIde.attach();
+    rainbowBrackets = new RainbowBracketHighlighter(this, this::refreshHighlightOverlay);
+    rainbowBrackets.attach();
+    gradleDependencyCheckerIde.setExtraHighlights(rainbowBrackets::contribute);
+    tomlDependencyCheckerIde.setExtraHighlights(rainbowBrackets::contribute);
 
     editorAutoCompletion.setAdapter(new CustomEditorCompletionAdapter());
     replaceComponent(EditorAutoCompletion.class, editorAutoCompletion);
@@ -203,6 +209,7 @@ public class IdeEditor extends CodeEditor
     updateEditorDeleteEmptyLineFast();
     updateEditorDeleteTabs();
     updateEditorHighlightBracketPair();
+    updateEditorRainbowBrackets();
     updateEditorLineSpacing();
     updateEditorCursorBlinkPeriod();
     applyNonPrintablePaintingFlags();
@@ -263,11 +270,56 @@ public class IdeEditor extends CodeEditor
   @Override
   public void setEditorLanguage(@Nullable Language lang) {
     super.setEditorLanguage(lang);
+    if (rainbowBrackets != null) {
+      // خودش overlay را (با هماهنگی چکرهای وابستگی) تازه می کند
+      rainbowBrackets.onLanguageChanged(lang);
+      return;
+    }
     if (gradleDependencyCheckerIde != null) {
       gradleDependencyCheckerIde.refreshHighlights();
     }
     if (tomlDependencyCheckerIde != null) {
       tomlDependencyCheckerIde.refreshHighlights();
+    }
+  }
+
+  /**
+   * تنها نقطه ی ثبت highlightTexts ادیتور: اگر چکر وابستگی فایل فعلی را در اختیار دارد او (همراه
+   * با براکت های رنگین کمانی) ثبت می کند، وگرنه فقط رنگین کمانی.
+   */
+  private void refreshHighlightOverlay(boolean fromScroll) {
+    if (gradleDependencyCheckerIde != null && gradleDependencyCheckerIde.isActive()) {
+      if (!fromScroll) {
+        gradleDependencyCheckerIde.refreshHighlights();
+      }
+      return;
+    }
+    if (tomlDependencyCheckerIde != null && tomlDependencyCheckerIde.isActive()) {
+      if (!fromScroll) {
+        tomlDependencyCheckerIde.refreshHighlights();
+      }
+      return;
+    }
+    if (rainbowBrackets != null) {
+      rainbowBrackets.applyOnly();
+    }
+  }
+
+  /** اسکوپ گرامر افزونه ی همین فایل را به براکت های رنگین کمانی می دهد (از LspExtensionBridge). */
+  public void setRainbowGrammarScope(String scope, String path) {
+    if (rainbowBrackets != null) {
+      rainbowBrackets.setPluginScope(scope, path);
+    }
+  }
+
+  private void updateEditorRainbowBrackets() {
+    setRainbowBracketsEnabled(true);
+  }
+
+  /** روشن/خاموش کردن براکت های رنگین کمانی (زبان های TextMate). */
+  public void setRainbowBracketsEnabled(boolean enabled) {
+    if (rainbowBrackets != null) {
+      rainbowBrackets.setEnabled(enabled);
     }
   }
 
@@ -411,6 +463,9 @@ public class IdeEditor extends CodeEditor
     }
     if (tomlDependencyCheckerIde != null) {
       tomlDependencyCheckerIde.setFilePath(htmlFilePath);
+    }
+    if (rainbowBrackets != null) {
+      rainbowBrackets.setFilePath(htmlFilePath);
     }
   }
 
@@ -757,6 +812,9 @@ public class IdeEditor extends CodeEditor
       case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_HIGHLIGHT_BRACKET:
         updateEditorHighlightBracketPair();
         break;
+      case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_RAINBOW_BRACKETS:
+        updateEditorRainbowBrackets();
+        break;
       case Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_LINE_HEIGHT:
         updateEditorLineSpacing();
         break;
@@ -829,6 +887,9 @@ public class IdeEditor extends CodeEditor
   protected void onDetachedFromWindow() {
     if (setting != null) {
       setting.getDefaultPreferences().unregisterOnSharedPreferenceChangeListener(this);
+    }
+    if (rainbowBrackets != null) {
+      rainbowBrackets.release();
     }
     super.onDetachedFromWindow();
   }

@@ -142,6 +142,18 @@ public class PreferencesUtils {
         .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_HIGHLIGHT_BRACKET, true);
   }
 
+  public boolean enableRainbowBrackets() {
+    return getDefaultPreferences()
+        .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_RAINBOW_BRACKETS, true);
+  }
+
+  public void setRainbowBrackets(boolean enabled) {
+    getDefaultPreferences()
+        .edit()
+        .putBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_RAINBOW_BRACKETS, enabled)
+        .apply();
+  }
+
   public boolean enableDeleteEmptyLine() {
     return getDefaultPreferences()
         .getBoolean(Constants.SharedPreferenceKeys.KEY_CODE_EDITOR_DELETE_EMPTY_LINE, false);

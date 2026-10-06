@@ -81,6 +81,7 @@ jobs:
           cp ide-api/build/libs/*.jar plugin-sdk-dist/
           cp ide-ui-api/build/outputs/aar/*.aar plugin-sdk-dist/
           cp editor/build/outputs/aar/*.aar plugin-sdk-dist/
+          cp thememanager/build/outputs/aar/*.aar plugin-sdk-dist/
 
       - name: Upload plugin SDK artifact
         uses: actions/upload-artifact@v4

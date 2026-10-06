@@ -52,6 +52,8 @@ public final class PluginPanelHost {
   private final Supplier<String> lastPathResolver;
   private final List<EditorPanel> panels;
   private final Map<String, View> views = new HashMap<>();
+  /** پنجره های شناور باز به ازای هر پنل (فقط داخل همین Activity). */
+  private final Map<String, FloatingPanelWindow> floatingWindows = new HashMap<>();
 
   public PluginPanelHost(Activity activity) {
     this(activity, null);
@@ -144,6 +146,13 @@ public final class PluginPanelHost {
     if (panel == null || activity.isFinishing()) {
       return;
     }
+
+    // اگه قبلاً یه پنجره ی شناور از همین پنل بازه، ببندش (حالت ها جایگزین هم می شن).
+    FloatingPanelWindow previousFloat = floatingWindows.remove(panel.getId());
+    if (previousFloat != null) {
+      previousFloat.dismiss();
+    }
+
     View content = views.get(panel.getId());
     if (content == null) {
       content = createPanelView(panel);
@@ -170,11 +179,32 @@ public final class PluginPanelHost {
       case BOTTOMSHEETDIALOG:
         showBottomSheetDialog(wrapper);
         break;
+      case FLOATINGWINDOWS:
+        showFloatingWindow(panel, content);
+        break;
       case SIDESHEET:
       default:
         showSideSheet(wrapper);
         break;
     }
+  }
+
+  /**
+   * پنجره ی شناور فقط روی همین Activity؛ نه نیاز به مجوز overlay داره نه از اپ خارج می شه. به جای
+   * wrapper، مستقیم content رو می فرستیم چون خود پنجره نوار عنوان و آیکون های بستن/درگ رو داره.
+   */
+  private void showFloatingWindow(EditorPanel panel, View content) {
+    FloatingPanelWindow win = new FloatingPanelWindow(activity, panel.getTitle(), content);
+    floatingWindows.put(panel.getId(), win);
+    win.show();
+  }
+
+  /** برای بستن همه ی پنجره های شناور (مثلاً در onPause یا onDestroy اکتویتی). */
+  public void dismissAllFloatingWindows() {
+    for (FloatingPanelWindow win : floatingWindows.values()) {
+      win.dismiss();
+    }
+    floatingWindows.clear();
   }
 
   private void showSideSheet(ViewGroup wrapper) {
