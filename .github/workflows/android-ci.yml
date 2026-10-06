@@ -72,7 +72,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build plugin SDK
-        run: ./gradlew :plugin-api:jar :plugin-api:sourcesJar :ide-api:jar :ide-api:sourcesJar :ide-ui-api:assembleRelease :editor:assembleRelease
+        run: ./gradlew :plugin-api:jar :plugin-api:sourcesJar :ide-api:jar :ide-api:sourcesJar :ide-ui-api:assembleRelease :editor:assembleRelease thememanager:assembleRelease
 
       - name: Collect plugin SDK artifacts
         run: |
