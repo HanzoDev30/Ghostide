@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvOpenFilesTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="10dp"
+        android:text="@string/open_files_title"
+        android:textSize="17sp"
+        android:textStyle="bold" />
+
+    <ir.hanzodev1375.components.SearchLayout
+        android:id="@+id/searchOpenFiles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="visible" />
+
+    <View
+        android:id="@+id/viewOpenFilesDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvOpenFiles"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingVertical="8dp"
+            android:paddingBottom="32dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutOpenFilesEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:alpha="0.4"
+                android:src="@drawable/ic_open_files" />
+
+            <TextView
+                android:id="@+id/tvOpenFilesEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/open_files_empty"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

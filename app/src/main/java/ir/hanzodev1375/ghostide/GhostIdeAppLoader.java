@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
 import android.util.Log;
+import androidx.appcompat.app.AppCompatDelegate;
 import com.downloader.PRDownloader;
 import ir.hanzodev1375.components.store.notification.PluginCheckLifecycle;
 import ir.hanzodev1375.components.store.notification.PluginNotifier;
@@ -55,6 +56,8 @@ public class GhostIdeAppLoader extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
+    // The app is always dark; colors come from the JSON/M3 theme, never from the system day mode.
+    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
     loader = this;
     setting = new PreferencesUtils(this);
     mApplicationContext = getApplicationContext();

@@ -5,7 +5,9 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -13,36 +15,44 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.format.Formatter;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import ir.hanzodev1375.components.views.GhostToast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.palette.graphics.Palette;
 import androidx.viewpager2.widget.ViewPager2;
-import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.GlassCompat;
+import ir.hanzodev1375.components.views.GhostToast;
 import ir.hanzodev1375.ghostide.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import ir.hanzodev1375.ghostide.adapters.ImagePagerAdapter;
 import ir.hanzodev1375.ghostide.databinding.ActivityImageViewerBinding;
+import ir.hanzodev1375.ghostide.fragments.ImageViewerFragment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import jp.wasabeef.blurry.Blurry;
 import ir.hanzodev1375.components.sheet.customitemsheet.ui.DialogCompat;
-public class ImageViewerActivity extends BaseCompat {
+
+public class ImageViewerActivity extends BaseCompat implements ImageViewerFragment.Host {
 
   public static final String EXTRA_IMAGE_URIS = "extra_image_uris";
   public static final String EXTRA_CURRENT_INDEX = "extra_current_index";
@@ -54,6 +64,8 @@ public class ImageViewerActivity extends BaseCompat {
   private LinearLayout topBar, bottomBar;
   private List<Uri> uriList = new ArrayList<>();
   private ImagePagerAdapter adapter;
+  private final SparseArray<Integer> rotations = new SparseArray<>();
+  private int iconTint = Color.WHITE;
   private ImageButton btnSettings,
       btnGallery,
       btnNext,
@@ -98,7 +110,6 @@ public class ImageViewerActivity extends BaseCompat {
     btnZoom = bind.btnZoom;
     btnSave = bind.btnSave;
     btnShare = bind.btnShare;
-    btnGallery.setOnClickListener(v -> showWallpaperOptionsDialog());
     Intent intent = getIntent();
     if (intent != null) {
       if (intent.hasExtra(EXTRA_IMAGE_URIS)) {
@@ -145,30 +156,65 @@ public class ImageViewerActivity extends BaseCompat {
           @Override
           public void onPageSelected(int position) {
             updateCounter(position);
+            applyZoomButtonTint(iconTint);
             loadDynamicColorsAndBlur(position);
           }
         });
 
-    btnSettings.setOnClickListener(
-        v -> GhostToast.makeText(this, "Settings", GhostToast.LENGTH_SHORT).show());
+    btnSettings.setOnClickListener(v -> showDisplayDialog());
+    btnGallery.setOnClickListener(v -> showWallpaperOptionsDialog());
     btnNext.setOnClickListener(
         v -> {
-          finish();
+          int next = viewPager.getCurrentItem() + 1;
+          if (next < uriList.size()) {
+            viewPager.setCurrentItem(next, true);
+          } else {
+            finish();
+          }
         });
     btnInfo.setOnClickListener(v -> showImageInfo());
     btnRotate.setOnClickListener(
-        v -> GhostToast.makeText(this, "Rotate not implemented", GhostToast.LENGTH_SHORT).show());
+        v -> {
+          ImageViewerFragment fragment = currentFragment();
+          if (fragment != null) fragment.rotateClockwise();
+        });
     btnZoom.setOnClickListener(
-        v -> GhostToast.makeText(this, "Zoom not implemented", GhostToast.LENGTH_SHORT).show());
+        v -> {
+          ImageViewerFragment fragment = currentFragment();
+          if (fragment != null) fragment.toggleZoom();
+        });
     btnSave.setOnClickListener(
         v -> {
           try {
             saveCurrentImage();
           } catch (Exception err) {
-            Log.e(getClass().getName(), err.getMessage());
+            Log.e(getClass().getName(), String.valueOf(err.getMessage()));
           }
         });
     btnShare.setOnClickListener(v -> shareCurrentImage());
+  }
+
+  private ImageViewerFragment currentFragment() {
+    Fragment fragment =
+        getSupportFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+    return fragment instanceof ImageViewerFragment ? (ImageViewerFragment) fragment : null;
+  }
+
+  @Override
+  public int getRotation(int position) {
+    Integer degrees = rotations.get(position);
+    return degrees == null ? 0 : degrees;
+  }
+
+  @Override
+  public void onRotationChanged(int position, int degrees) {
+    rotations.put(position, degrees);
+  }
+
+  @Override
+  public void onZoomStateChanged(int position, boolean zoomed) {
+    if (position != viewPager.getCurrentItem()) return;
+    applyZoomButtonTint(zoomed ? Color.WHITE : iconTint);
   }
 
   private void enableEdgeToEdge() {
@@ -228,13 +274,13 @@ public class ImageViewerActivity extends BaseCompat {
                           int darkVibrant = palette.getDarkVibrantColor(defaultColor);
                           int lightMuted = palette.getLightMutedColor(Color.WHITE);
                           int bgColor = vibrant != defaultColor ? vibrant : darkVibrant;
-                          int iconTint = lightMuted;
-                          if (Math.abs(Color.red(bgColor) - Color.red(iconTint)) < 50
-                              && Math.abs(Color.green(bgColor) - Color.green(iconTint)) < 50
-                              && Math.abs(Color.blue(bgColor) - Color.blue(iconTint)) < 50) {
-                            iconTint = Color.WHITE;
+                          int tint = lightMuted;
+                          if (Math.abs(Color.red(bgColor) - Color.red(tint)) < 50
+                              && Math.abs(Color.green(bgColor) - Color.green(tint)) < 50
+                              && Math.abs(Color.blue(bgColor) - Color.blue(tint)) < 50) {
+                            tint = Color.WHITE;
                           }
-                          applyIconTint(iconTint);
+                          applyIconTint(tint);
                         });
               }
 
@@ -244,7 +290,7 @@ public class ImageViewerActivity extends BaseCompat {
   }
 
   private void applyIconTint(int color) {
-
+    iconTint = color;
     btnSettings.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     btnGallery.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     btnNext.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
@@ -268,21 +314,128 @@ public class ImageViewerActivity extends BaseCompat {
     tvCounter.setTextColor(color);
   }
 
+  private void applyZoomButtonTint(int color) {
+    btnZoom.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      btnZoom.setImageTintList(ColorStateList.valueOf(color));
+    }
+  }
+
+  private void showDisplayDialog() {
+    if (uriList.isEmpty()) return;
+    CharSequence[] options =
+        new CharSequence[] {
+          getString(R.string.viewer_fit),
+          getString(R.string.viewer_fill),
+          getString(R.string.viewer_actual)
+        };
+    new DialogCompat(this)
+        .setTitle(R.string.viewer_settings)
+        .setItems(
+            options,
+            (dialog, which) -> {
+              ImageViewerFragment fragment = currentFragment();
+              if (fragment == null) return;
+              switch (which) {
+                case 0:
+                  fragment.fitToScreen();
+                  break;
+                case 1:
+                  fragment.fillScreen();
+                  break;
+                case 2:
+                  fragment.showActualSize();
+                  break;
+              }
+            })
+        .setNegativeButton(R.string.cancel, null)
+        .show();
+  }
+
   private void showImageInfo() {
     if (uriList.isEmpty()) return;
-    //    Uri uri = uriList.get(viewPager.getCurrentItem());
-    //    GhostToast.makeText(this, "URI: " + uri.toString(), GhostToast.LENGTH_LONG).show();
-    GhostToast.makeText("Share not work...").show();
+    Uri uri = uriList.get(viewPager.getCurrentItem());
+    File file = resolveFile(uri);
+    if (file == null) {
+      new DialogCompat(this)
+          .setTitle(R.string.viewer_info)
+          .setMessage(uri.toString())
+          .setPositiveButton(android.R.string.ok, null)
+          .show();
+      return;
+    }
+    new Thread(
+            () -> {
+              String name = file.getName();
+              String size = Formatter.formatFileSize(this, file.length());
+              int width = 0;
+              int height = 0;
+              try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+                width = options.outWidth;
+                height = options.outHeight;
+              } catch (Exception ignored) {
+              }
+              String resolution =
+                  width > 0 && height > 0 ? width + "×" + height : "-";
+              String modified =
+                  new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
+                      .format(new Date(file.lastModified()));
+              String message =
+                  getString(
+                      R.string.viewer_info_message,
+                      name,
+                      size,
+                      resolution,
+                      file.getAbsolutePath(),
+                      modified);
+              runOnUiThread(
+                  () ->
+                      new DialogCompat(this)
+                          .setTitle(R.string.viewer_info)
+                          .setMessage(message)
+                          .setPositiveButton(android.R.string.ok, null)
+                          .show());
+            })
+        .start();
+  }
+
+  private File resolveFile(Uri uri) {
+    if (uri == null) return null;
+    if ("file".equalsIgnoreCase(uri.getScheme())) {
+      String path = uri.getPath();
+      if (path != null) {
+        File file = new File(path);
+        if (file.exists()) return file;
+      }
+    }
+    return null;
+  }
+
+  private Bitmap rotateIfNeeded(Bitmap bitmap, int position) {
+    int degrees = getRotation(position);
+    if (degrees == 0 || bitmap == null) return bitmap;
+    Matrix matrix = new Matrix();
+    matrix.postRotate(degrees);
+    Bitmap rotated =
+        Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    if (rotated != bitmap) bitmap.recycle();
+    return rotated;
   }
 
   private void saveCurrentImage() {
     if (uriList.isEmpty()) return;
     Uri imageUri = uriList.get(viewPager.getCurrentItem());
+    int position = viewPager.getCurrentItem();
     new Thread(
             () -> {
               try {
                 Bitmap bitmap = Glide.with(this).asBitmap().load(imageUri).submit().get();
                 if (bitmap == null) return;
+                bitmap = rotateIfNeeded(bitmap, position);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                   ContentValues values = new ContentValues();
                   values.put(
@@ -299,20 +452,27 @@ public class ImageViewerActivity extends BaseCompat {
                       bitmap.compress(Bitmap.CompressFormat.JPEG, 90, oss);
                     }
                     runOnUiThread(
-                        () -> GhostToast.makeText(this, "Saved to Gallery", GhostToast.LENGTH_SHORT).show());
+                        () ->
+                            GhostToast.makeText(
+                                    this, "Saved to Gallery", GhostToast.LENGTH_SHORT)
+                                .show());
                   } else {
                     runOnUiThread(
-                        () -> GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT).show());
+                        () ->
+                            GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT)
+                                .show());
                   }
                 } else {
                   File dir =
                       new File(
                           Environment.getExternalStoragePublicDirectory(
-                                  Environment.DIRECTORY_PICTURES),
+                              Environment.DIRECTORY_PICTURES),
                           "ImageViewer");
                   if (!dir.exists() && !dir.mkdirs()) {
                     runOnUiThread(
-                        () -> GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT).show());
+                        () ->
+                            GhostToast.makeText(this, "Save failed", GhostToast.LENGTH_SHORT)
+                                .show());
                     return;
                   }
                   File outFile = new File(dir, "img_" + System.currentTimeMillis() + ".jpg");
@@ -320,12 +480,17 @@ public class ImageViewerActivity extends BaseCompat {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
                   }
                   runOnUiThread(
-                      () -> GhostToast.makeText(this, "Saved to Gallery", GhostToast.LENGTH_SHORT).show());
+                      () ->
+                          GhostToast.makeText(this, "Saved to Gallery", GhostToast.LENGTH_SHORT)
+                              .show());
                 }
+                bitmap.recycle();
               } catch (Exception e) {
                 e.printStackTrace();
                 runOnUiThread(
-                    () -> GhostToast.makeText(this, "Error saving", GhostToast.LENGTH_SHORT).show());
+                    () ->
+                        GhostToast.makeText(this, "Error saving", GhostToast.LENGTH_SHORT)
+                            .show());
               }
             })
         .start();
@@ -333,11 +498,25 @@ public class ImageViewerActivity extends BaseCompat {
 
   private void shareCurrentImage() {
     if (uriList.isEmpty()) return;
-    Uri imageUri = uriList.get(viewPager.getCurrentItem());
+    Uri uri = uriList.get(viewPager.getCurrentItem());
+    Uri shareUri = uri;
+    File file = resolveFile(uri);
+    if (file != null) {
+      try {
+        shareUri =
+            FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+      } catch (Exception e) {
+        e.printStackTrace();
+        GhostToast.makeText(this, "Share failed", GhostToast.LENGTH_SHORT).show();
+        return;
+      }
+    }
     Intent shareIntent = new Intent(Intent.ACTION_SEND);
     shareIntent.setType("image/*");
-    shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-    startActivity(Intent.createChooser(shareIntent, "Share Image"));
+    shareIntent.putExtra(Intent.EXTRA_STREAM, shareUri);
+    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    startActivity(
+        Intent.createChooser(shareIntent, getString(R.string.viewer_share_title)));
   }
 
   private void showWallpaperOptionsDialog() {
@@ -371,15 +550,18 @@ public class ImageViewerActivity extends BaseCompat {
   private void applyWallpaper(int flags) {
     if (uriList.isEmpty()) return;
     Uri imageUri = uriList.get(viewPager.getCurrentItem());
+    int position = viewPager.getCurrentItem();
 
     new Thread(
             () -> {
               try {
                 Bitmap bitmap = Glide.with(this).asBitmap().load(imageUri).submit().get();
                 if (bitmap == null) return;
+                bitmap = rotateIfNeeded(bitmap, position);
 
                 WallpaperManager wm = WallpaperManager.getInstance(this);
                 wm.setBitmap(bitmap, null, true, flags);
+                bitmap.recycle();
 
                 runOnUiThread(
                     () ->

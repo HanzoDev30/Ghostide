@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -74,7 +75,7 @@ public class SearchLayout extends FrameLayout {
     glass.setBevelWidth(8f);
     glass.setMaterial(GlassMaterial.REGULAR);
     glass.setDispersionStrength(0.1f);
-    glass.setEnableDynamicBackground(true);
+    glass.setEnableDynamicBackground(false);
     glass.setEnableSensorHighlight(true);
     glass.setEnableAdaptiveTint(true);
     addView(
@@ -83,14 +84,29 @@ public class SearchLayout extends FrameLayout {
         new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-    post(
-        () -> {
-          if (!isAttachedToWindow()) return;
-          View backdrop = findBackdrop(activity);
-          if (backdrop != null) {
-            glass.setBackdropSource(backdrop);
-          }
-        });
+    attachBackdropSource(glass, activity);
+  }
+
+  private void attachBackdropSource(GlassCompat glass, Activity activity) {
+    if (isAttachedToWindow()) {
+      View backdrop = findBackdrop(activity);
+      if (backdrop != null) {
+        glass.setBackdropSource(backdrop);
+        return;
+      }
+    }
+    getViewTreeObserver()
+        .addOnGlobalLayoutListener(
+            new ViewTreeObserver.OnGlobalLayoutListener() {
+              @Override
+              public void onGlobalLayout() {
+                if (!isAttachedToWindow()) return;
+                View backdrop = findBackdrop(activity);
+                if (backdrop == null) return;
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                glass.setBackdropSource(backdrop);
+              }
+            });
   }
 
   /**
@@ -201,6 +217,10 @@ public class SearchLayout extends FrameLayout {
 
   public String getQuery() {
     return editText.getText().toString();
+  }
+
+  public void setHint(CharSequence hint) {
+    editText.setHint(hint);
   }
 
   public void setQuery(String query) {

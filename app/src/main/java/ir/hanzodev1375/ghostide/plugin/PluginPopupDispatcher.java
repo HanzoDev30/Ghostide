@@ -15,6 +15,7 @@ import ir.hanzodev1375.ghostide.activity.EditorActivity;
 import ir.hanzodev1375.ghostide.activity.PluginScreenActivity;
 import ir.hanzodev1375.ghostide.adapters.PluginPopupAdapter;
 import ir.hanzodev1375.ghostide.ide.ui.api.EditorPanel;
+import ir.hanzodev1375.ghostide.ide.ui.api.FilePanel;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginScreen;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
 import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
@@ -48,10 +49,17 @@ public final class PluginPopupDispatcher {
     }
     String ownerId = item.manifest() != null ? item.manifest().id() : item.id();
     boolean editorHost = PluginHostRouter.isEditorHost(activity) && panelHost != null;
+    boolean fileHost = PluginHostRouter.isFileManagerHost(activity) && panelHost != null;
 
     List<EditorPanel> ownerPanels = PluginPopupAdapter.panelsOf(ownerId);
     if (!ownerPanels.isEmpty() && editorHost) {
       panelHost.showPanel(ownerPanels.get(0));
+      return;
+    }
+
+    List<FilePanel> ownerFilePanels = PluginPopupAdapter.filePanelsOf(ownerId);
+    if (!ownerFilePanels.isEmpty() && fileHost) {
+      panelHost.showPanel(ownerFilePanels.get(0));
       return;
     }
 
@@ -69,6 +77,14 @@ public final class PluginPopupDispatcher {
 
     if (editorHost) {
       EditorPanel panel = findPanel(item, ownerId);
+      if (panel != null) {
+        panelHost.showPanel(panel);
+        return;
+      }
+    }
+
+    if (fileHost) {
+      FilePanel panel = findFilePanel(item, ownerId);
       if (panel != null) {
         panelHost.showPanel(panel);
         return;
@@ -144,8 +160,19 @@ public final class PluginPopupDispatcher {
     return null;
   }
 
-  private static PluginScreen findScreen(PluginPopupAdapter.PluginItem item, String ownerId) {
-    for (var reg :
+  private static FilePanel findFilePanel(PluginPopupAdapter.PluginItem item, String ownerId) {
+    for (var reg : GlobalRegistry.extensions().registrations(PluginUiExtensionPoints.FILE_PANEL)) {
+      FilePanel panel = (FilePanel) reg.extension();
+      if (ownerId.equals(reg.ownerPluginId())
+          || ownerId.equals(panel.getId())
+          || (item.id() != null && item.id().equals(panel.getId()))) {
+        return panel;
+      }
+    }
+    return null;
+  }
+
+  private static PluginScreen findScreen(PluginPopupAdapter.PluginItem item, String ownerId) {    for (var reg :
         GlobalRegistry.extensions().registrations(PluginUiExtensionPoints.PLUGIN_SCREEN)) {
       PluginScreen screen = (PluginScreen) reg.extension();
       if (ownerId.equals(reg.ownerPluginId())

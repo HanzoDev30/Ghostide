@@ -11,11 +11,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Window;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import ir.hanzodev1375.components.animators.AnimationManager;
 import ir.hanzodev1375.components.childern.ViewChilder;
 import ir.theme.M3Theme;
@@ -30,8 +35,7 @@ import android.view.View;
 import java.util.Map;
 
 public class BaseCompat extends AppCompatActivity
-    implements SharedPreferences.OnSharedPreferenceChangeListener,
-        ThemeBus.ThemeChangeListener {
+    implements SharedPreferences.OnSharedPreferenceChangeListener, ThemeBus.ThemeChangeListener {
 
   private PreferencesUtils prefs;
   private AnimationManager animMgr;
@@ -49,8 +53,7 @@ public class BaseCompat extends AppCompatActivity
     EdgeToEdge.enable(this);
     super.onCreate(arg0);
     ThemeBus.getInstance().register(this);
-    getWindow().setNavigationBarColor(Color.TRANSPARENT);
-    getWindow().setStatusBarColor(Color.TRANSPARENT);
+    applySystemBars();
     animMgr = AnimationManager.getInstance(this);
     if (animMgr.areAnimationsEnabled()) {
       MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.Z, true);
@@ -65,7 +68,7 @@ public class BaseCompat extends AppCompatActivity
         .post(
             () -> {
               applyJsonThemeBackground();
-              applyWindowBarColors();
+              applySystemBars();
               View decor = getWindow().getDecorView();
               if (decor != null) {
                 M3Theme.applyTopLevel(decor);
@@ -192,7 +195,8 @@ public class BaseCompat extends AppCompatActivity
     animator.addUpdateListener(
         a -> {
           float t = a.getAnimatedFraction();
-          Map<String, Integer> palette = ThemePreviewBuilder.blendPalettes(oldPalette, newPalette, t);
+          Map<String, Integer> palette =
+              ThemePreviewBuilder.blendPalettes(oldPalette, newPalette, t);
           M3Theme.setPreviewTheme(previewBuilder.build(palette));
           applyThemeNow();
         });
@@ -228,43 +232,45 @@ public class BaseCompat extends AppCompatActivity
     ThemeUtils themeUtils = new ThemeUtils(new ThemeManager(this));
     themeUtils.applyActivity(this);
     applyJsonThemeBackground();
-    applyWindowBarColors();
+    applySystemBars();
     applyOwnTheme(themeUtils);
   }
 
-  private void applyWindowBarColors() {
+  /**
+   * Keeps the status bar and navigation bar fully transparent (so the JSON/M3 surface shows
+   * through) on every device, and matches the system bar icons to the M3 theme: dark icons on a
+   * light surface, light icons on a dark surface. Contrast enforcement is disabled so the system
+   * never paints its own scrim over the transparent bars in day mode.
+   */
+  private void applySystemBars() {
     if (isFinishing()) {
       return;
     }
-    try {
-      Integer barColor = null;
-      if (new PreferencesUtils(this).isShowBackground()) {
-        GhostTheme theme = new ThemeUtils(new ThemeManager(this)).getTheme();
-        boolean hasImage =
-            theme != null
-                && theme.getWidget() != null
-                && theme.getWidget().getImagepath() != null
-                && !theme.getWidget().getImagepath().isEmpty();
-        if (hasImage
-            && theme.getActivity() != null
-            && theme.getActivity().getBackground() != null
-            && !theme.getActivity().getBackground().isEmpty()) {
-          barColor = Color.parseColor(theme.getActivity().getBackground());
-        }
-      }
-      if (barColor == null) {
-        barColor = M3Theme.surface();
-        if (barColor == null) {
-          barColor = M3Theme.surfaceContainer();
-        }
-      }
-      if (barColor != null) {
-          //bad wrok dont edit
-        //getWindow().setStatusBarColor(barColor);
-       // getWindow().setNavigationBarColor(barColor);
-      }
-    } catch (Throwable ignored) {
+    Window window = getWindow();
+    if (window == null) {
+      return;
     }
+    window.setStatusBarColor(Color.TRANSPARENT);
+    window.setNavigationBarColor(Color.TRANSPARENT);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      window.setStatusBarContrastEnforced(false);
+      window.setNavigationBarContrastEnforced(false);
+    }
+    View decor = window.getDecorView();
+    if (decor == null) {
+      return;
+    }
+    WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, decor);
+    if (controller == null) {
+      return;
+    }
+    Integer surface = M3Theme.surface();
+    if (surface == null) {
+      surface = M3Theme.surfaceContainer();
+    }
+    boolean lightBackground = surface != null && ColorUtils.calculateLuminance(surface) > 0.5;
+    controller.setAppearanceLightStatusBars(lightBackground);
+    controller.setAppearanceLightNavigationBars(lightBackground);
   }
 
   /** One-shot full restyle: repaints every themed view in the window's decor tree. */
@@ -311,17 +317,17 @@ public class BaseCompat extends AppCompatActivity
         themeUtil.applyImageBackground(backgroundView);
       } else {
         getWindow().getDecorView().setBackgroundColor(M3Theme.surface());
-        getWindow().setNavigationBarColor(M3Theme.surface());
-        getWindow().setStatusBarColor(M3Theme.surface());
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
         backgroundView.clear();
         backgroundView.setVisibility(View.GONE);
       }
     }
 
+    applySystemBars();
+
     if (hasImage && theme.getActivity() != null && theme.getActivity().getBackground() != null) {
       int bgColor = Color.parseColor(theme.getActivity().getBackground());
-      //getWindow().setStatusBarColor(bgColor);
-    //  getWindow().setNavigationBarColor(bgColor);
       for (View v : tintViews) {
         if (v != null && v != backgroundView) {
           v.setBackgroundColor(bgColor);

@@ -20,7 +20,7 @@ import android.view.View;
  * LayoutInflater.from(pluginContext).cloneInContext(pluginContext).inflate(R.layout.my_panel, root, false);
  * }</pre>
  */
-public interface EditorPanel {
+public interface EditorPanel extends Panel {
 
   String getId();
 
@@ -39,11 +39,11 @@ public interface EditorPanel {
    * {@link #createView()}, ...) or simply override this method to return a fixed mode.
    */
   default PluginStateMod getState() {
-    return EditorPanelStateStore.get(getId());
+    return PanelStateStore.get(getId());
   }
 
   /** Overrides the display mode used by the host. {@code null} resets back to the default. */
   default void setState(PluginStateMod state) {
-    EditorPanelStateStore.set(getId(), state);
+    PanelStateStore.set(getId(), state);
   }
 }

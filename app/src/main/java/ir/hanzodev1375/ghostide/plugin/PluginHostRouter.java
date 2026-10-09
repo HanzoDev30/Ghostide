@@ -3,6 +3,7 @@ package ir.hanzodev1375.ghostide.plugin;
 import android.app.Activity;
 import android.content.Intent;
 import ir.hanzodev1375.ghostide.activity.EditorActivity;
+import ir.hanzodev1375.ghostide.activity.FileManagerActivity;
 import ir.hanzodev1375.ghostide.ide.api.EditorExtensionPoints;
 import ir.hanzodev1375.ghostide.ide.api.LspServerProvider;
 import ir.hanzodev1375.ghostide.ide.api.LspServerRequest;
@@ -27,6 +28,11 @@ public final class PluginHostRouter {
   /** Whether {@code activity} is a host whose job is editing rather than browsing files. */
   public static boolean isEditorHost(Activity activity) {
     return activity instanceof EditorActivity;
+  }
+
+  /** Whether {@code activity} is the file manager, the host for {@code FILE_PANEL} contributions. */
+  public static boolean isFileManagerHost(Activity activity) {
+    return activity instanceof FileManagerActivity;
   }
 
   /**

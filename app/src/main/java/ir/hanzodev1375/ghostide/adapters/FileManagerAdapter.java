@@ -29,6 +29,7 @@ import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import ir.hanzodev1375.ghostide.materialfileicon.core.FileIconHelper;
+import ir.hanzodev1375.ghostide.glide.gpl.GplIcon;
 import com.bumptech.glide.Glide;
 
 import com.google.android.material.listitem.ListItemCardView;
@@ -47,6 +48,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
@@ -565,20 +567,19 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
     }
 
     void bindItem(FileManagerModel item) {
-      var iconHelper = new FileIconHelper(item.getPath());
-      iconHelper.setDynamicFolderEnabled(true);
-      iconHelper.setEnvironmentEnabled(true);
-      if (item.getPath().endsWith(".xml")) {
+      if (isGpl(item.getPath())) {
         Glide.with(ivIcon)
-            .load(new VectorModel(new File(item.getPath()), ivIcon.getContext()))
-            .error(R.drawable.ic_fileicon)
+            .load(new GplIcon(new File(item.getPath())))
+            .error(R.drawable.ic_outline_extension)
             .into(ivIcon);
       } else {
+        var iconHelper = new FileIconHelper(item.getPath());
+        iconHelper.setDynamicFolderEnabled(true);
+        iconHelper.setEnvironmentEnabled(true);
         iconHelper.bindIcon(ivIcon);
+        var icon = new Icon();
+        icon.bind(item.getPath(), ivIcon);
       }
-
-      var icon = new Icon();
-      icon.bind(item.getPath(), ivIcon);
       if (searchQuery.isEmpty()) {
         tvName.setText(item.getName());
       } else {
@@ -662,5 +663,9 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
 
   private int fallback(Integer value, int def) {
     return value != null ? value : def;
+  }
+
+  private static boolean isGpl(String path) {
+    return path != null && path.toLowerCase(Locale.ROOT).endsWith(".gpl");
   }
 }

@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.ide.api.EditorExtensionPoints;
 import ir.hanzodev1375.ghostide.ide.ui.api.EditorPanel;
+import ir.hanzodev1375.ghostide.ide.ui.api.FilePanel;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginScreen;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
 import ir.hanzodev1375.ghostide.interfaces.OnItemClickListener;
@@ -86,6 +87,17 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
         .toList();
   }
 
+  public static List<FilePanel> filePanelsOf(String pluginId) {
+    if (pluginId == null) {
+      return List.of();
+    }
+    return GlobalRegistry.extensions()
+        .registrations(PluginUiExtensionPoints.FILE_PANEL).stream()
+        .filter(r -> pluginId.equals(r.ownerPluginId()))
+        .map(r -> (FilePanel) r.extension())
+        .toList();
+  }
+
   public static List<PluginScreen> screensOf(String pluginId) {
     if (pluginId == null) {
       return List.of();
@@ -110,6 +122,10 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
     return owns(pluginId, PluginUiExtensionPoints.PLUGIN_SCREEN);
   }
 
+  public static boolean isFile(String pluginId) {
+    return owns(pluginId, PluginUiExtensionPoints.FILE_PANEL);
+  }
+
   /** Icon shown when the plugin ships no usable icon in its .gpl package. */
   public static int fallbackIconFor(String pluginId) {
     if (isLsp(pluginId)) {
@@ -118,7 +134,7 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
     if (isEditor(pluginId)) {
       return R.drawable.ic_plugin_editor;
     }
-    if (isScreen(pluginId)) {
+    if (isFile(pluginId) || isScreen(pluginId)) {
       return R.drawable.ic_plugin_misc;
     }
     return R.drawable.ic_outline_extension;
@@ -143,7 +159,6 @@ public final class PluginPopupAdapter extends RecyclerView.Adapter<PluginPopupAd
     }
     return R.drawable.ic_plugin_misc;
   }
-
   static final class VH extends RecyclerView.ViewHolder {
     final ImageView icon;
     final TextView name;

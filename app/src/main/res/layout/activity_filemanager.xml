@@ -92,6 +92,15 @@
                         android:id="@+id/buttonPlugins" />
 
                     <ImageButton
+                        android:id="@+id/openFilesIcon"
+                        android:layout_height="40dp"
+                        android:layout_width="40dp"
+                        android:src="@drawable/ic_open_files"
+                        android:layout_marginEnd="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/open_files_title" />
+
+                    <ImageButton
                         android:layout_height="40dp"
                         android:layout_width="40dp"
                         android:src="@drawable/more_vert"

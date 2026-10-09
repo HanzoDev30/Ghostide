@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Backing store for the default {@link EditorPanel#setState(PluginStateMod)} /
- * {@link EditorPanel#getState()} implementation. Interfaces cannot hold instance fields, so the
- * chosen {@link PluginStateMod} is keyed by {@link EditorPanel#getId()}.
+ * Backing store for the default {@link Panel#setState(PluginStateMod)} /
+ * {@link Panel#getState()} implementation. Interfaces cannot hold instance fields, so the chosen
+ * {@link PluginStateMod} is keyed by {@link Panel#getId()}.
  */
-final class EditorPanelStateStore {
+final class PanelStateStore {
 
   private static final Map<String, PluginStateMod> STATES = new ConcurrentHashMap<>();
 
-  private EditorPanelStateStore() {}
+  private PanelStateStore() {}
 
   static PluginStateMod get(String panelId) {
     return STATES.getOrDefault(panelId, PluginStateMod.SIDESHEET);

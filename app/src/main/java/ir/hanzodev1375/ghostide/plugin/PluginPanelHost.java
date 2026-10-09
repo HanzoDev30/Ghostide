@@ -33,27 +33,31 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import ir.hanzodev1375.ghostide.ide.ui.api.EditorPanel;
+import ir.hanzodev1375.ghostide.ide.ui.api.Panel;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginStateMod;
 import ir.hanzodev1375.ghostide.ide.ui.api.PluginUiExtensionPoints;
+import ir.hanzodev1375.ghostide.plugin.api.ExtensionPoint;
 import ir.hanzodev1375.ghostide.plugin.api.GlobalRegistry;
 import ir.theme.ThemeManager;
 import ir.theme.ThemeUtils;
 import ir.theme.WidgetTheme;
 
 /**
- * Host for {@link EditorPanel} contributions on any screen. Reads everything registered at {@link
- * PluginUiExtensionPoints#EDITOR_PANEL}, exposes it as {@link #getPanels()}, and opens one panel
- * when {@link #showPanel(EditorPanel)} is called. The {@link PluginStateMod} returned by {@link
- * EditorPanel#getState()} decides how the panel is shown: side sheet (default), dialog, bottom sheet
- * or a (bottom sheet) dialog fragment. The returned {@link View} is created lazily and cached for
- * the lifetime of this host so a panel keeps its state between opens.
+ * Host for {@link Panel} contributions on any screen. Built over {@link
+ * PluginUiExtensionPoints#EDITOR_PANEL} for the editor, or over {@link
+ * PluginUiExtensionPoints#FILE_PANEL} via {@link #forFileManager(Activity)} for the file manager.
+ * Reads everything registered at that point, exposes it as {@link #getPanels()}, and opens one
+ * panel when {@link #showPanel(Panel)} is called. The {@link PluginStateMod} returned by {@link
+ * Panel#getState()} decides how the panel is shown: side sheet (default), dialog, bottom sheet or a
+ * (bottom sheet) dialog fragment. The returned {@link View} is created lazily and cached for the
+ * lifetime of this host so a panel keeps its state between opens.
  */
 public final class PluginPanelHost {
 
   private final Activity activity;
   private final ThemeUtils theme;
   private final Supplier<String> lastPathResolver;
-  private final List<EditorPanel> panels;
+  private final List<Panel> panels;
   private final Map<String, View> views = new HashMap<>();
   /** پنجره های شناور باز به ازای هر پنل (فقط داخل همین Activity). */
   private final Map<String, FloatingPanelWindow> floatingWindows = new HashMap<>();
@@ -61,15 +65,32 @@ public final class PluginPanelHost {
   private final Map<String, PopupWindow> popupWindows = new HashMap<>();
 
   public PluginPanelHost(Activity activity) {
-    this(activity, null);
+    this(activity, null, PluginUiExtensionPoints.EDITOR_PANEL);
   }
 
   public PluginPanelHost(Activity activity, Supplier<String> lastPathResolver) {
+    this(activity, lastPathResolver, PluginUiExtensionPoints.EDITOR_PANEL);
+  }
+
+  /** Host for {@link PluginUiExtensionPoints#FILE_PANEL} contributions inside the file manager. */
+  public static PluginPanelHost forFileManager(Activity activity) {
+    return new PluginPanelHost(activity, null, PluginUiExtensionPoints.FILE_PANEL);
+  }
+
+  private PluginPanelHost(
+      Activity activity, Supplier<String> lastPathResolver, ExtensionPoint<? extends Panel> point) {
     this.activity = activity;
     this.lastPathResolver = lastPathResolver;
     this.theme = new ThemeUtils(new ThemeManager(activity));
-    this.panels =
-        wrapLastPath(GlobalRegistry.extensions().extensions(PluginUiExtensionPoints.EDITOR_PANEL));
+    this.panels = wrapLastPath(collectPanels(point));
+  }
+
+  private static List<Panel> collectPanels(ExtensionPoint<? extends Panel> point) {
+    List<Panel> found = new ArrayList<>();
+    for (var registration : GlobalRegistry.extensions().registrations(point)) {
+      found.add((Panel) registration.extension());
+    }
+    return found;
   }
 
   /**
@@ -89,18 +110,18 @@ public final class PluginPanelHost {
   }
 
   /** Wraps panels so an unimplemented {@code getLastPath()} falls back to this host's path. */
-  private List<EditorPanel> wrapLastPath(List<EditorPanel> originals) {
-    List<EditorPanel> wrapped = new ArrayList<>(originals.size());
-    for (EditorPanel panel : originals) {
-      wrapped.add(new LastPathEditorPanel(panel));
+  private List<Panel> wrapLastPath(List<Panel> originals) {
+    List<Panel> wrapped = new ArrayList<>(originals.size());
+    for (Panel panel : originals) {
+      wrapped.add(new LastPathPanel(panel));
     }
     return wrapped;
   }
 
-  private final class LastPathEditorPanel implements EditorPanel {
-    private final EditorPanel delegate;
+  private final class LastPathPanel implements Panel {
+    private final Panel delegate;
 
-    LastPathEditorPanel(EditorPanel delegate) {
+    LastPathPanel(Panel delegate) {
       this.delegate = delegate;
     }
 
@@ -139,7 +160,7 @@ public final class PluginPanelHost {
     }
   }
 
-  public List<EditorPanel> getPanels() {
+  public List<Panel> getPanels() {
     return panels;
   }
 
@@ -147,7 +168,7 @@ public final class PluginPanelHost {
     return panels.isEmpty();
   }
 
-  public void showPanel(EditorPanel panel) {
+  public void showPanel(Panel panel) {
     if (panel == null || activity.isFinishing()) {
       return;
     }
@@ -223,13 +244,13 @@ public final class PluginPanelHost {
    * پنجره ی شناور فقط روی همین Activity؛ نه نیاز به مجوز overlay داره نه از اپ خارج می شه. به جای
    * wrapper، مستقیم content رو می فرستیم چون خود پنجره نوار عنوان و آیکون های بستن/درگ رو داره.
    */
-  private void showFloatingWindow(EditorPanel panel, View content) {
+  private void showFloatingWindow(Panel panel, View content) {
     FloatingPanelWindow win = new FloatingPanelWindow(activity, panel.getTitle(), content);
     floatingWindows.put(panel.getId(), win);
     win.show();
   }
 
-  private void showPopupWindow(EditorPanel panel, ViewGroup wrapper) {
+  private void showPopupWindow(Panel panel, ViewGroup wrapper) {
     PopupWindow popup = new PopupWindow(activity);
     popup.setContentView(wrapper);
     popup.setWidth(dp(280));
@@ -245,7 +266,7 @@ public final class PluginPanelHost {
     popupWindows.put(panel.getId(), popup);
   }
 
-  private void showActivity(EditorPanel panel, ViewGroup wrapper) {
+  private void showActivity(Panel panel, ViewGroup wrapper) {
     new Dialog(activity) {
       {
         setContentView(wrapper);
@@ -255,13 +276,13 @@ public final class PluginPanelHost {
     }.show();
   }
 
-  private void showSnackbar(EditorPanel panel) {
+  private void showSnackbar(Panel panel) {
     View root = activity.findViewById(android.R.id.content);
     if (root == null) return;
     Snackbar.make(root, panel.getTitle(), Snackbar.LENGTH_LONG).show();
   }
 
-  private void runHeadless(EditorPanel panel) {
+  private void runHeadless(Panel panel) {
     try {
       panel.createView();
     } catch (Exception ignored) {
@@ -302,7 +323,7 @@ public final class PluginPanelHost {
     dialog.show();
   }
 
-  private void showDialogFragment(EditorPanel panel, ViewGroup wrapper) {
+  private void showDialogFragment(Panel panel, ViewGroup wrapper) {
     FragmentManager fm = fragmentManager();
     if (fm == null) {
       showDialog(wrapper);
@@ -316,7 +337,7 @@ public final class PluginPanelHost {
     new PanelDialogFragment(wrapper).show(fm, tag);
   }
 
-  private void showBottomSheetFragment(EditorPanel panel, ViewGroup wrapper) {
+  private void showBottomSheetFragment(Panel panel, ViewGroup wrapper) {
     FragmentManager fm = fragmentManager();
     if (fm == null) {
       showBottomSheetDialog(wrapper);
@@ -330,7 +351,7 @@ public final class PluginPanelHost {
     new PanelBottomSheetFragment(wrapper).show(fm, tag);
   }
 
-  private void showFragment(EditorPanel panel, ViewGroup wrapper) {
+  private void showFragment(Panel panel, ViewGroup wrapper) {
     FragmentManager fm = fragmentManager();
     if (fm == null) {
       showDialog(wrapper);
@@ -356,7 +377,7 @@ public final class PluginPanelHost {
     return null;
   }
 
-  private ViewGroup buildWrapper(EditorPanel panel, View content) {
+  private ViewGroup buildWrapper(Panel panel, View content) {
     LinearLayout wrapper = new LinearLayout(activity);
     wrapper.setOrientation(LinearLayout.VERTICAL);
 
@@ -404,7 +425,7 @@ public final class PluginPanelHost {
     return wrapper;
   }
 
-  private View createPanelView(EditorPanel panel) {
+  private View createPanelView(Panel panel) {
     try {
       return panel.createView();
     } catch (Exception e) {

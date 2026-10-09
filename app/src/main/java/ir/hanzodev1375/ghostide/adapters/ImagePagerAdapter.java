@@ -22,7 +22,7 @@ public class ImagePagerAdapter extends FragmentStateAdapter {
   @NonNull
   @Override
   public Fragment createFragment(int position) {
-    return ImageViewerFragment.newInstance(uriList.get(position));
+    return ImageViewerFragment.newInstance(uriList.get(position), position);
   }
 
   @Override

@@ -175,16 +175,12 @@ public class ThemeUtils {
       return;
     }
 
-    ActivityTheme colors = theme.getActivity();
     Window window = activity.getWindow();
-
-    if (colors.getStatusBar() != null) {
-      window.setStatusBarColor(parseColor(colors.getStatusBar()));
-    }
-
-    if (colors.getNavigationBar() != null) {
-      window.setNavigationBarColor(parseColor(colors.getNavigationBar()));
-    }
+    // The system bars stay transparent so the JSON/M3 surface behind them shows through. The
+    // light/dark appearance of the status/navigation bar icons is handled centrally in BaseCompat
+    // (based on M3Theme), so the JSON theme's explicit bar colors are intentionally ignored here.
+    window.setStatusBarColor(Color.TRANSPARENT);
+    window.setNavigationBarColor(Color.TRANSPARENT);
   }
 
   public void applyEditor(IdeEditor editor) {

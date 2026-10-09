@@ -258,6 +258,14 @@
     <string name="wallpaper_option_both">Both</string>
     <string name="wallpaper_set_success">Wallpaper set successfully</string>
     <string name="wallpaper_set_failed">Failed to set wallpaper</string>
+    <string name="viewer_load_error">Failed to load image</string>
+    <string name="viewer_settings">Display</string>
+    <string name="viewer_fit">Fit to screen</string>
+    <string name="viewer_fill">Fill screen</string>
+    <string name="viewer_actual">Actual size</string>
+    <string name="viewer_info">Image info</string>
+    <string name="viewer_info_message">Name: %1$s\nSize: %2$s\nResolution: %3$s\nPath: %4$s\nModified: %5$s</string>
+    <string name="viewer_share_title">Share Image</string>
     <string name="batch_rename">Rename Group Item</string>
     <string name="shortcut_menu_item">Create shortcut on home screen</string>
     <string name="shortcut_dialog_title">Create Shortcut</string>
@@ -637,4 +645,7 @@
     <string name="shortcuts_reset_all">Reset all</string>
     <string name="shortcuts_reset_all_confirm">Reset all shortcuts to their defaults?</string>
     <string name="shortcuts_empty">No default binding</string>
+    <string name="open_files_title">Open files</string>
+    <string name="open_files_search_hint">Search open files</string>
+    <string name="open_files_empty">No open files</string>
 </resources>

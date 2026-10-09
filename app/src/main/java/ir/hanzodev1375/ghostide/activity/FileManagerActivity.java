@@ -55,6 +55,7 @@ import ir.hanzodev1375.ghostide.adapters.FileManagerAdapter;
 import ir.hanzodev1375.ghostide.adapters.ToolbarAdapter;
 import ir.hanzodev1375.ghostide.helper.FileGitHelper;
 import ir.hanzodev1375.ghostide.helper.PluginPopupHelper;
+import ir.hanzodev1375.ghostide.plugin.PluginPanelHost;
 import ir.hanzodev1375.ghostide.helper.ZipModeHelper;
 import ir.hanzodev1375.ghostide.databinding.ActivityFilemanagerBinding;
 import ir.hanzodev1375.ghostide.databinding.SelectionPanelBinding;
@@ -111,6 +112,12 @@ import ir.hanzodev1375.components.store.event.ThemeInstalledEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import ir.hanzodev1375.ghostide.dialogs.OpenFilesSheet;
+import ir.hanzodev1375.ghostide.models.TabModel;
 
 public class FileManagerActivity extends BaseCompat
     implements NetworkChangeReceiver.CallBackNetWork {
@@ -143,6 +150,7 @@ public class FileManagerActivity extends BaseCompat
   private GitViewModel gitViewModel;
   private FileGitHelper gitHelper;
   private PluginPopupHelper pluginPopupHelper;
+  private PluginPanelHost pluginPanelHost;
   private final ExecutorService ftpExecutor = Executors.newSingleThreadExecutor();
   private String currentDir;
   private int systemBarsBottomInset = 0;
@@ -153,6 +161,7 @@ public class FileManagerActivity extends BaseCompat
   private long pendingScrollToPathTime;
   private PulseBridge changePulse;
   private final PulseListener changePulseListener = this::echoTreeChange;
+  private BadgeDrawable openFilesBadge;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -175,8 +184,10 @@ public class FileManagerActivity extends BaseCompat
         bind.buttonAi,
         bind.buttonPlugins,
         bind.btnSettings,
-        bind.gitActionButton);
+        bind.gitActionButton,
+        bind.openFilesIcon);
     M3Theme.textView(bind.userNameText);
+    setupOpenFilesIndicator();
     if (appsetting.isShowBackground()) {
       bind.headtop.setBackgroundColor(0);
       bind.headline.setBackgroundColor(0);
@@ -486,7 +497,8 @@ public class FileManagerActivity extends BaseCompat
                 v,
                 ObjectUtil.TRANSITION_AI_CHAT));
 
-    pluginPopupHelper = new PluginPopupHelper();
+    pluginPanelHost = PluginPanelHost.forFileManager(this);
+    pluginPopupHelper = new PluginPopupHelper(pluginPanelHost);
     bind.buttonPlugins.setOnClickListener(v -> pluginPopupHelper.show(this, v));
 
     setOnBackPress();
@@ -1005,6 +1017,9 @@ public class FileManagerActivity extends BaseCompat
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    if (pluginPanelHost != null) {
+      pluginPanelHost.dismissAllFloatingWindows();
+    }
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
@@ -1323,9 +1338,59 @@ public class FileManagerActivity extends BaseCompat
     bind.btnSettings.setOnClickListener(v -> stepButton(v));
   }
 
+  private void setupOpenFilesIndicator() {
+    openFilesBadge = BadgeDrawable.create(this);
+    openFilesBadge.setBadgeGravity(BadgeDrawable.TOP_END);
+    BadgeUtils.attachBadgeDrawable(openFilesBadge, bind.openFilesIcon);
+    bind.openFilesIcon.setOnClickListener(v -> showOpenFilesSheet());
+    bind.openFilesIcon.addOnLayoutChangeListener(
+        (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+          if (right - left > 0 && bottom - top > 0) {
+            updateOpenFilesIndicator();
+          }
+        });
+  }
+
+  private List<TabModel> readOpenTabs() {
+    String json = getSharedPreferences("editor", MODE_PRIVATE).getString("path", null);
+    if (json == null || json.isEmpty()) {
+      return new ArrayList<>();
+    }
+    try {
+      List<TabModel> tabs =
+          new Gson().fromJson(json, new TypeToken<List<TabModel>>() {}.getType());
+      return tabs == null ? new ArrayList<>() : tabs;
+    } catch (Exception e) {
+      return new ArrayList<>();
+    }
+  }
+
+  private void updateOpenFilesIndicator() {
+    if (bind == null || openFilesBadge == null) return;
+    int count = readOpenTabs().size();
+    boolean hasTabs = count > 0;
+    M3Theme.imageB(bind.openFilesIcon);
+    bind.openFilesIcon.setEnabled(hasTabs);
+    bind.openFilesIcon.setAlpha(hasTabs ? 1f : 0.38f);
+    openFilesBadge.setNumber(count);
+    openFilesBadge.setVisible(hasTabs);
+    openFilesBadge.updateBadgeCoordinates(bind.openFilesIcon);
+  }
+
+  private void showOpenFilesSheet() {
+    List<TabModel> tabs = readOpenTabs();
+    if (tabs.isEmpty()) return;
+    OpenFilesSheet sheet = OpenFilesSheet.newInstance();
+    sheet.setTabs(tabs);
+    sheet.setOnFileSelectedListener(
+        tab -> setupClick(tab.getFilePath(), tab.getFileName()));
+    sheet.show(getSupportFragmentManager(), OpenFilesSheet.TAG);
+  }
+
   @Override
   protected void onResume() {
     super.onResume();
+    updateOpenFilesIndicator();
     relaxPulseRoot();
     setupHeader();
     if (IconPackManager.shouldRefresh(this)) {

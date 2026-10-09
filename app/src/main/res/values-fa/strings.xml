@@ -256,6 +256,14 @@
   <string name="wallpaper_option_both">هر دو</string>
   <string name="wallpaper_set_success">تصویر زمینه با موفقیت تنظیم شد</string>
   <string name="wallpaper_set_failed">تنظیم تصویر زمینه ناموفق بود</string>
+  <string name="viewer_load_error">بارگذاری تصویر ناموفق بود</string>
+  <string name="viewer_settings">نمایش</string>
+  <string name="viewer_fit">متناسب با صفحه</string>
+  <string name="viewer_fill">پر کردن صفحه</string>
+  <string name="viewer_actual">اندازه اصلی</string>
+  <string name="viewer_info">اطلاعات تصویر</string>
+  <string name="viewer_info_message">نام: %1$s\nحجم: %2$s\nابعاد: %3$s\nمسیر: %4$s\nتغییر: %5$s</string>
+  <string name="viewer_share_title">اشتراک‌گذاری تصویر</string>
   <string name="batch_rename">تغییر نام گروهی</string>
   <string name="shortcut_menu_item">ایجاد میانبر در صفحه اصلی</string>
   <string name="shortcut_dialog_title">ایجاد میانبر</string>
@@ -634,4 +642,7 @@
   <string name="shortcuts_reset_all">بازنشانی همه</string>
   <string name="shortcuts_reset_all_confirm">همه میان‌برها به حالت پیش‌فرض بازگردد؟</string>
   <string name="shortcuts_empty">بدون میان‌بر</string>
+  <string name="open_files_title">فایل‌های باز</string>
+  <string name="open_files_search_hint">جستجوی فایل‌های باز</string>
+  <string name="open_files_empty">فایلی باز نیست</string>
 </resources>

@@ -16,11 +16,22 @@ import ir.hanzodev1375.ghostide.plugin.gpl.GplManifest;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplManifestReader;
 import ir.hanzodev1375.ghostide.plugin.gpl.GplPluginLoader;
 import ir.hanzodev1375.ghostide.plugin.PluginPopupDispatcher;
+import ir.hanzodev1375.ghostide.plugin.PluginPanelHost;
 import ir.hanzodev1375.ghostide.utils.ObjectUtil;
 import java.util.Optional;
 
 /** مسئول ساخت و نمایش پاپ‌آپ لیست پلاگین‌های نصب‌شده (دکمه‌ی پلاگین‌ها). */
 public class PluginPopupHelper {
+
+  private final PluginPanelHost panelHost;
+
+  public PluginPopupHelper() {
+    this(null);
+  }
+
+  public PluginPopupHelper(PluginPanelHost panelHost) {
+    this.panelHost = panelHost;
+  }
 
   public void show(Activity activity, View anchor) {
     var installedFiles = GplInstalledPlugins.listInstalled(activity);
@@ -54,6 +65,14 @@ public class PluginPopupHelper {
                     GplManifest manifest = GplManifestReader.read(f);
                     if (manifest == null) {
                       return Optional.<PluginPopupAdapter.PluginItem>empty();
+                    }
+
+                    var ownerFilePanels = PluginPopupAdapter.filePanelsOf(manifest.id());
+                    if (!ownerFilePanels.isEmpty()) {
+                      var panel = ownerFilePanels.get(0);
+                      return Optional.of(
+                          new PluginPopupAdapter.PluginItem(
+                              panel.getId(), panel.getTitle(), f, manifest));
                     }
 
                     var ownerScreens = PluginPopupAdapter.screensOf(manifest.id());
@@ -103,7 +122,7 @@ public class PluginPopupHelper {
         new PluginPopupAdapter(
             (view, item, pos) -> {
               if (popupRef[0] != null) popupRef[0].dismiss();
-              PluginPopupDispatcher.dispatch(activity, item, null);
+              PluginPopupDispatcher.dispatch(activity, item, panelHost);
             }));
 
     ((PluginPopupAdapter) rv.getAdapter()).submit(pluginItems);

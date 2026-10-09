@@ -16,6 +16,14 @@ public final class PluginUiExtensionPoints {
       new ExtensionPoint<>("ir.hanzodev1375.ghostide.ui.editorPanel", EditorPanel.class);
 
   /**
+   * Panels that slide out inside the file manager. Same contract as {@link #EDITOR_PANEL} but the
+   * host screen is the file manager, so a plugin (e.g. git clone, archives, sync) can show its UI
+   * without leaving the file list.
+   */
+  public static final ExtensionPoint<FilePanel> FILE_PANEL =
+      new ExtensionPoint<>("ir.hanzodev1375.ghostide.ui.filePanel", FilePanel.class);
+
+  /**
    * Handlers that intercept LSP command actions locally (e.g. code actions sent by a plugin
    * language server) and run them inside the editor, with the raw {@code IdeEditor} available.
    */
