@@ -1,5 +1,8 @@
 package irhanzodev1375.musicpreview;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -12,17 +15,26 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Gravity;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.google.android.material.color.MaterialColors;
 import ir.theme.M3Theme;
 import irhanzodev1375.musicpreview.databinding.MusicLayoutBinding;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFragment.MusicControl {
 
   private static final int SEEK_STEP_MS = 10000;
+  private static final long FADE_OUT_MS = 220L;
+  private static final long FADE_IN_MS = 480L;
+  private static final long END_FADE_WINDOW_MS = 1400L;
+
+  private static final PathInterpolator M3_STANDARD =
+      new PathInterpolator(0.2f, 0f, 0f, 1f);
 
   private MusicLayoutBinding bind;
   private Music music;
@@ -31,6 +43,12 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
   private Runnable onMusicClickListener;
   private String songName = "";
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+  private final List<String> playlist = new ArrayList<>();
+  private int playlistIndex = -1;
+  private MusicPlayerBottomSheetFragment.OnTrackChangedListener trackChangedListener;
+  private ValueAnimator volumeAnimator;
+  private boolean endFadeStarted;
 
   public MusicView(Context c) {
     super(c);
@@ -82,9 +100,9 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
       return;
     }
     if (music.isPlaying()) {
-      music.pause();
+      pause();
     } else {
-      music.start();
+      play();
     }
   }
 
@@ -123,15 +141,71 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
   }
 
   public void setMusicPath(String musicPath) {
+    loadTrack(musicPath, false);
+  }
+
+  public void setPlaylist(List<String> paths, int startIndex) {
+    playlist.clear();
+    if (paths != null) {
+      playlist.addAll(paths);
+    }
+    if (playlist.isEmpty()) {
+      playlistIndex = -1;
+      return;
+    }
+    playlistIndex = Math.max(0, Math.min(startIndex, playlist.size() - 1));
+    setMusicPath(playlist.get(playlistIndex));
+  }
+
+  public List<String> getPlaylist() {
+    return new ArrayList<>(playlist);
+  }
+
+  public int getPlaylistIndex() {
+    return playlistIndex;
+  }
+
+  public boolean hasNext() {
+    return playlistIndex >= 0 && playlistIndex < playlist.size() - 1;
+  }
+
+  public boolean hasPrevious() {
+    return playlistIndex > 0;
+  }
+
+  public void next() {
+    if (!hasNext()) return;
+    playlistIndex++;
+    loadTrack(playlist.get(playlistIndex), true);
+  }
+
+  public void previous() {
+    if (!hasPrevious()) return;
+    playlistIndex--;
+    loadTrack(playlist.get(playlistIndex), true);
+  }
+
+  public void setOnTrackChangedListener(MusicPlayerBottomSheetFragment.OnTrackChangedListener listener) {
+    this.trackChangedListener = listener;
+  }
+
+  private void loadTrack(String musicPath, boolean autoPlay) {
+    cancelVolumeAnimation();
+    endFadeStarted = false;
     this.musicPath = musicPath;
     if (music != null) {
       music.release();
+      music = null;
+    }
+    if (musicPath == null) {
+      return;
     }
     music = new Music(getContext(), musicPath);
     music.setMediaPlayerListener(
         new MediaPlayerListener() {
           @Override
           public void isPlaying(int currentDuration) {
+            checkEndFade(currentDuration);
             if (externalListener != null) {
               externalListener.isPlaying(currentDuration);
             }
@@ -159,18 +233,17 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
             if (externalListener != null) {
               externalListener.onComplete();
             }
+            handleCompletion();
           }
         });
-    if (musicPath != null
-        && (musicPath.startsWith("http://") || musicPath.startsWith("https://"))) {
+    if (musicPath.startsWith("http://") || musicPath.startsWith("https://")) {
       music.setUrlSource(musicPath);
-    } else if (musicPath != null) {
+    } else {
       music.setPathSource(new File(musicPath));
     }
     updatePlayIcon(false);
     try {
-      String artist = music.getNameArtist();
-      bind.nameartist.setText(artist);
+      bind.nameartist.setText(music.getNameArtist());
     } catch (Exception err) {
       bind.nameartist.setText("");
     }
@@ -178,6 +251,53 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
     if (music.getImageBitmap() != null) {
       bind.musiccaver.setImageBitmap(music.getImageBitmap());
       applyPaletteFromBitmap(music.getImageBitmap());
+    } else {
+      bind.musiccaver.setImageDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
+
+    if (autoPlay) {
+      play();
+    }
+    if (trackChangedListener != null) {
+      trackChangedListener.onTrackChanged(musicPath);
+    }
+  }
+
+  private void handleCompletion() {
+    cancelVolumeAnimation();
+    if (hasNext()) {
+      playlistIndex++;
+      loadTrack(playlist.get(playlistIndex), true);
+    } else if (music != null) {
+      music.setVolume(1f);
+    }
+  }
+
+  private void checkEndFade(int currentDuration) {
+    if (endFadeStarted || music == null || !music.isPlaying()) return;
+    int duration = music.getDuration();
+    if (duration <= 0) return;
+    long remaining = duration - currentDuration;
+    if (remaining > 0 && remaining <= END_FADE_WINDOW_MS) {
+      endFadeStarted = true;
+      cancelVolumeAnimation();
+      volumeAnimator = ValueAnimator.ofFloat(1f, 0f);
+      volumeAnimator.setDuration(Math.max(200L, remaining));
+      volumeAnimator.setInterpolator(M3_STANDARD);
+      volumeAnimator.addUpdateListener(
+          a -> {
+            if (music != null) music.setVolume((float) a.getAnimatedValue());
+          });
+      volumeAnimator.start();
+    }
+  }
+
+  private void cancelVolumeAnimation() {
+    if (volumeAnimator != null) {
+      volumeAnimator.removeAllUpdateListeners();
+      volumeAnimator.removeAllListeners();
+      volumeAnimator.cancel();
+      volumeAnimator = null;
     }
   }
 
@@ -186,6 +306,7 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
   }
 
   public void release() {
+    cancelVolumeAnimation();
     if (music != null) {
       music.release();
       music = null;
@@ -200,12 +321,47 @@ public class MusicView extends FrameLayout implements MusicPlayerBottomSheetFrag
 
   @Override
   public void play() {
-    if (music != null) music.start();
+    if (music == null || music.isPlaying()) return;
+    cancelVolumeAnimation();
+    endFadeStarted = false;
+    music.setVolume(0f);
+    music.start();
+    volumeAnimator = ValueAnimator.ofFloat(0f, 1f);
+    volumeAnimator.setDuration(FADE_IN_MS);
+    volumeAnimator.setInterpolator(M3_STANDARD);
+    volumeAnimator.addUpdateListener(
+        a -> {
+          if (music != null) music.setVolume((float) a.getAnimatedValue());
+        });
+    volumeAnimator.start();
   }
 
   @Override
   public void pause() {
-    if (music != null) music.pause();
+    if (music == null || !music.isPlaying()) return;
+    cancelVolumeAnimation();
+    Music target = music;
+    volumeAnimator = ValueAnimator.ofFloat(1f, 0f);
+    volumeAnimator.setDuration(FADE_OUT_MS);
+    volumeAnimator.setInterpolator(M3_STANDARD);
+    volumeAnimator.addUpdateListener(a -> target.setVolume((float) a.getAnimatedValue()));
+    volumeAnimator.addListener(
+        new AnimatorListenerAdapter() {
+          private boolean cancelled;
+
+          @Override
+          public void onAnimationCancel(Animator animation) {
+            cancelled = true;
+          }
+
+          @Override
+          public void onAnimationEnd(Animator animation) {
+            if (cancelled) return;
+            target.pause();
+            target.setVolume(1f);
+          }
+        });
+    volumeAnimator.start();
   }
 
   @Override

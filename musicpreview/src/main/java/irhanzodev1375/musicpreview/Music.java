@@ -123,6 +123,16 @@ public class Music {
     }
   }
 
+  public void setVolume(float volume) {
+    if (mediaplayer != null) {
+      try {
+        float clamped = Math.max(0f, Math.min(1f, volume));
+        mediaplayer.setVolume(clamped, clamped);
+      } catch (IllegalStateException ignored) {
+      }
+    }
+  }
+
   public int getCurrentDuration() {
     return mediaplayer != null ? mediaplayer.getCurrentPosition() : 0;
   }
@@ -178,7 +188,7 @@ public class Music {
   public String getNameArtist() throws Exception {
     MediaMetadataRetriever meta = new MediaMetadataRetriever();
     try {
-      meta.setDataSource(path);
+      setDataSourceCompat(meta, path);
       String artist = meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
       return artist != null ? artist : classContext.getString(R.string.music_preview_no_artist);
     } catch (Exception e) {
@@ -192,7 +202,7 @@ public class Music {
   public String getNameAlbom() throws Exception {
     MediaMetadataRetriever meta = new MediaMetadataRetriever();
     try {
-      meta.setDataSource(path);
+      setDataSourceCompat(meta, path);
       String album = meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
       return album != null ? album : classContext.getString(R.string.music_preview_no_album);
     } catch (Exception e) {
@@ -200,6 +210,18 @@ public class Music {
       return classContext.getString(R.string.music_preview_load_error);
     } finally {
       meta.release();
+    }
+  }
+
+  private static void setDataSourceCompat(MediaMetadataRetriever meta, String source)
+      throws Exception {
+    if (source == null) {
+      throw new IllegalArgumentException("Null data source");
+    }
+    if (source.startsWith("http://") || source.startsWith("https://")) {
+      meta.setDataSource(source, new HashMap<String, String>());
+    } else {
+      meta.setDataSource(source);
     }
   }
 

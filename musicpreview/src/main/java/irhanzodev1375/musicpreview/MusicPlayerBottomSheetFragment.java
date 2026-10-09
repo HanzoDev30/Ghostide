@@ -14,14 +14,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.animation.PathInterpolator;
 import android.widget.SeekBar;
+import java.io.File;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.transition.MaterialSharedAxis;
 import irhanzodev1375.musicpreview.databinding.FragmentMusicPlayerBottomSheetBinding;
 import ir.theme.M3Theme;
 import java.util.Locale;
@@ -33,6 +38,7 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
   private static final String ARG_SONG_NAME = "song_name";
   private static final String ARG_ARTIST_NAME = "artist_name";
   private static final int UPDATE_INTERVAL_MS = 100;
+  private static final PathInterpolator M3_STANDARD = new PathInterpolator(0.2f, 0f, 0f, 1f);
 
   private FragmentMusicPlayerBottomSheetBinding binding;
   private MusicControl musicControl;
@@ -40,6 +46,7 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
   private boolean isUserSeeking = false;
   private SquigglyProgress squigglyProgress;
   private OnDismissListener onDismissCallback;
+  private boolean introPlayed;
 
   public interface MusicControl {
     void play();
@@ -51,6 +58,15 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
     Bitmap getAlbumArt();
     String getArtistName();
     String getMusicPath();
+    void next();
+    void previous();
+    boolean hasNext();
+    boolean hasPrevious();
+    void setOnTrackChangedListener(OnTrackChangedListener listener);
+  }
+
+  public interface OnTrackChangedListener {
+    void onTrackChanged(String path);
   }
 
   public interface OnDismissListener {
@@ -100,8 +116,71 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
     setupSquigglyProgress();
     updateUI();
     setupListeners();
+    if (musicControl != null) {
+      musicControl.setOnTrackChangedListener(this::onTrackChanged);
+    }
     startProgressUpdates();
     M3Theme.apply(binding.getRoot());
+  }
+
+  private void onTrackChanged(String path) {
+    if (binding == null || musicControl == null) return;
+    playTrackChangeAnimation(path != null ? new File(path).getName() : "");
+  }
+
+  private void playTrackChangeAnimation(String songName) {
+    View content = binding.musicSheetContent;
+    float density = getResources().getDisplayMetrics().density;
+    content.animate().cancel();
+    content
+        .animate()
+        .alpha(0f)
+        .scaleX(0.94f)
+        .scaleY(0.94f)
+        .translationY(-6f * density)
+        .setDuration(220)
+        .setInterpolator(M3_STANDARD)
+        .withEndAction(
+            () -> {
+              updateTrackContent(songName);
+              content.setAlpha(0f);
+              content.setScaleX(0.96f);
+              content.setScaleY(0.96f);
+              content.setTranslationY(8f * density);
+              content
+                  .animate()
+                  .alpha(1f)
+                  .scaleX(1f)
+                  .scaleY(1f)
+                  .translationY(0f)
+                  .setDuration(420)
+                  .setInterpolator(M3_STANDARD)
+                  .start();
+            })
+        .start();
+  }
+
+  private void updateTrackContent(String songName) {
+    String path = musicControl.getMusicPath();
+    binding.musicSheetTitle.setText(
+        songName == null || songName.isEmpty() ? path : songName);
+    String artist = musicControl.getArtistName();
+    binding.musicSheetArtist.setText(
+        artist != null ? artist : getString(R.string.music_preview_no_artist));
+
+    Bitmap cover = musicControl.getAlbumArt();
+    if (cover != null) {
+      binding.musicSheetCover.setImageBitmap(cover);
+      applyPaletteFromBitmap(cover);
+    } else {
+      binding.musicSheetCover.setImageDrawable(new ColorDrawable(Color.CYAN));
+    }
+
+    binding.musicSheetSeekBar.setProgress(0);
+    binding.musicSheetPosition.setText(formatTime(0));
+    binding.musicSheetSeekBar.setMax(musicControl.getDuration());
+    binding.musicSheetDuration.setText(formatTime(musicControl.getDuration()));
+    updatePlayPauseState();
   }
 
   private void setupSheetStyle() {
@@ -136,6 +215,7 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
                   binding.getRoot().setAlpha(1f);
                   binding.getRoot().setTranslationY(0f);
                 }
+                playIntro();
               } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 if (binding != null) {
                   binding.getRoot().setAlpha(0f);
@@ -157,6 +237,51 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
               binding.getRoot().setTranslationY((1f - clamped) * 100f);
             }
           });
+    }
+  }
+
+  private void playIntro() {
+    if (introPlayed || binding == null) return;
+    introPlayed = true;
+
+    View[] cover = {binding.musicSheetCoverCard, binding.musicSheetTitle, binding.musicSheetArtist};
+    View[] progress = {binding.musicSheetSeekBar, binding.musicSheetTimeRow};
+    View[] controls = {binding.musicSheetControls};
+
+    hide(cover);
+    hide(progress);
+    hide(controls);
+
+    TransitionSet reveal = new TransitionSet();
+    reveal.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+    reveal.addTransition(sharedAxis(cover));
+    reveal.addTransition(sharedAxis(progress));
+    reveal.addTransition(sharedAxis(controls));
+
+    TransitionManager.beginDelayedTransition(binding.getRoot(), reveal);
+    show(cover);
+    show(progress);
+    show(controls);
+  }
+
+  private MaterialSharedAxis sharedAxis(View[] targets) {
+    MaterialSharedAxis axis = new MaterialSharedAxis(MaterialSharedAxis.Y, true);
+    axis.setDuration(220);
+    for (View target : targets) {
+      axis.addTarget(target);
+    }
+    return axis;
+  }
+
+  private void hide(View[] views) {
+    for (View view : views) {
+      view.setVisibility(View.INVISIBLE);
+    }
+  }
+
+  private void show(View[] views) {
+    for (View view : views) {
+      view.setVisibility(View.VISIBLE);
     }
   }
 
@@ -219,15 +344,23 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
     binding.musicSheetPrev.setOnClickListener(
         v -> {
           if (musicControl == null) return;
-          int target = musicControl.getCurrentPosition() - 10000;
-          musicControl.seekTo(Math.max(target, 0));
+          if (musicControl.hasPrevious()) {
+            musicControl.previous();
+          } else {
+            int target = musicControl.getCurrentPosition() - 10000;
+            musicControl.seekTo(Math.max(target, 0));
+          }
         });
 
     binding.musicSheetNext.setOnClickListener(
         v -> {
           if (musicControl == null) return;
-          int target = musicControl.getCurrentPosition() + 10000;
-          musicControl.seekTo(Math.min(target, musicControl.getDuration()));
+          if (musicControl.hasNext()) {
+            musicControl.next();
+          } else {
+            int target = musicControl.getCurrentPosition() + 10000;
+            musicControl.seekTo(Math.min(target, musicControl.getDuration()));
+          }
         });
 
     binding.musicSheetSeekBar.setOnSeekBarChangeListener(
@@ -400,10 +533,5 @@ public class MusicPlayerBottomSheetFragment extends BottomSheetDialogFragment {
 
     binding.musicSheetPlayPause.setShapeColor(onPrimary != null ? onPrimary : Color.TRANSPARENT);
     binding.musicSheetPlayPause.setIconColor(primary);
-
-    if (getDialog() != null && getDialog().getWindow() != null) {
-      getDialog().getWindow().setStatusBarColor(surfaceContainer);
-      getDialog().getWindow().setNavigationBarColor(surfaceContainer);
-    }
   }
 }

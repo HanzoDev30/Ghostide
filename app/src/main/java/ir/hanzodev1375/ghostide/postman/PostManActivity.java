@@ -88,6 +88,7 @@ public class PostManActivity extends BaseCompat {
     setupRequestTabs();
     setupBodyTypeToggle();
     setupResponseSheet();
+    setupGlassCard(binding.cardStatus);
     setupSendButton();
 
     M3Theme.apply(binding.getRoot());
@@ -183,6 +184,14 @@ public class PostManActivity extends BaseCompat {
                   : binding.bodyRawInput.getText().toString();
           binding.bodyRawInput.setText(JsonUtils.prettyPrint(raw));
         });
+
+    binding.bodyTypeToggleGroup.check(binding.bodyTypeNone.getId());
+  }
+
+  private void setupGlassCard(GlassCompat glass) {
+    if (glass == null) return;
+    glass.setBackdropSource(binding.mainContentContainer);
+    glass.setEnableDynamicBackground(true);
   }
 
   private void setupResponseSheet() {

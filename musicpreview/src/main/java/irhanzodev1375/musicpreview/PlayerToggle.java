@@ -129,6 +129,16 @@ public class PlayerToggle extends FrameLayout {
     this.externalClickListener = l;
   }
 
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    executor.shutdownNow();
+    if (rotateAnimation != null) {
+      rotateAnimation.cancel();
+      rotateAnimation = null;
+    }
+  }
+
   private void startContinuousRotation() {
     if (rotateAnimation != null && rotateAnimation.isRunning()) return;
     rotateAnimation = ObjectAnimator.ofFloat(shapeLayout, "rotation", 0f, 360f);

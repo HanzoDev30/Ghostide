@@ -58,7 +58,7 @@
 				android:id="@+id/play"
 				android:layout_width="40dp"
 				android:layout_height="40dp"
-				android:src="@drawable/music_icon_pause"
+				android:src="@drawable/icon_play_arrow_round"
 				android:scaleType="centerInside"
 				android:contentDescription="@string/music_preview_play" />
 

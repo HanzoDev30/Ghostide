@@ -658,7 +658,7 @@ public class FileManagerActivity extends BaseCompat
         GhostToast.makeText(this, "No image found", GhostToast.LENGTH_SHORT).show();
       }
     } else if (FileExtensionUtils.isAudioFile(extension)) {
-      showMusicPreview(path);
+      showMusicPreview(resolveAudioPlaylist(path), path);
     } else if (extension.equals(".apk")) {
       installApk(path);
     } else {
@@ -978,6 +978,35 @@ public class FileManagerActivity extends BaseCompat
                 ? bind.musicPreview.getHeight()
                 : 0);
     bind.fab.setLayoutParams(fabParams);
+  }
+
+  private ArrayList<String> resolveAudioPlaylist(String path) {
+    ArrayList<String> audioPaths = new ArrayList<>();
+    File dir = new File(path).getParentFile();
+    File[] allFiles = dir != null ? dir.listFiles() : null;
+    if (allFiles != null) {
+      for (File f : allFiles) {
+        if (f.isFile()
+            && FileExtensionUtils.isAudioFile(FileExtensionUtils.getExtension(f.getName()))) {
+          audioPaths.add(f.getAbsolutePath());
+        }
+      }
+    }
+    return audioPaths;
+  }
+
+  private void showMusicPreview(ArrayList<String> playlist, String path) {
+    if (playlist.isEmpty()) {
+      showMusicPreview(path);
+      return;
+    }
+    int index = playlist.indexOf(path);
+    if (index < 0) index = 0;
+    bind.musicPreview.setPlaylist(playlist, index);
+    bind.musicPreview.setSongName(new File(playlist.get(index)).getName());
+    bind.musicPreview.setOnMusicClickListener(() -> showMusicPlayerBottomSheet());
+    bind.musicPreview.setVisibility(View.VISIBLE);
+    bind.musicPreview.post(this::updateFabBottomMargin);
   }
 
   private void showMusicPreview(String path) {
