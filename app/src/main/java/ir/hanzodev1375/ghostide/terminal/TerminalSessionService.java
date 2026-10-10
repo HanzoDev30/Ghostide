@@ -16,6 +16,7 @@ import com.termux.terminal.TerminalSession;
 import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.terminal.activity.TerminalActivity;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,8 +132,14 @@ public class TerminalSessionService extends Service {
       TerminalSession session = TerminalSessionFactory.createSession(this, null, client);
       return registerNewSession(session);
     }
+    String ghostUser = TerminalPrompt.resolveUsername(this);
+    try {
+      TerminalPrompt.install(rootfs);
+    } catch (IOException e) {
+      Log.w(LOG_TAG, "failed to install terminal prompt script", e);
+    }
     TerminalSession session =
-        ProotSessionFactory.createProotSession(this, rootfs, "/bin/bash", client);
+        ProotSessionFactory.createProotSession(this, rootfs, "/bin/bash", ghostUser, client);
     return registerNewSession(session);
   }
 

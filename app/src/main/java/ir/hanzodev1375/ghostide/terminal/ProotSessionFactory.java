@@ -19,9 +19,13 @@ public final class ProotSessionFactory {
   private static final String LOADER32_LIBRARY_NAME = "libloader32.so";
 
   public static TerminalSession createProotSession(
-      Context context, File rootfsDir, String loginShell, TerminalSessionClient client) {
+      Context context,
+      File rootfsDir,
+      String loginShell,
+      String ghostUser,
+      TerminalSessionClient client) {
     try {
-      return createProotSessionInternal(context, rootfsDir, loginShell, client);
+      return createProotSessionInternal(context, rootfsDir, loginShell, ghostUser, client);
     } catch (IllegalStateException e) {
       Log.e(LOG_TAG, e.getMessage());
       throw e;
@@ -33,7 +37,11 @@ public final class ProotSessionFactory {
   }
 
   private static TerminalSession createProotSessionInternal(
-      Context context, File rootfsDir, String loginShell, TerminalSessionClient client) {
+      Context context,
+      File rootfsDir,
+      String loginShell,
+      String ghostUser,
+      TerminalSessionClient client) {
 
     String nativeLibDir = context.getApplicationInfo().nativeLibraryDir;
     Log.i(LOG_TAG, "nativeLibDir=" + nativeLibDir);
@@ -94,6 +102,10 @@ public final class ProotSessionFactory {
     args.add("TERM=xterm-256color");
     args.add("LANG=C.UTF-8");
     args.add("PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
+    // یوزرنیمِ گیت‌هاب برای پرامپت؛ اگه لاگین نکرده باشه پاس نمیدیم و اسکریپت به root برمی‌گرده.
+    if (ghostUser != null && !ghostUser.isEmpty()) {
+      args.add(TerminalPrompt.GHOST_USER_ENV + "=" + ghostUser);
+    }
     args.add(loginShell == null ? "/bin/bash" : loginShell);
     args.add("--login");
 

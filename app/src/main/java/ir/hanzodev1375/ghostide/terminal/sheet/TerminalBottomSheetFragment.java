@@ -34,9 +34,12 @@ import ir.hanzodev1375.ghostide.terminal.GhostTerminalSessionClient;
 import ir.hanzodev1375.ghostide.terminal.GhostTerminalViewClient;
 import ir.hanzodev1375.ghostide.terminal.ProotSessionFactory;
 import ir.hanzodev1375.ghostide.terminal.TerminalInputDock;
+import ir.hanzodev1375.ghostide.terminal.TerminalPrompt;
 import ir.hanzodev1375.ghostide.terminal.TerminalSessionFactory;
 import ir.hanzodev1375.ghostide.terminal.TerminalTab;
 import ir.hanzodev1375.ghostide.terminal.adapters.TerminalTabAdapter;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -312,9 +315,16 @@ public class TerminalBottomSheetFragment extends BaseBlurBottomSheet
     }
     GhostTerminalSessionClient client =
         new GhostTerminalSessionClient(requireContext(), internalCallback);
+    File rootfs = DebianBootstrap.getRootfsDir(requireContext());
+    String ghostUser = TerminalPrompt.resolveUsername(requireContext());
+    try {
+      TerminalPrompt.install(rootfs);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     TerminalSession session =
         ProotSessionFactory.createProotSession(
-            requireContext(), DebianBootstrap.getRootfsDir(requireContext()), "/bin/bash", client);
+            requireContext(), rootfs, "/bin/bash", ghostUser, client);
     TerminalTab tab = new TerminalTab(nextSessionId++, session);
     sessions.add(tab);
     if (tabAdapter == null) setupSessionTabs();

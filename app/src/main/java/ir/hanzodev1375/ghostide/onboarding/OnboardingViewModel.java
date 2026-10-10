@@ -13,8 +13,10 @@ import ir.hanzodev1375.ghostide.terminal.DebianBootstrap;
 import ir.hanzodev1375.ghostide.terminal.DebianInstaller;
 import ir.hanzodev1375.ghostide.terminal.GhostTerminalSessionClient;
 import ir.hanzodev1375.ghostide.terminal.ProotSessionFactory;
+import ir.hanzodev1375.ghostide.terminal.TerminalPrompt;
 import ir.hanzodev1375.ghostide.terminal.TerminalSessionFactory;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -184,12 +186,16 @@ public class OnboardingViewModel extends AndroidViewModel {
     try {
       GhostTerminalSessionClient client =
           new GhostTerminalSessionClient(getApplication(), internalCallback);
+      File rootfs = DebianBootstrap.getRootfsDir(getApplication());
+      String ghostUser = TerminalPrompt.resolveUsername(getApplication());
+      try {
+        TerminalPrompt.install(rootfs);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       TerminalSession deb =
           ProotSessionFactory.createProotSession(
-              getApplication(),
-              DebianBootstrap.getRootfsDir(getApplication()),
-              "/bin/bash",
-              client);
+              getApplication(), rootfs, "/bin/bash", ghostUser, client);
       activeSession.setValue(deb);
       if (oldInstallSession != null) {
         oldInstallSession.finishIfRunning();
