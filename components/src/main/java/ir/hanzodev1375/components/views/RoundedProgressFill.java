@@ -61,7 +61,12 @@ final class RoundedProgressFill {
   void updateShape() {
     View view = source;
     if (view == null) return;
-    bounds.set(0f, 0f, view.getWidth(), view.getHeight());
+    int width = view.getWidth() > 0 ? view.getWidth() : view.getMeasuredWidth();
+    int height = view.getHeight() > 0 ? view.getHeight() : view.getMeasuredHeight();
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+    bounds.set(0f, 0f, width, height);
     float radius = defaultRadius;
     if (view instanceof MaterialButton) {
       ShapeAppearanceModel model = ((MaterialButton) view).getShapeAppearanceModel();

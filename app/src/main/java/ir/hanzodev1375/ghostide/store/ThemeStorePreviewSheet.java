@@ -284,11 +284,16 @@ public class ThemeStorePreviewSheet extends BaseBlurBottomSheet {
       editorPreview.setColorScheme(fresh);
     }
     var scheme = editorPreview.getColorScheme();
+    if (scheme instanceof GhostColorScheme) {
+      WidgetTheme widget = theme.getWidget();
+      String imagePath = widget != null ? widget.getImagepath() : null;
+      boolean hasImage = imagePath != null && !imagePath.isEmpty();
+      ((GhostColorScheme) scheme).setUseThemeBackground(!hasImage);
+    }
     scheme.setColor(GhostColorScheme.LINE_DIVIDER, parseColor(t.getLineDivider()));
     scheme.setColor(GhostColorScheme.LINE_NUMBER, parseColor(t.getLineNumber()));
     scheme.setColor(
         GhostColorScheme.LINE_NUMBER_BACKGROUND, parseColor(t.getLineNumberBackground()));
-    editorPreview.getColorScheme().setColor(EditorColorScheme.WHOLE_BACKGROUND, 0);
     scheme.setColor(GhostColorScheme.TEXT_NORMAL, parseColor(t.getTextNormal()));
     scheme.setColor(
         GhostColorScheme.SELECTED_TEXT_BACKGROUND, parseColor(t.getSelectedTextBackground()));

@@ -60,7 +60,7 @@ other-sora-editor-code = { group = "io.github.rosemoe", name = "editor", version
 other-sora-editor-lsp = { group = "io.github.rosemoe", name = "editor-lsp", version.ref = "soraEditorVersion" }
 other-sora-editor-textmate = { group = "io.github.rosemoe", name = "language-textmate", version.ref = "soraEditorVersion" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gsonversion" }
-utilcode = { group = "com.blankj", name = "utilcodex",version.ref = "utilcodev" }
+utilcode = { group = "com.blankj", name = "utilcodex", version.ref = "utilcodev" }
 powermenu = { group = "com.github.skydoves", name = "powermenu", version.ref = "powermenu" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
@@ -70,8 +70,8 @@ jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "j
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-recyclerview-selection = { module = "androidx.recyclerview:recyclerview-selection", version.ref = "recyclerviewSelection" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-androidsvg = { module = "com.caverock:androidsvg", version.ref = "svg"}
-zip4j = {module = "net.lingala.zip4j:zip4j",version.ref = "zip"}
+androidsvg = { module = "com.caverock:androidsvg", version.ref = "svg" }
+zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip" }
 
 # Markwon
 markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
@@ -95,5 +95,5 @@ eventbus = { group = "org.greenrobot", name = "eventbus", version.ref = "eventbu
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-glass = {group = "com.github.QWEA0",name = "Liquid-Glass-Android",version.ref = "glass"}
+glass = { group = "com.github.QWEA0", name = "Liquid-Glass-Android", version.ref = "glass" }
 subsampling = { group = "com.davemorrissey.labs", name = "subsampling-scale-image-view-androidx", version.ref = "subsampling" }

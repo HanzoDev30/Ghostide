@@ -12,6 +12,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
@@ -284,40 +286,81 @@ public class WebViewActivity extends BaseCompat {
 
   private void toggleDevTools() {
     isDevToolsOpen = !isDevToolsOpen;
-    b.devToolsPanel.setVisibility(isDevToolsOpen ? View.VISIBLE : View.GONE);
-    if (isDevToolsOpen) switchTab(currentTab);
+    if (isDevToolsOpen) {
+      b.devToolsPanel.setVisibility(View.VISIBLE);
+      b.devToolsPanel.setAlpha(0f);
+      b.devToolsPanel.setTranslationY(Math.max(b.devToolsPanel.getHeight(), dp(300)));
+      b.devToolsPanel
+          .animate()
+          .alpha(1f)
+          .translationY(0f)
+          .setDuration(280L)
+          .setInterpolator(new DecelerateInterpolator())
+          .start();
+      if (b.consoleContainer.getVisibility() != View.VISIBLE) switchTab(currentTab);
+    } else {
+      b.devToolsPanel
+          .animate()
+          .cancel();
+      b.devToolsPanel
+          .animate()
+          .alpha(0f)
+          .translationY(Math.max(b.devToolsPanel.getHeight(), dp(300)))
+          .setDuration(220L)
+          .setInterpolator(new AccelerateInterpolator())
+          .withEndAction(() -> b.devToolsPanel.setVisibility(View.GONE))
+          .start();
+    }
   }
 
   private void switchTab(int tab) {
     currentTab = tab;
 
-    b.consoleContainer.setVisibility(View.GONE);
-    b.elementsContainer.setVisibility(View.GONE);
-    b.networkContainer.setVisibility(View.GONE);
-    b.storageContainer.setVisibility(View.GONE);
+    View[] containers =
+        new View[] {b.consoleContainer, b.elementsContainer, b.networkContainer, b.storageContainer};
+    View[] tabs = new View[] {b.tabConsole, b.tabElements, b.tabNetwork, b.tabStorage};
 
-    b.tabConsole.setAlpha(0.45f);
-    b.tabElements.setAlpha(0.45f);
-    b.tabNetwork.setAlpha(0.45f);
-    b.tabStorage.setAlpha(0.45f);
+    for (int i = 0; i < containers.length; i++) {
+      final int index = i;
+      boolean active = index == tab;
+      containers[index].animate().cancel();
+      if (active) {
+        containers[index].setVisibility(View.VISIBLE);
+        containers[index].setAlpha(0f);
+        containers[index].setTranslationY(dp(16));
+        containers[index]
+            .animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(200L)
+            .setInterpolator(new DecelerateInterpolator())
+            .start();
+      } else {
+        if (containers[index].getVisibility() == View.VISIBLE) {
+          containers[index].setTranslationY(0f);
+          containers[index]
+              .animate()
+              .alpha(0f)
+              .setDuration(120L)
+              .withEndAction(() -> containers[index].setVisibility(View.GONE))
+              .start();
+        } else {
+          containers[index].setVisibility(View.GONE);
+        }
+      }
+      tabs[index].animate().cancel();
+      tabs[index].animate().alpha(active ? 1f : 0.45f).setDuration(180L).start();
+    }
 
     switch (tab) {
       case TAB_CONSOLE:
-        b.consoleContainer.setVisibility(View.VISIBLE);
-        b.tabConsole.setAlpha(1f);
         break;
       case TAB_ELEMENTS:
-        b.elementsContainer.setVisibility(View.VISIBLE);
-        b.tabElements.setAlpha(1f);
         loadDomTree();
         break;
       case TAB_NETWORK:
-        b.networkContainer.setVisibility(View.VISIBLE);
-        b.tabNetwork.setAlpha(1f);
         break;
       case TAB_STORAGE:
-        b.storageContainer.setVisibility(View.VISIBLE);
-        b.tabStorage.setAlpha(1f);
         loadStorage("localStorage");
         break;
     }
@@ -398,7 +441,13 @@ public class WebViewActivity extends BaseCompat {
           span.setSpan(
               new ForegroundColorSpan(color), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
           b.consoleOutput.append(span);
-          b.consoleScroll.post(() -> b.consoleScroll.fullScroll(View.FOCUS_DOWN));
+          b.consoleScroll.post(
+              () -> {
+                View child = b.consoleScroll.getChildAt(0);
+                if (child != null) {
+                  b.consoleScroll.smoothScrollTo(0, child.getBottom());
+                }
+              });
         });
   }
 

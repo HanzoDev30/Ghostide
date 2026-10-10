@@ -47,6 +47,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import ir.hanzodev1375.ghostide.activity.BaseCompat;
 import ir.hanzodev1375.ghostide.activity.EditorActivity;
 import ir.hanzodev1375.ghostide.codeeditors.colorrender.ColorPickerBottomSheetDialog;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
+import ir.hanzodev1375.ghostide.utils.ObjectUtil;
 import ir.theme.ActivityTheme;
 import ir.theme.EditorTheme;
 import ir.theme.GhostTheme;
@@ -687,28 +689,45 @@ public class ThemeEditorActivity extends BaseCompat {
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == R.id.action_reset) {
-      resetToDefault();
-      return true;
-    } else if (item.getItemId() == R.id.action_view) {
-      GhostTheme themeCopy =
-          new GsonBuilder()
-              .create()
-              .fromJson(
-                  new GsonBuilder().setPrettyPrinting().create().toJson(currentTheme),
-                  GhostTheme.class);
-      ThemePreviewBottomSheet bottomSheet =
-          ThemePreviewBottomSheet.newInstance(themeCopy, currentThemePath);
-      bottomSheet.show(getSupportFragmentManager(), "preview_theme");
-      return true;
-    } else if (item.getItemId() == R.id.action_edit_source) {
-      Intent editorIntent = new Intent(this, EditorActivity.class);
-      editorIntent.putExtra("file_path", currentThemePath);
-      editorIntent.putExtra("file_name", new File(currentThemePath).getName());
-      startActivity(editorIntent);
+    if (item.getItemId() == R.id.action_menu) {
+      showThemeMenu(findViewById(R.id.action_menu));
       return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+
+  private void showThemeMenu(View anchor) {
+    List<String> items = Arrays.asList("Reset", "View theme", "Edit source");
+    ObjectUtil.showGlassMenu(
+        this,
+        anchor,
+        items,
+        (index, title) -> {
+          switch (index) {
+            case 0 -> resetToDefault();
+            case 1 -> previewTheme();
+            case 2 -> editSource();
+          }
+        });
+  }
+
+  private void previewTheme() {
+    GhostTheme themeCopy =
+        new GsonBuilder()
+            .create()
+            .fromJson(
+                new GsonBuilder().setPrettyPrinting().create().toJson(currentTheme),
+                GhostTheme.class);
+    ThemePreviewBottomSheet bottomSheet =
+        ThemePreviewBottomSheet.newInstance(themeCopy, currentThemePath);
+    bottomSheet.show(getSupportFragmentManager(), "preview_theme");
+  }
+
+  private void editSource() {
+    Intent editorIntent = new Intent(this, EditorActivity.class);
+    editorIntent.putExtra("file_path", currentThemePath);
+    editorIntent.putExtra("file_name", new File(currentThemePath).getName());
+    startActivity(editorIntent);
   }
 
   private void buildColorItems() {

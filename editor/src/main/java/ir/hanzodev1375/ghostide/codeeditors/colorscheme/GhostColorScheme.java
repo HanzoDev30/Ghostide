@@ -39,6 +39,8 @@ public class GhostColorScheme extends TextMateColorScheme {
   public static final int RAINBOW_NO_BG = ++endColor;
 
   private final ThemeModel themeModel;
+  private int themeBackground = Color.TRANSPARENT;
+  private boolean useThemeBackground = false;
 
   public GhostColorScheme(ThemeModel themeModel) {
     super(ThemeRegistry.getInstance(), themeModel);
@@ -48,6 +50,23 @@ public class GhostColorScheme extends TextMateColorScheme {
   /** مدل تم این اسکیم (همان که در ThemeRegistry ثبت شده). */
   public ThemeModel getThemeModel() {
     return themeModel;
+  }
+
+  /**
+   * اگر true باشد، پس زمینه ی کل ادیتور رنگ خود تم (editor.background) می شود؛ در غیر این صورت
+   * شفاف می ماند. برای پیش نمایش فروشگاه که تم بدون عکس باید رنگ خودش را نشان دهد.
+   */
+  public boolean isUseThemeBackground() {
+    return useThemeBackground;
+  }
+
+  public void setUseThemeBackground(boolean use) {
+    this.useThemeBackground = use;
+    applyWholeBackground();
+  }
+
+  private void applyWholeBackground() {
+    setColor(WHOLE_BACKGROUND, useThemeBackground ? themeBackground : Color.TRANSPARENT);
   }
 
   /**
@@ -88,6 +107,7 @@ public class GhostColorScheme extends TextMateColorScheme {
   @Override
   public void applyDefault() {
     super.applyDefault();
+    themeBackground = getColor(WHOLE_BACKGROUND);
     setColor(COLORNEXTDOT, Color.parseColor("#ff3208"));
     setColor(COLORNEXTBRAK, Color.parseColor("#ff10ba"));
     setColor(COLORNEXTCHAR, Color.parseColor("#6ba108"));
@@ -102,7 +122,7 @@ public class GhostColorScheme extends TextMateColorScheme {
     setColor(DEPENDENCY_UPDATE_AVAILABLE, Color.parseColor("#FFC107"));
     setColor(DEPENDENCY_UPDATE_AVAILABLE_BG, Color.parseColor("#33FFC107"));
     setColor(RAINBOW_NO_BG, Color.TRANSPARENT);
-    setColor(WHOLE_BACKGROUND, Color.TRANSPARENT);
+    applyWholeBackground();
     setColor(BLOCK_LINE, Color.parseColor("#26FFFFFF"));
     setColor(BLOCK_LINE_CURRENT, Color.parseColor("#33FFFFFF"));
     setColor(SIDE_BLOCK_LINE, Color.parseColor("#66E0E0E0"));

@@ -150,7 +150,7 @@ public final class RainbowBracketHighlighter {
   public void applyOnly() {
     HighlightTextContainer container = new HighlightTextContainer();
     contribute(container);
-    editor.setHighlightTexts(container.isEmpty() ? null : container);
+   // editor.setHighlightTexts(container.isEmpty() ? null : container);
   }
 
   /** براکت های خطوط قابل دیدن را به {@code container} اضافه می کند. */

@@ -3,32 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_reset"
-        android:title="Reset"
-        android:icon="@drawable/ic_restore"
-        app:iconTint="?colorOnSurface"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/action_view"
-        android:title="view theme"
-        android:icon="@drawable/round_remove_red_eye"
-        app:iconTint="?colorOnSurface"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/action_edit_source"
-        android:title="Edit source"
-        android:icon="@drawable/ic_edit"
-        app:iconTint="?colorOnSurface"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_search"
         android:title="Search"
         android:icon="@drawable/outline_search"
         app:iconTint="?colorOnSurface"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/action_menu"
+        android:title="Menu"
+        android:icon="@drawable/more_vert"
+        app:iconTint="?colorOnSurface"
+        app:showAsAction="always" />
 
 </menu>

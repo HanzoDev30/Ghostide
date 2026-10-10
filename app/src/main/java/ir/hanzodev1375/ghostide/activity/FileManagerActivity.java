@@ -1072,22 +1072,38 @@ public class FileManagerActivity extends BaseCompat
   public void onThemeInstalled(ThemeInstalledEvent event) {
     if (EventBus.getDefault().isRegistered(this)) {
       reapplyThemeLive();
-      M3Theme.imageB(
-          bind.btnGoToDir,
-          bind.btnGoToDir,
-          bind.buttonAi,
-          bind.buttonPlugins,
-          bind.btnSettings,
-          bind.gitActionButton);
+      applyToolbarIconTint();
     }
   }
 
   @Override
   protected void onThemeReapplied() {
     super.onThemeReapplied();
+    if (bind != null) {
+      applyToolbarIconTint();
+    }
     if (adapter != null) {
       adapter.notifyDataSetChanged();
     }
+  }
+
+  /**
+   * M3Theme.apply() skip می‌کنه چون این ImageButton ها داخل ویوهای glass هستن، پس tint شون زنده
+   * آپدیت نمی‌شه. اینجا صریح دوباره tint رو ست می‌کنیم (شامل openFilesIcon) تا موقع تعویض تم
+   * بدون ری‌استارت آپدیت شن.
+   */
+  private void applyToolbarIconTint() {
+    if (bind == null) {
+      return;
+    }
+    M3Theme.imageB(
+        bind.btnGoToDir,
+        bind.btnGoToDir,
+        bind.buttonAi,
+        bind.buttonPlugins,
+        bind.btnSettings,
+        bind.gitActionButton,
+        bind.openFilesIcon);
   }
 
   private void setOnBackPress() {

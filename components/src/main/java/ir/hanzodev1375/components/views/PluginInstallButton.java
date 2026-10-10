@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.ColorUtils;
 import com.google.android.material.button.MaterialButton;
 import ir.hanzodev1375.components.R;
 import ir.theme.M3Theme;
@@ -83,6 +84,12 @@ public class PluginInstallButton extends FrameLayout {
 
     addView(button, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
+    button.addOnLayoutChangeListener(
+        (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+          fill.updateShape();
+          invalidate();
+        });
+
     setClickable(true);
     setFocusable(true);
     setOnClickListener(clickHandler);
@@ -122,10 +129,10 @@ public class PluginInstallButton extends FrameLayout {
 
   /** Re-reads the Material colors; call after a theme change. */
   public void applyTheme() {
+    int primaryColor = color(M3Theme.primary(), Color.DKGRAY);
     int contentColor = color(M3Theme.onPrimary(), Color.WHITE);
     ring.setColor(contentColor);
-    fill.setColors(
-        color(M3Theme.primary(), Color.DKGRAY), color(M3Theme.onPrimary(), Color.LTGRAY));
+    fill.setColors(primaryColor, ColorUtils.blendARGB(primaryColor, Color.BLACK, 0.30f));
     button.setTextColor(contentColor);
     button.setIconTint(ColorStateList.valueOf(contentColor));
     M3Theme.button(button);
@@ -221,7 +228,7 @@ public class PluginInstallButton extends FrameLayout {
           animation -> {
             float current = (float) animation.getAnimatedValue();
             fill.setProgress(state == State.INSTALLING ? current : 0f);
-            progress = target;
+            progress = current;
             if (state == State.INSTALLING) {
               button.setText(buildInstallingText());
             }

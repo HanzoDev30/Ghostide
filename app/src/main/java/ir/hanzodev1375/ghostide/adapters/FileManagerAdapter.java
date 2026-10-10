@@ -2,6 +2,8 @@ package ir.hanzodev1375.ghostide.adapters;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
@@ -29,7 +31,6 @@ import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import ir.hanzodev1375.ghostide.materialfileicon.core.FileIconHelper;
-import ir.hanzodev1375.ghostide.glide.gpl.GplIcon;
 import com.bumptech.glide.Glide;
 
 import com.google.android.material.listitem.ListItemCardView;
@@ -39,6 +40,7 @@ import ir.hanzodev1375.ghostide.R;
 import ir.hanzodev1375.ghostide.codeeditors.setting.PreferencesUtils;
 import ir.hanzodev1375.ghostide.fileevents.FileEventCheck;
 import ir.hanzodev1375.ghostide.models.FileManagerModel;
+import ir.hanzodev1375.ghostide.plugin.gpl.GplManifestReader;
 import ir.hanzodev1375.ghostide.utils.Icon;
 import ir.hanzodev1375.ghostide.utils.ShapeUtil;
 import ir.theme.M3Theme;
@@ -453,11 +455,7 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
     stopAnimation();
   }
 
-  /**
-   * فایل انیمیشن (مثلاً res/anim/list_item.xml) رو با یه delay پلکانی روی هر ردیف پخش میکنه؛ فقط
-   * وقتی isAnimating روشنه (یعنی همین الان یه لیست جدید لود شده). به محض دراگ یا گذشتن ۵۰۰ms
-   * بی‌فعالیت، isAnimating خاموش میشه و از این به بعد هیچ انیمیشنی پخش نمیشه.
-   */
+
   private void bindViewHolderAnimation(@NonNull ViewHolder holder) {
     holder.itemView.clearAnimation();
     if (!isAnimating) return;
@@ -568,10 +566,18 @@ public class FileManagerAdapter extends RecyclerView.Adapter<FileManagerAdapter.
 
     void bindItem(FileManagerModel item) {
       if (isGpl(item.getPath())) {
-        Glide.with(ivIcon)
-            .load(new GplIcon(new File(item.getPath())))
-            .error(R.drawable.ic_outline_extension)
-            .into(ivIcon);
+        File gplFile = new File(item.getPath());
+        byte[] iconBytes =
+            GplManifestReader.readIconBytes(gplFile, GplManifestReader.read(gplFile));
+        Bitmap bitmap =
+            iconBytes != null
+                ? BitmapFactory.decodeByteArray(iconBytes, 0, iconBytes.length)
+                : null;
+        if (bitmap != null) {
+          Glide.with(ivIcon).asBitmap().load(bitmap).centerInside().into(ivIcon);
+        } else {
+          ivIcon.setImageResource(R.drawable.ic_outline_extension);
+        }
       } else {
         var iconHelper = new FileIconHelper(item.getPath());
         iconHelper.setDynamicFolderEnabled(true);

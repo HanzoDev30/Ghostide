@@ -54,7 +54,7 @@ public class EditorPagerAdapter extends FragmentStateAdapter {
 
   public Fragment getFragmentAtPosition(int position, FragmentActivity activity) {
     long itemId = getItemId(position);  
-    String tag = "f" + itemId;          // تگ واقعی که ViewPaاستفاده می‌کنه
+    String tag = "f" + itemId;
     return activity.getSupportFragmentManager().findFragmentByTag(tag);
 }
 }
